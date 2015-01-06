@@ -87,7 +87,7 @@ ConsoleTest (char *in, char *out)
       {
 	  readAvail->P ();	// wait for character to arrive
 	  ch = console->GetChar ();
-	  #ifdef CHANGED
+
 	   //if q or EOF in begining of newline
 	  if ((prevch == '\n' || prevch == 0) && (ch == 'q' || ch == EOF)) {
 		  if (ch == 'q') 
@@ -101,19 +101,15 @@ ConsoleTest (char *in, char *out)
 		console->PutChar ('<');
 		writeDone->P ();
 	  } 
-	  #endif
+
 	  console->PutChar (ch);	// echo it!	
 	  writeDone->P ();	// wait for write to finish
-	  #ifdef CHANGED
+	  
 	  if (ch=='c') {
 		console->PutChar ('>');
 		writeDone->P ();
 	  } 
 	  prevch = ch;
-	  #endif
-	  #ifndef CHANGED
-	  if (ch == 'q')
-	      return;		// if q quit
-	  #endif
+	  
       }
 }
