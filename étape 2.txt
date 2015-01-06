@@ -10,13 +10,24 @@ partie 2 :
 partie 3 :
 	faire synchconsole
 
+	tests :
+		utilisation courante
+		ecriture/lecture parallèle
+		trop de caractères
+		pas de caractère
+
 partie 4 :
 	PutChar -> SyscallException -> Handler -> SynchPutChar
 	création de l'appel system
 	partie assembleur
 	modifier ExeptionHandler
-	ajouter les fonction aux fonctions utilisable
+	ajouter les fonctions aux fonctions utilisable
 	initialiser le bordel
+
+	tests :
+		test handler
+			pour tous les appels
+
 
 partie 5 :
 	faire un truc qui permet de transformer nu pointeur mips en pointeur linux
