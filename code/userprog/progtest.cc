@@ -77,7 +77,7 @@ WriteDone (int arg)
 void
 ConsoleTest (char *in, char *out)
 {
-    char ch;
+    char ch, prevch = 0;
 
     console = new Console (in, out, ReadAvail, WriteDone, 0);
     readAvail = new Semaphore ("read avail", 0);
@@ -87,9 +87,33 @@ ConsoleTest (char *in, char *out)
       {
 	  readAvail->P ();	// wait for character to arrive
 	  ch = console->GetChar ();
-	  console->PutChar (ch);	// echo it!
+	  #ifdef CHANGED
+	   //if q or EOF in begining of newline
+	  if ((prevch == '\n' || prevch == 0) && (ch == 'q' || ch == EOF)) {
+		  if (ch == 'q') 
+		    while (ch != EOF && ch != '\n') { //empty buffer
+			    readAvail->P ();	// wait for character to arrive
+				ch = console->GetChar ();
+			}
+		  return; //quit
+	  }
+	  if (ch=='c') {
+		console->PutChar ('<');
+		writeDone->P ();
+	  } 
+	  #endif
+	  console->PutChar (ch);	// echo it!	
 	  writeDone->P ();	// wait for write to finish
+	  #ifdef CHANGED
+	  if (ch=='c') {
+		console->PutChar ('>');
+		writeDone->P ();
+	  } 
+	  prevch = ch;
+	  #endif
+	  #ifndef CHANGED
 	  if (ch == 'q')
-	      return;		// if q, quit
+	      return;		// if q quit
+	  #endif
       }
 }
