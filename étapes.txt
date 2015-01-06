@@ -1,0 +1,29 @@
+1- installation/compilation		2j
+2- Syscall						2j
+	-drivers for console
+	-syscalls for drivers
+	-extensions
+3- multithreading				4j
+4- virtual memory				4j
+5- Filesystem + 6- Network		3-4j
++finalisation
+
++ écriture de test
++ écriture de documentation
+
+final : 
+exposé d'1/2h :
+	pas une présentation de nachos mais du travail effectué
+		expliquer la façon dont on a procédé pour effectuer le travail demandé
+	une démo d'1/4h plus 1/4h de questions
+
+rapport :
+	description de notre noyau
+	description des fonctions utilisateur
+	description des tests effectué
+	partie implementation pour expliquer le fonctionnement
+	partie expliquative de l'organisation
+
+2 façon de contacter
+	le forum moodle
+	mail : cse-nachos@lists.forge.imag.fr

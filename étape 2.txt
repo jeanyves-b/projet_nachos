@@ -1,0 +1,37 @@
+partie 1 :
+	définir l'utilité de la partie pour le rapport
+
+partie 2 :
+	writedown
+	readavail
+		utilisation des sémaphore/mutex
+		faire une chier de jeux de tests... partout
+
+partie 3 :
+	faire synchconsole
+
+partie 4 :
+	PutChar -> SyscallException -> Handler -> SynchPutChar
+	création de l'appel system
+	partie assembleur
+	modifier ExeptionHandler
+	ajouter les fonction aux fonctions utilisable
+	initialiser le bordel
+
+partie 5 :
+	faire un truc qui permet de transformer nu pointeur mips en pointeur linux
+
+partie 6 :
+	implémenter le return
+	détécter les fins de fichiers de code
+
+partie 7 :
+	registre de retour : r2
+		fin de fichier?
+		/!\ fin de ligne et débordement
+	appel concurent
+	fuite mémoire
+
+partie 8 :
+	ettofer feof pour exclure '\127'
+	renvoyer un int avec SynchGetChar
