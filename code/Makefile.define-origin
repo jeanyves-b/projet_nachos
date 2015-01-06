@@ -42,7 +42,7 @@ THREAD_SRC      :=      main.cc list.cc scheduler.cc synch.cc synchlist.cc \
                         stats.cc sysdep.cc timer.cc switch.S
 
 USERPROG_SRC    :=      addrspace.cc bitmap.cc exception.cc progtest.cc console.cc \
-                        machine.cc mipssim.cc translate.cc
+                        synchconsole.cc machine.cc mipssim.cc translate.cc
 
 VM_SRC          :=
 
@@ -104,7 +104,7 @@ ORIG_FLAVORS=threads userprog filesys network vm
 $(eval $(call define-flavor,threads,thread-test))
 
 ######### userprog
-$(eval $(call define-flavor,userprog,userprog filesys-stub))
+$(eval $(call define-flavor,userprog,userprog filesys-stub,synchconsole.cc))
 
 # if file system done first!
 # $(eval $(call define-flavor,userprog,userprog filesys))
