@@ -4,10 +4,15 @@ partie 1 :
 	on a définit le program C putchar
 
 partie 2 :
-	writedown
-	readavail
+	writedown/readavail
 		utilisation des sémaphore/mutex
 		faire une chier de jeux de tests... partout
+	prise en compte de tty
+		tester le 1er caractère par rapport à EOF et q
+		vider le buffer après q si q présent en début de ligne
+	ecrire <c> au lieu de c
+		putchar < avant et putchar > après le putchar du caractère si le caractère est c
+		
 
 partie 3 :
 	Création du header SynchConsole.h
@@ -32,10 +37,15 @@ partie 3 :
 partie 4 :
 	PutChar -> SyscallException -> Handler -> SynchPutChar
 	création de l'appel system
+		attribution d'un numéro à l'appel GetChar
 	partie assembleur
+		caractère mis dans le registre 4 (sous forme d'int)
 	modifier ExeptionHandler
+		transformation en switch
+		ajout du cas d'une interruption de type GetChar
+			appel à la méthode SynchPutChar de SynchConsole
+				instanciation d'un objet SynchConsole à l'inisialisation du système.
 	ajouter les fonctions aux fonctions utilisable
-	initialiser le bordel
 
 	tests :
 		test handler

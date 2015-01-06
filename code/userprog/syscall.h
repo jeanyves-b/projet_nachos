@@ -29,6 +29,7 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
+#define SC_PutChar	11
 
 #ifdef IN_USER_MODE
 
@@ -108,6 +109,9 @@ void Write (char *buffer, int size, OpenFileId id);
  * you should always wait until you can return at least one character).
  */
 int Read (char *buffer, int size, OpenFileId id);
+
+/* Writes character "c" to the standard output */
+void PutChar(char c);
 
 /* Close the file, we're done reading and writing to it. */
 void Close (OpenFileId id);
