@@ -8,13 +8,24 @@ partie 2 :
 		faire une chier de jeux de tests... partout
 
 partie 3 :
-	faire synchconsole
+	Création du header SynchConsole.h
+	Création des fonctions de SynchConsole.cc
+		Utilisation des fonctions SynchGetChare et SynchPutChar
+		pour réaliser SynchgetString et SynchPutString
+		
+	Modification du makefile pour compiler SynchConsole
+		Modification de makefile.define-origine pour garder les noms originaux
+		des programmes utilisateurs.
+		
+	Rajout de l'option -sc pour lancer le programme SynchConsoleTest
+	Création de la fonction SynchConsoleTest
 
 	tests :
-		utilisation courante
-		ecriture/lecture parallèle
-		trop de caractères
-		pas de caractère
+		utilisation courante 		Validé
+		ecriture/lecture parallèle	à faire
+		trop de caractères		à faire
+		pas de caractère 		validé
+		arrêt avec EOF 			validé
 
 partie 4 :
 	PutChar -> SyscallException -> Handler -> SynchPutChar
