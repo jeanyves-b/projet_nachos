@@ -26,11 +26,20 @@ partie 4 :
 
 	tests :
 		test handler
-			pour tous les appels
-
+			un test par appels
+			+ test pour des appels bidon
+		test d'initialisation de la console
 
 partie 5 :
-	faire un truc qui permet de transformer nu pointeur mips en pointeur linux
+	faire un truc qui permet de transformer un pointeur mips en pointeur linux
+
+	test :
+		avec une chaine cohérente
+		avec une chaine vide
+		avec trop de caractère
+		avec pas asez de caractère
+		avec une chaine monstrueuse
+		avec une chaine pas assez grande
 
 partie 6 :
 	implémenter le return
