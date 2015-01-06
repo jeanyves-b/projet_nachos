@@ -15,6 +15,10 @@
 int
 main ()
 {
+    int i;
+    i = 0;
+    i = 3+5;
+    i = i + 6;
     Halt ();
 
     /* not reached */
