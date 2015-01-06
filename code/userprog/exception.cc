@@ -24,6 +24,7 @@
 #include "copyright.h"
 #include "system.h"
 #include "syscall.h"
+#include "limits.h"
 
 //----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
@@ -40,6 +41,28 @@ UpdatePC ()
     machine->WriteRegister (NextPCReg, pc);
 }
 
+
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+void copyStringFromMachine(int from, char *to, unsigned size)
+{
+	char test = 0;
+	for (unsigned i=0 ; i<size ; i++)
+	{
+		machine->ReadMem(from+i, 1, (int*)(to[i]));
+		if (to[i] == EOF || to[i] == '\n' || to[i] == '\r' || to[i] == '\0')
+		{
+			test = 1;
+			to[i] = '\0';
+			break;
+		}
+	}
+	if(test == 0)
+	{
+		to[size-1] = '\0';
+	}
+}
 
 //----------------------------------------------------------------------
 // ExceptionHandler
