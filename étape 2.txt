@@ -1,5 +1,7 @@
 partie 1 :
 	définir l'utilité de la partie pour le rapport
+	définir des fonction d'affichage et de capture de cractère / chaine de caractère utilisable par l'utilisateur.
+	on a définit le program C putchar
 
 partie 2 :
 	writedown
@@ -55,3 +57,5 @@ partie 7 :
 partie 8 :
 	ettofer feof pour exclure '\127'
 	renvoyer un int avec SynchGetChar
+
+	testé 'ÿ' dans un fichier et en tant que caractère et il est considérer comme un caractère comme un autre
