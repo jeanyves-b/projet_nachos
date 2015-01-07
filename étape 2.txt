@@ -76,10 +76,14 @@ partie 6 :
 
 partie 7 :
 	registre de retour : r2
-		fin de fichier?
-		/!\ fin de ligne et débordement
-	appel concurent
-	fuite mémoire
+		cast char en int et mettre dans r2
+	GetString
+		fin de ligne débordement
+			ider le buffer dès que caractère de fin ou taille maximale atteinte
+		appel concurent
+			--pas encore fait
+		fuites mémoire
+			liberation du buffer
 
 partie 8 :
 	ettofer feof pour exclure '\127'
