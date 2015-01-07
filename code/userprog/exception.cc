@@ -126,6 +126,16 @@ ExceptionHandler (ExceptionType which)
 				synchconsole->SynchPutChar(machine->ReadRegister(2));
 				break;
 			}
+			case SC_GetChar: {
+				DEBUG('a', "reading character on standard intput, initiated by user program.\n");
+				 machine->writeRegister(2,(int)synchconsole->SynchGetChar());
+				break;
+			}
+			case SC_GetString: {
+				DEBUG('a', "reading string on standard intput, initiated by user program.\n");
+				synchconsole->SynchGetString((char*)machine->ReadRegister(4),machine->ReadRegister(5));
+				break;
+			}
 			default: {
 				printf("Unexpected user mode exception %d %d\n", which, type);
 				ASSERT(FALSE);
