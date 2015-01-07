@@ -112,6 +112,14 @@ PutChar:
 	syscall
 	j	$31
 	.end PutChar
+	
+	.globl SynchPutString
+	.ent	SynchPutString
+SynchPutString:
+	addiu $2,$0,SC_SynchPS
+	syscall
+	j	$31
+	.end SynchPutString
 
 	.globl Close
 	.ent	Close

@@ -11,7 +11,6 @@
 #include "copyright.h"
 #include "utility.h"
 #include "thread.h"
-#include "synchconsole.h"
 #include "scheduler.h"
 #include "interrupt.h"
 #include "stats.h"
@@ -32,6 +31,8 @@ extern Timer *timer;		// the hardware alarm clock
 
 #ifdef USER_PROGRAM
 #include "machine.h"
+#include "synchconsole.h"
+#define MAX_STRING_SIZE 256
 extern Machine *machine;	// user program memory and registers
 extern SynchConsole *synchconsole;	// synchconsole to create on system initialiazation
 #endif

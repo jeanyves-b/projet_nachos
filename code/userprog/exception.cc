@@ -43,14 +43,16 @@ UpdatePC ()
 
 
 //----------------------------------------------------------------------
-//
+//Copy a String from MIPS's world into Linux's world
 //----------------------------------------------------------------------
 void copyStringFromMachine(int from, char *to, unsigned size)
 {
 	char test = 0;
+	int tmp;
 	for (unsigned i=0 ; i<size ; i++)
 	{
-		machine->ReadMem(from+i, 1, (int*)(to[i]));
+		machine->ReadMem(from+i, 1, &tmp);
+		to[i] = (char) tmp;
 		if (to[i] == EOF || to[i] == '\n' || to[i] == '\r' || to[i] == '\0')
 		{
 			test = 1;
@@ -62,6 +64,13 @@ void copyStringFromMachine(int from, char *to, unsigned size)
 	{
 		to[size-1] = '\0';
 	}
+}
+
+void writeString(int from){
+  char to[MAX_STRING_SIZE];
+  copyStringFromMachine(from,to,MAX_STRING_SIZE);
+  synchconsole->SynchPutChar('a');
+  synchconsole->SynchPutString(to);
 }
 
 //----------------------------------------------------------------------
@@ -103,6 +112,11 @@ ExceptionHandler (ExceptionType which)
 			case SC_PutChar: {
 				DEBUG('a', "Writing character on standard output, initiated by user program.\n");
 				synchconsole->SynchPutChar(machine->ReadRegister(4));
+				break;
+			}
+			case SC_SynchPS:{
+				DEBUG('a', "Writing a string on standard output, initiated by user program.\n");
+				writeString(machine->ReadRegister(4));
 				break;
 			}
 			default: {

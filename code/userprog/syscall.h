@@ -30,6 +30,7 @@
 #define SC_Fork		9
 #define SC_Yield	10
 #define SC_PutChar	11
+#define SC_SynchPS	12
 
 #ifdef IN_USER_MODE
 
@@ -112,6 +113,9 @@ int Read (char *buffer, int size, OpenFileId id);
 
 /* Writes character "c" to the standard output */
 void PutChar(char c);
+
+/* Wtrites String "s" to the standard output*/
+void SynchPutString(char *s);
 
 /* Close the file, we're done reading and writing to it. */
 void Close (OpenFileId id);
