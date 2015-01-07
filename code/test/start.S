@@ -137,6 +137,22 @@ SynchGetString:
 	syscall
 	j	$31
 	.end SynchGetString
+	
+	.globl SynchPutInt
+	.ent	SynchPutInt
+SynchPutInt:
+	addiu $2,$0,SC_SynchPI
+	syscall
+	j	$31
+	.end SynchPutInt
+	
+	.globl SynchGetInt
+	.ent	SynchGetInt
+SynchGetInt:
+	addiu $2,$0,SC_SynchGI
+	syscall
+	j	$31
+	.end SynchGetInt
 
 	.globl Close
 	.ent	Close

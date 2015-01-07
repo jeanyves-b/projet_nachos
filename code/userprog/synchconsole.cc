@@ -65,4 +65,36 @@ void SynchConsole::SynchGetString(char *s, int n)
 	}
 }
 
+void SynchConsole::SynchPutInt(int n)
+{
+	//	récupération du nombre de chiffres de l'entier
+	//	+1 si négative, et +1 pour le byte null
+	int digits = 1, tmp = n;
+	if (tmp == 0) 
+		digits = 2;
+	else {
+		if (tmp < 0) {
+			tmp = -tmp;
+			digits++;
+		}
+		for (; tmp > 0; digits++, tmp = tmp / 10);
+	}	
+	
+	//écriture de l'entier à l'emplacement buf en mémoire
+	char* buf = new char[digits];
+	snprintf(buf, digits, "%d", n);
+	buf[digits-1] = '\0';
+	
+	this->SynchPutString(buf);
+	
+}
+
+void SynchConsole::SynchGetInt(int *n)
+{	
+	//récupération d'un nombre dans buf
+	char* buf = new char[MAX_STRING_SIZE];
+	this->SynchGetString(buf, MAX_STRING_SIZE);
+	sscanf(buf, "%d", n);
+}
+
 #endif // CHANGED

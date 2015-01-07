@@ -33,6 +33,8 @@
 #define SC_SynchPS	12
 #define SC_SynchGC	13
 #define SC_SynchGS	14
+#define SC_SynchPI	15
+#define SC_SynchGI	16
 
 #ifdef IN_USER_MODE
 
@@ -113,6 +115,9 @@ void Write (char *buffer, int size, OpenFileId id);
  */
 int Read (char *buffer, int size, OpenFileId id);
 
+/* Close the file, we're done reading and writing to it. */
+void Close (OpenFileId id);
+
 /* Writes character "c" to the standard output */
 void PutChar(char c);
 
@@ -122,13 +127,14 @@ void SynchPutString(char *s);
 /* Gets character from the standard output returns char */
 char SynchGetChar();
 
-/* Gets string of length n from the standard output and put it in s */
+/* Gets string of length n from the standard input and put it in s */
 void SynchGetString(char *s, int n);
 
-/* Close the file, we're done reading and writing to it. */
-void Close (OpenFileId id);
+/* Puts int n into standard output */
+void SynchPutInt(int n);
 
-
+/* Gets int from standard input and puts it in *n */
+void SynchGetInt(int *n);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

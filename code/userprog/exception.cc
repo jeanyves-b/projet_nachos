@@ -141,17 +141,17 @@ ExceptionHandler (ExceptionType which)
 				synchconsole->SynchPutChar(machine->ReadRegister(4));
 				break;
 			}
-			case SC_SynchPS:{
+			case SC_SynchPS:{ //SynchPutString
 				DEBUG('a', "Writing a string on standard output, initiated by user program.\n");
 				writeString(machine->ReadRegister(4));
 				break;
 			}	
-			case SC_SynchGC: {
+			case SC_SynchGC: { //SynchGetChar
 				DEBUG('a', "reading character on standard intput, initiated by user program.\n");
 				 machine->WriteRegister(2,(int)synchconsole->SynchGetChar());
 				break;
 			}
-			case SC_SynchGS: {
+			case SC_SynchGS: { //SynchGetString
 				DEBUG('a', "reading string on standard intput, initiated by user program.\n");
 				char* buf = new char[MAX_STRING_SIZE];
 				if (machine->ReadRegister(5) > 0) {
@@ -182,6 +182,18 @@ ExceptionHandler (ExceptionType which)
 				}
 				delete buf;
 				break; 
+			}
+			case SC_SynchPI: { //SynchPutInt
+				DEBUG('a', "writing signed integer on standard output, initiated by user program.\n");
+				synchconsole->SynchPutInt(machine->ReadRegister(4));
+				break;
+			}
+			case SC_SynchGI: { //SynchGetInt
+				DEBUG('a', "reading signed integer from standard intput, initiated by user program.\n");
+				int n;
+				synchconsole->SynchGetInt(&n);
+				machine->WriteMem(machine->ReadRegister(4) ,4, n);
+				break;
 			}
 			default: {
 				printf("Unexpected user mode exception %d %d\n", which, type);
