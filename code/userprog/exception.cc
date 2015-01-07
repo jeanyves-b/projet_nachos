@@ -43,14 +43,15 @@ UpdatePC ()
 
 
 //----------------------------------------------------------------------
-//
+// copyStringFromMachine: fonction pour copier une chaine du monde MIPS
+// 	vers le monde C
 //----------------------------------------------------------------------
 void copyStringFromMachine(int from, char *to, unsigned size)
 {
 	char test = 0;
 	for (unsigned i=0 ; i<size ; i++)
 	{
-		machine->ReadMem(from+i, 1, (int*)(to[i]));
+		machine->ReadMem(from+i, 1, (int*)(to+i));
 		if (to[i] == EOF || to[i] == '\n' || to[i] == '\r' || to[i] == '\0')
 		{
 			test = 1;
