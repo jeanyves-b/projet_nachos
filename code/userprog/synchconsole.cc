@@ -40,6 +40,7 @@ void SynchConsole::SynchPutString(const char s[])
     SynchPutChar(*s);
     s++;
   }
+  SynchPutChar('\n');
 }
 
 void SynchConsole::SynchGetString(char *s, int n)
