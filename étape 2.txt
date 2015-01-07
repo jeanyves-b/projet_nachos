@@ -54,13 +54,14 @@ partie 4 :
 		test d'initialisation de la console
 
 partie 5 :
-	faire un truc qui permet de transformer un pointeur mips en pointeur linux
-
+	création de la fonction copyStringFromMachine
+	  Utilisation de readMEM()
+	Création de l'appel system SynchPutString
+	
 	test :
 		avec une chaine cohérente
 		avec une chaine vide
 		avec trop de caractère
-		avec pas asez de caractère
 		avec une chaine monstrueuse
 		avec une chaine pas assez grande
 
