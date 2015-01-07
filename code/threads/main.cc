@@ -102,6 +102,7 @@ main (int argc, char **argv)
 	    }
 	  else if (!strcmp (*argv, "-c"))
 	    {			// test the console
+		delete synchconsole;
 		if (argc == 1)
 		    ConsoleTest (NULL, NULL);
 		else

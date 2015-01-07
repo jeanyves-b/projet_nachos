@@ -121,6 +121,22 @@ SynchPutString:
 	syscall
 	j	$31
 	.end SynchPutString
+	
+	.globl SynchGetChar
+	.ent	SynchGetChar
+SynchGetChar:
+	addiu $2,$0,SC_SynchGC
+	syscall
+	j	$31
+	.end SynchGetChar
+	
+	.globl SynchGetString
+	.ent	SynchGetString
+SynchGetString:
+	addiu $2,$0,SC_SynchGS
+	syscall
+	j	$31
+	.end SynchGetString
 
 	.globl Close
 	.ent	Close

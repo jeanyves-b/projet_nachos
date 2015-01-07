@@ -90,7 +90,6 @@ ConsoleTest (char *in, char *out)
       {
 	  readAvail->P ();	// wait for character to arrive
 	  ch = console->GetChar ();
-
 	   //if q or EOF in begining of newline
 	  if ((prevch == '\n' || prevch == 0) && (ch == 'q' || ch == EOF)) {
 		  if (ch == 'q') 
@@ -100,6 +99,7 @@ ConsoleTest (char *in, char *out)
 			}
 		  return; //quit
 	  }
+	  
 	  if (ch=='c') {
 		console->PutChar ('<');
 		writeDone->P ();
@@ -121,9 +121,10 @@ void
 SynchConsoleTest (char *in, char *out)
 {
   char ch;
+  delete synchconsole;
   synchconsole = new SynchConsole(in, out);
   while ((ch = synchconsole->SynchGetChar()) != EOF)
-  synchconsole->SynchPutChar(ch);
-  fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
+	synchconsole->SynchPutChar(ch);
+  //fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
 }
 #endif //CHANGED
