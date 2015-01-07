@@ -44,7 +44,7 @@ UpdatePC ()
 
 //----------------------------------------------------------------------
 // copyStringFromMachine: fonction pour copier une chaine du monde MIPS
-// 	vers le monde C
+// 	vers le monde Linux
 //----------------------------------------------------------------------
 void copyStringFromMachine(int from, char *to, unsigned size)
 {
@@ -63,6 +63,21 @@ void copyStringFromMachine(int from, char *to, unsigned size)
 	{
 		to[size-1] = '\0';
 	}
+}
+
+//----------------------------------------------------------------------
+// copyStringToMachine: fonction pour copier une chaine du monde Linux
+// 	vers le monde MIPS
+//----------------------------------------------------------------------
+void copyStringToMachine(char* from, int to, unsigned size)
+{
+	for(unsigned i=0; i<size && from[i]!='\0' 
+							&& from[i] != '\n' 
+							&& from[i] != '\r'
+							&& from[i] != EOF; i++) {
+		machine->WriteMem(to+i, 1, (int)(from[i]));
+	}
+	machine->WriteMem(to+i, 1, (int)('\0'));
 }
 
 //----------------------------------------------------------------------
