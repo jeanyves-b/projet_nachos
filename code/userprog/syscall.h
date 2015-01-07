@@ -119,6 +119,12 @@ void PutChar(char c);
 /* Wtrites String "s" to the standard output*/
 void SynchPutString(char *s);
 
+/* Gets character from the standard output returns char */
+char SynchGetChar();
+
+/* Gets string of length n from the standard output and put it in s */
+void SynchGetString(char *s, int n);
+
 /* Close the file, we're done reading and writing to it. */
 void Close (OpenFileId id);
 
