@@ -77,11 +77,12 @@ void writeString(int from){
 
 //----------------------------------------------------------------------
 // copyStringToMachine: fonction pour copier une chaine du monde Linux
-// 	vers le monde MIPS
+// 	vers le monde MIPS.
 //----------------------------------------------------------------------
 void copyStringToMachine(char* from, int to, unsigned size)
 {
-	for(unsigned i=0; i<size && from[i]!='\0' 
+	unsigned i =0;
+	for(; i<size && from[i]!='\0' 
 							&& from[i] != '\n' 
 							&& from[i] != '\r'
 							&& from[i] != EOF; i++) {
@@ -133,21 +134,40 @@ ExceptionHandler (ExceptionType which)
 			}
 			case SC_PutChar: {
 				DEBUG('a', "Writing character on standard output, initiated by user program.\n");
-				synchconsole->SynchPutChar(machine->ReadRegister(2));
+				synchconsole->SynchPutChar(machine->ReadRegister(4));
 				break;
 			}
 			case SC_SynchPS:{
 				DEBUG('a', "Writing a string on standard output, initiated by user program.\n");
 				writeString(machine->ReadRegister(4));
-			case SC_GetChar: {
+				break;
+			}	
+			case SC_SynchGC: {
 				DEBUG('a', "reading character on standard intput, initiated by user program.\n");
-				 machine->writeRegister(2,(int)synchconsole->SynchGetChar());
+				 machine->WriteRegister(2,(int)synchconsole->SynchGetChar());
 				break;
 			}
-			case SC_GetString: {
+			case SC_SynchGS: {
 				DEBUG('a', "reading string on standard intput, initiated by user program.\n");
-				synchconsole->SynchGetString((char*)machine->ReadRegister(4),machine->ReadRegister(5));
-				break;
+				char* buf = new char[MAX_STRING_SIZE];
+				if (machine->ReadRegister(5) > 0) {
+					unsigned chars_nb = (unsigned) machine->ReadRegister(5);
+					unsigned chars_to_copy = chars_nb;
+					
+					synchconsole->SynchGetString(buf, chars_nb); //	récupération de la chaine depuis la console
+					
+					//	copie des caractères par blocs de MAX_STRING_SIZE vers la machine
+					for (;
+							chars_to_copy >= MAX_STRING_SIZE;
+							chars_to_copy -= MAX_STRING_SIZE) {
+						copyStringToMachine(buf, machine->ReadRegister(4) + (chars_nb - chars_to_copy), MAX_STRING_SIZE);
+					}
+					//	copie du reste des caractères vers la machine
+					if (chars_to_copy>0) {
+						copyStringToMachine(buf, machine->ReadRegister(4) + (chars_nb - chars_to_copy), chars_to_copy);
+					}
+				}
+				break; 
 			}
 			default: {
 				printf("Unexpected user mode exception %d %d\n", which, type);

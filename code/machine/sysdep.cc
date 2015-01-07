@@ -166,7 +166,6 @@ int
 OpenForReadWrite(const char *name, bool crashOnError)
 {
     int fd = open(name, O_RDWR, 0);
-
     ASSERT(!crashOnError || fd >= 0);
     return fd;
 }

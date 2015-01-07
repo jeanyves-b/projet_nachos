@@ -81,7 +81,7 @@ ConsoleTest (char *in, char *out)
 
     char ch, prevch = 0;
 
-
+    delete synchconsole;
     console = new Console (in, out, ReadAvail, WriteDone, 0);
     readAvail = new Semaphore ("read avail", 0);
     writeDone = new Semaphore ("write done", 0);
@@ -90,16 +90,13 @@ ConsoleTest (char *in, char *out)
       {
 	  readAvail->P ();	// wait for character to arrive
 	  ch = console->GetChar ();
-
 	   //if q or EOF in begining of newline
-	  if ((prevch == '\n' || prevch == 0) && (ch == 'q' || ch == EOF)) {
-		  if (ch == 'q') 
-		    while (ch != EOF && ch != '\n') { //empty buffer
-			    readAvail->P ();	// wait for character to arrive
-				ch = console->GetChar ();
-			}
+	  if ((prevch == '\n' || prevch == 0) && (ch == EOF)) {
+		   delete console;
+		   synchconsole = new SynchConsole(NULL,NULL);
 		  return; //quit
 	  }
+	  
 	  if (ch=='c') {
 		console->PutChar ('<');
 		writeDone->P ();
@@ -111,9 +108,10 @@ ConsoleTest (char *in, char *out)
 	  if (ch=='c') {
 		console->PutChar ('>');
 		writeDone->P ();
-	  } 
+	  }
 	  prevch = ch;
       }
+      
 }
 
 #ifdef CHANGED
@@ -121,9 +119,11 @@ void
 SynchConsoleTest (char *in, char *out)
 {
   char ch;
+  delete synchconsole;
   synchconsole = new SynchConsole(in, out);
   while ((ch = synchconsole->SynchGetChar()) != EOF)
-    synchconsole->SynchPutChar(ch);
-  fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
+
+	synchconsole->SynchPutChar(ch);
+  //fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
 }
 #endif //CHANGED

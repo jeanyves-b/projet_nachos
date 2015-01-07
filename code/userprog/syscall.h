@@ -31,6 +31,8 @@
 #define SC_Yield	10
 #define SC_PutChar	11
 #define SC_SynchPS	12
+#define SC_SynchGC	13
+#define SC_SynchGS	14
 
 #ifdef IN_USER_MODE
 
