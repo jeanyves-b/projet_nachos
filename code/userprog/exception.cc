@@ -101,9 +101,14 @@ ExceptionHandler (ExceptionType which)
 				interrupt->Halt();
 				break;
 			}
+			case SC_Exit: {
+				DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+				interrupt->Halt();
+				break;
+			}
 			case SC_PutChar: {
 				DEBUG('a', "Writing character on standard output, initiated by user program.\n");
-				synchconsole->SynchPutChar(machine->ReadRegister(4));
+				synchconsole->SynchPutChar(machine->ReadRegister(2));
 				break;
 			}
 			default: {
