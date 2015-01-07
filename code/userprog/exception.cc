@@ -43,7 +43,9 @@ UpdatePC ()
 
 
 //----------------------------------------------------------------------
-//Copy a String from MIPS's world into Linux's world
+
+// copyStringFromMachine: fonction pour copier une chaine du monde MIPS
+// 	vers le monde C
 //----------------------------------------------------------------------
 void copyStringFromMachine(int from, char *to, unsigned size)
 {
@@ -109,9 +111,14 @@ ExceptionHandler (ExceptionType which)
 				interrupt->Halt();
 				break;
 			}
+			case SC_Exit: {
+				DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+				interrupt->Halt();
+				break;
+			}
 			case SC_PutChar: {
 				DEBUG('a', "Writing character on standard output, initiated by user program.\n");
-				synchconsole->SynchPutChar(machine->ReadRegister(4));
+				synchconsole->SynchPutChar(machine->ReadRegister(2));
 				break;
 			}
 			case SC_SynchPS:{

@@ -66,7 +66,9 @@ partie 5 :
 
 partie 6 :
 	implémenter le return
-	détécter les fins de fichiers de code
+		copie du registre r2 (valeur retour main) dans le registre 
+			temporaire r8 au début dans l'appel Exit
+		Halt() dans le l'appel système Exit
 
 partie 7 :
 	registre de retour : r2

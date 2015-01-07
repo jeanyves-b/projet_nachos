@@ -14,7 +14,9 @@ void print(char c, int n)
 
 int main()
 {
-  print('a',26);
-  //Halt();
-  return 0;
+
+print('a',4);
+//Halt();
+return 33;
+
 }
