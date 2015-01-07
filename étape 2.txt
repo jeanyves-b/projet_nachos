@@ -69,6 +69,9 @@ partie 6 :
 		copie du registre r2 (valeur retour main) dans le registre 
 			temporaire r8 au début dans l'appel Exit
 		Halt() dans le l'appel système Exit
+	
+	tests
+		debug valeur retour main: Fait
 
 partie 7 :
 	registre de retour : r2

@@ -45,7 +45,7 @@ UpdatePC ()
 //----------------------------------------------------------------------
 
 // copyStringFromMachine: fonction pour copier une chaine du monde MIPS
-// 	vers le monde C
+// 	vers le monde Linux
 //----------------------------------------------------------------------
 void copyStringFromMachine(int from, char *to, unsigned size)
 {
@@ -73,6 +73,21 @@ void writeString(int from){
   copyStringFromMachine(from,to,MAX_STRING_SIZE);
   synchconsole->SynchPutChar('a');
   synchconsole->SynchPutString(to);
+}
+
+//----------------------------------------------------------------------
+// copyStringToMachine: fonction pour copier une chaine du monde Linux
+// 	vers le monde MIPS
+//----------------------------------------------------------------------
+void copyStringToMachine(char* from, int to, unsigned size)
+{
+	for(unsigned i=0; i<size && from[i]!='\0' 
+							&& from[i] != '\n' 
+							&& from[i] != '\r'
+							&& from[i] != EOF; i++) {
+		machine->WriteMem(to+i, 1, (int)(from[i]));
+	}
+	machine->WriteMem(to+i, 1, (int)('\0'));
 }
 
 //----------------------------------------------------------------------
@@ -124,6 +139,14 @@ ExceptionHandler (ExceptionType which)
 			case SC_SynchPS:{
 				DEBUG('a', "Writing a string on standard output, initiated by user program.\n");
 				writeString(machine->ReadRegister(4));
+			case SC_GetChar: {
+				DEBUG('a', "reading character on standard intput, initiated by user program.\n");
+				 machine->writeRegister(2,(int)synchconsole->SynchGetChar());
+				break;
+			}
+			case SC_GetString: {
+				DEBUG('a', "reading string on standard intput, initiated by user program.\n");
+				synchconsole->SynchGetString((char*)machine->ReadRegister(4),machine->ReadRegister(5));
 				break;
 			}
 			default: {
