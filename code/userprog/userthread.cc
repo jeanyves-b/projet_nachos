@@ -18,18 +18,19 @@ void StartUserThread(int data) {
 	FunctionData *function_data = (FunctionData*)data;
 	
 	//Initialisation de tous les registres
-	for (i = 0; i < NumTotalRegs; i++)
-	machine->WriteRegister (i, 0);
+	for (int i = 0; i < NumTotalRegs; i++) {
+		machine->WriteRegister (i, 0);
+	}
 	
 	//	mettre le PC à la fonction qu'on veut éxecuter
-	machine->WriteRegister(PCReg, data->function);
+	machine->WriteRegister(PCReg, function_data->function);
 	//	écriture de l'argument dans le registre 4
-    machine->WriteRegister(4, data->arg);
+    machine->WriteRegister(4, function_data->arg);
     //	mettre à jour le NextPC avec l'instruction suivant f
-    machine->WriteRegister(NextPCReg, data->function + 4);
+    machine->WriteRegister(NextPCReg, function_data->function + 4);
     
     //	mettre le registre de pile au bon endroit
-     machine->WriteRegister(StackReg, currentThread->space->GetStackAddress(data->id));
+     machine->WriteRegister(StackReg, currentThread->space->GetStackAddress(function_data->id));
 	
 	//currentThread->space->InitRegisters();
 	currentThread->space->RestoreState();
@@ -65,8 +66,8 @@ int do_UserThreadCreate(int f, int arg){
 }
 
 void do_UserThreadExit(){
-  delete currentThread->space;
-  currentThread->finish();
+  currentThread->space->RemoveThread(currentThread->id);
+  currentThread->Finish();
   /*NOT REACHED*/
 }
 

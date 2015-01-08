@@ -122,8 +122,10 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
-	threads_stack[numPages/THREAD_PAGES] = { false };
-	numThreads = 0;
+	threads_stack = new bool[numPages/THREAD_PAGES];
+	for(unsigned int j=0; j<numPages/THREAD_PAGES; j++)
+		threads_stack[j] = false;
+		
 }
 
 //----------------------------------------------------------------------
@@ -259,9 +261,11 @@ AddrSpace::GetStackAddress (int threadId)
 int
 AddrSpace::GetFirstFreeThreadStackBlockId ()
 {
-    while (i<numPages/THREAD_PAGES) {
-		if (!threads_stack[i])
-			return i;
+	unsigned offset = 0;
+    while (offset<numPages/THREAD_PAGES) {
+		if (!threads_stack[offset])
+			return offset;
+		offset++;
 	}
 	
 	return -1;
