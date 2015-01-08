@@ -31,7 +31,20 @@ partie 2:
 	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
 	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore?)
 
-	thread initial quit, qu'est-ce qui se passe?
+	thread initial quite, qu'est-ce qui se passe?
 		a priori la thread liée n'est pas néttoyée et c'est caca
+		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, peut etre une static dans UserThreadExit?
+		/!\ à ce qu'elle ne soie pas modifiée par plusieur thread en même temps.
+
+	plusieur thread lancé en même temps?
+		section critique dans la création de threads?
+
+	très grand nombre de threads?
+		place dans la mémoire?
+		nombre de thread max?
+		patate?
+
+	UserThreadJoin
+		une cond sur la variable du nombre de thread lié et un tableau référancant les threads?
 	
-partie 3 bonus (à revenir dessus)
+partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)
