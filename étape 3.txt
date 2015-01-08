@@ -37,24 +37,27 @@ partie 1:
 
 partie 2:
 	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
-	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
+	dans SynchConsole, mettre un mutex/semaphore pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
+	mettre un mutex sur les pustring et putchar
 
 	thread initial quite, qu'est-ce qui se passe?
-		a priori les threads liés ne sont néttoyés et c'est caca
-		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, peut etre une static dans UserThreadExit?
+		tout est tué mais proprement
+		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, unr variable par thread
 		/!\ à ce qu'elle ne soie pas modifiée par plusieur thread en même temps.
 	appel unique de UserThreadCreate
-		
 
 	plusieurs threads lancés en même temps?
 		/!\ pas de SaveState fonction a définir pour que les threads puissent reprendre au bon endroit.
 		section critique dans la création de threads?
 
 	très grand nombre de threads?
-		place dans la mémoire?
-		nombre de thread max?
+		retourne une érreur
+		mémoire en fonction du besoin
+			allouer des pages si besoin de plus de mémoires
 
 	UserThreadJoin
-		une cond sur la variable du nombre de thread lié et un tableau référancant les threads?
+		tableau de sémaphore
+		id sert d'identifiant dans ce tableau
+		pour attendre, on attend le sémaphore
 	
 partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)
