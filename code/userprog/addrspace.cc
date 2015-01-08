@@ -62,6 +62,8 @@ SwapHeader (NoffHeader * noffH)
 
 AddrSpace::AddrSpace (OpenFile * executable)
 {
+	ASSERT(UserStackSize>=THREAD_PAGES*(PageSize+16));
+	
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -123,7 +125,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
 	threads_stack = new bool[numPages/THREAD_PAGES];
-	for(unsigned int j=0; j<numPages/THREAD_PAGES; j++)
+	unsigned int threads_max = UserStackSize/(PageSize+16)/THREAD_PAGES;
+	for(unsigned int j=0; j<threads_max; j++)
 		threads_stack[j] = false;
 		
 }
@@ -169,7 +172,7 @@ AddrSpace::InitRegisters ()
     // Set the stack register to the end of the address space, where we
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
-    machine->WriteRegister (StackReg, numPages * PageSize); //- 16);
+    machine->WriteRegister (StackReg, numPages * PageSize - 16);
     
     ASSERT(this->AddThread() == 0); //
     DEBUG ('a', "Initializing stack register to %d\n",
@@ -250,7 +253,7 @@ AddrSpace::RemoveThread (int thread_id)
 int
 AddrSpace::GetStackAddress (int threadId)
 {
-    return numPages*PageSize - ((PageSize)*THREAD_PAGES*threadId);
+    return UserStackSize - ((PageSize+16)*THREAD_PAGES*threadId);
 }
 //----------------------------------------------------------------------
 // AddrSpace::GetFirstFreeStackId
@@ -264,7 +267,7 @@ int
 AddrSpace::GetFirstFreeThreadStackBlockId ()
 {
 	unsigned offset = 0;
-    while (offset<numPages/THREAD_PAGES) {
+    while (offset<UserStackSize/(PageSize+16)/THREAD_PAGES) {
 		if (!threads_stack[offset])
 			return offset;
 		offset++;
