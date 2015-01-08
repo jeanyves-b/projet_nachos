@@ -1,17 +1,15 @@
 partie 1:
-	action 1
-	
-	action 2
-	
-	action 3
-	
-	action 4
-	
-	action 5
-	
-	action 6
-	
-	action 7
+	les threads noyaux sont créer en créant une nouvelle structure thread et en la mettant dans l'ordonanceur
+	choix d'implementation :
+		comment passer les informations aux threads :
+		comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
+		exit d'un thread (appel de thread::finish + cleanup) :
+
+	raison du plantage d'un thread
+		pas assez de ressources
+		plus de thread disponible
+		mauvais argument
+		pas la permission de créer un thread
 
 partie 2:
 	action 1
