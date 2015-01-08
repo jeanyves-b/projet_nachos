@@ -8,9 +8,12 @@ int main()
 {
 char c;
 while (c!='q') {
-	c = SynchGetChar();
-	SynchPutString("Le caractère entré est: ")
-	PutChar(c);
+		c = SynchGetChar();
+	if (c!='\n') {
+		SynchPutString("Le caractère entré est: ");
+		PutChar(c);
+		PutChar('\n');
+	}
 }
 	
 return 0;
