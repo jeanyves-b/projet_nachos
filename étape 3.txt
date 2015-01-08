@@ -14,15 +14,18 @@ partie 1:
 		plus de thread disponible
 		mauvais argument
 		pas la permission de créer un thread
-
+		
+	Création des appels systèmes UserThreadCreate et UserThreadExit
+ 
 	do_UserThreadCreate
-		va appeler la fonction UserThreadCreate au niveau noyaux et lui allouer ce dont elle a besoin
-
+		Crée un nouveau thread et le fork avec la fonction StartUserThread
+		
 	StartUserThread
 		passage de "arg"
+		initialise les registres et lance la fonction demandée
 
 	do_UserThreadExit
-		tue la thread et nettoie sont espace de travail
+		tue la thread et nettoie son espace de travail
 		doit attendre la fin de tous les threads lié à ce thread
 
 	tester!
