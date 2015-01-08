@@ -9,7 +9,7 @@ partie 1:
 		comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
 		exit d'un thread (appel de thread::finish + cleanup) :
 
-	raison du plantage d'un thread (penser a mettre un DEBUG) à tester.
+	raison du plantage d'un thread (penser a mettre un DEBUG).
 		pas assez de ressources
 		plus de thread disponible
 		mauvais argument
@@ -26,23 +26,33 @@ partie 1:
 		doit attendre la fin de tous les threads lié à ce thread
 
 	tester!
+		création d'un thread
+			tester toutes les possibilités d'échecs (voir plus haut)
+		arreter un thread "proprement"
+			vérifier les fuites mémoires
+			plus dans l'ordonanceur
+			état du parent, et des enfants.
+		effectue correctement une fonction
+			tester avec les fonctions disponible
 
 partie 2:
 	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
-	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore?)
+	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
 
 	thread initial quite, qu'est-ce qui se passe?
-		a priori la thread liée n'est pas néttoyée et c'est caca
+		a priori les threads liés ne sont néttoyés et c'est caca
 		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, peut etre une static dans UserThreadExit?
 		/!\ à ce qu'elle ne soie pas modifiée par plusieur thread en même temps.
+	appel unique de UserThreadCreate
+		
 
-	plusieur thread lancé en même temps?
+	plusieurs threads lancés en même temps?
+		/!\ pas de SaveState fonction a définir pour que les threads puissent reprendre au bon endroit.
 		section critique dans la création de threads?
 
 	très grand nombre de threads?
 		place dans la mémoire?
 		nombre de thread max?
-		patate?
 
 	UserThreadJoin
 		une cond sur la variable du nombre de thread lié et un tableau référancant les threads?
