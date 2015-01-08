@@ -93,6 +93,8 @@ ConsoleTest (char *in, char *out)
 	   //if q or EOF in begining of newline
 	  if ((prevch == '\n' || prevch == 0) && (ch == EOF)) {
 		   delete console;
+		   delete readAvail;
+		   delete writeDone;
 		   synchconsole = new SynchConsole(NULL,NULL);
 		  return; //quit
 	  }
