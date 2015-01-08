@@ -7,4 +7,7 @@
 //Création de thread utilisateur avec la fonction f et l'argument arg
 extern int UserThreadCreate(void f(void *a), void* arg); 
 
+//Structure pour stocker les paramètres d'une fonction
+struct FunctionData; 
+
 #endif // USERTHREAD_H
