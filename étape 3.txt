@@ -1,3 +1,7 @@
+reste à faire :
+	test unitaire
+	partie 3
+
 partie 1:
 	les threads noyaux sont créer en créant une nouvelle structure thread et en la mettant dans l'ordonanceur
 	choix d'implementation :
@@ -5,21 +9,24 @@ partie 1:
 		comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
 		exit d'un thread (appel de thread::finish + cleanup) :
 
-	raison du plantage d'un thread
+	raison du plantage d'un thread (penser a mettre un DEBUG) à tester.
 		pas assez de ressources
 		plus de thread disponible
 		mauvais argument
 		pas la permission de créer un thread
 
+	do_UserThreadCreate
+		va appeler la fonction UserThreadCreate au niveau noyaux et lui allouer ce dont elle a besoin
+
+	StartUserThread
+		passage de "arg"
+
+	do_UserThreadExit
+		tue la thread et nettoie sont espace de travail
+
+	tester!
+
 partie 2:
-	action 1
 	
-	action 2
 	
-	action 3
-	
-	action 4
-	
-	action 5
-	
-partie 3
+partie 3 bonus (à revenir dessus)
