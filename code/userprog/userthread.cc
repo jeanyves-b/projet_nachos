@@ -46,7 +46,7 @@ int UserThreadCreate(void f(void*), void *arg) {
 }
 
 
-void do_UserThreadCreate(){
+int do_UserThreadCreate(int f, int arg){
 
 }
 

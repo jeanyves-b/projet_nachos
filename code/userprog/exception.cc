@@ -197,8 +197,8 @@ ExceptionHandler (ExceptionType which)
 				break;
 			}
 			case SC_UserThC: { //UserThreadCreate
-				DEBUG('a', "Create user thread, initiated by user program.\n");
-				do_UserThreadCreate();
+				DEBUG('a', "Creating user thread, initiated by user program.\n");
+				do_UserThreadCreate(machine->ReadRegister(4), machine->ReadRegister(5));
 				break;
 			}
 			case SC_UserThE: { //UserThreadExit
