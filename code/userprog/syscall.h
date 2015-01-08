@@ -31,10 +31,12 @@
 #define SC_Yield	10
 #define SC_PutChar	11
 #define SC_SynchPS	12
-#define SC_SynchGC	13
-#define SC_SynchGS	14
-#define SC_SynchPI	15
-#define SC_SynchGI	16
+#define SC_SynchGC	13 //SynchPutString
+#define SC_SynchGS	14 //SynchGetString
+#define SC_SynchPI	15 //SynchPutInt
+#define SC_SynchGI	16 //SynchGetInt
+#define SC_UserThC	17 //UserThreadCreate
+#define SC_UserThE	18 //UserThreadExit
 
 #ifdef IN_USER_MODE
 
@@ -135,6 +137,9 @@ void SynchPutInt(int n);
 
 /* Gets int from standard input and puts it in *n */
 void SynchGetInt(int *n);
+
+/*Exit current thread*/
+void UserThreadExit();
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
