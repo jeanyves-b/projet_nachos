@@ -46,6 +46,10 @@ int UserThreadCreate(void f(void*), void *arg) {
 }
 
 
+void do_UserThreadCreate(){
+
+}
+
 void do_UserThreadExit(){
   delete currentThread->space;
   currentThread->finish();

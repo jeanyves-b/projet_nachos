@@ -35,7 +35,8 @@
 #define SC_SynchGS	14 //SynchGetString
 #define SC_SynchPI	15 //SynchPutInt
 #define SC_SynchGI	16 //SynchGetInt
-#define SC_UserThE	18 //UserThreadExit()
+#define SC_UserThC	17 //UserThreadCreate
+#define SC_UserThE	18 //UserThreadExit
 
 #ifdef IN_USER_MODE
 

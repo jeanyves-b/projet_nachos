@@ -154,6 +154,14 @@ SynchGetInt:
 	j	$31
 	.end SynchGetInt
 	
+	.globl UserThreadCreate
+	.ent	UserThreadCreate
+UserThreadCreate:
+	addiu $2,$0,SC_UserThC
+	syscall
+	j	$31
+	.end UserThreadCreate
+	
 	.globl UserThreadExit
 	.ent	UserThreadExit
 UserThreadExit:
