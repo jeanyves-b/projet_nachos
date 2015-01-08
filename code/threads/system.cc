@@ -181,6 +181,7 @@ Initialize (int argc, char **argv)
 void
 Cleanup ()
 {
+    Thread *tmp; //un thread pour permettre l'arrêt du thread courant
     printf ("\nCleaning up...\n");
 #ifdef NETWORK
     delete postOffice;
@@ -202,6 +203,11 @@ Cleanup ()
     delete timer;
     delete scheduler;
     delete interrupt;
-
+#ifdef CHANGED
+    delete stats;
+    tmp = currentThread;
+    currentThread = NULL;
+    delete tmp;
+#endif //CHANGED
     Exit (0);
 }
