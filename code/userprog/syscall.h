@@ -138,6 +138,9 @@ void SynchPutInt(int n);
 /* Gets int from standard input and puts it in *n */
 void SynchGetInt(int *n);
 
+/*Create user thread*/
+int UserThreadCreate(void f(void *arg), void *arg);
+
 /*Exit current thread*/
 void UserThreadExit();
 
