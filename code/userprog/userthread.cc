@@ -45,7 +45,7 @@ int do_UserThreadCreate(int f, int arg){
 
 	Thread *newThread = new Thread("new thread");
 	
-	// Si le thread crée est nul, on renvoie -1
+	// Si le thread créé est null, on renvoie -1
 	if(newThread == NULL)
 		return -1;
 	

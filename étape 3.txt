@@ -6,24 +6,50 @@ partie 1:
 	les threads noyaux sont créer en créant une nouvelle structure thread et en la mettant dans l'ordonanceur
 	choix d'implementation :
 		comment passer les informations aux threads :
+			on crée une fonction StartUserThread qui prend en paramètre un entier
+			l'entier en paramètre sera une adresse vers une structure de type FunctionData
+			la structure FunctionData contient:
+				adresse de la fonction à éxecuter
+				adresse de l'argument de la fonction à éxecuter
+				identifiant du thread à créer
 		comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
+			fork qui s'en occupe
 		exit d'un thread (appel de thread::finish + cleanup) :
+			libération des blocs de pile alloué au thread
+			demander au thread de se terminer
+		gestion des identifiants de threads: dans l'espace d'adressage
+			un tableau où chaque case représente un espace disponible (ou pas) pour un thread dans la pile
+			un thread demandera un espace dans la pile à sa création, et le liberera à sa fin
+			l'identifiant d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
+			possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant
 
 	raison du plantage d'un thread (penser a mettre un DEBUG).
+		impossibilité de créer un thread
+			new Thread() échoue
 		pas assez de ressources
-		plus de thread disponible
+			pas assez d'espace restant dans la pile
 		mauvais argument
+			??
 		pas la permission de créer un thread
+			??
 
 	do_UserThreadCreate
 		va appeler la fonction UserThreadCreate au niveau noyaux et lui allouer ce dont elle a besoin
+		initilialisera tous les registres à 0
+		mettra le registre compteur à l'adresse de la fonction à exécuter par le thread
+			(mettra le registre NextPC fonction+4)
+		mettre le registre de pile à l'emplacement de l'espace de pile reservé au thread
+			calculable selon l'identifiant du thread, la taille de la pile, la taille d'une page et le nombre de pages allouées à un thread
+			
 
 	StartUserThread
 		passage de "arg"
+			//dit plus haut dans "comment passer les infos à un thread"
 
 	do_UserThreadExit
 		tue la thread et nettoie sont espace de travail
 		doit attendre la fin de tous les threads lié à ce thread
+			!!pas encore fait
 
 	tester!
 		création d'un thread
