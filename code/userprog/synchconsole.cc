@@ -50,10 +50,10 @@ void SynchConsole::SynchPutString(const char s[])
 {
 	int i = 0;
   while (s[i] != '\0'){
-    SynchPutChar(s[i]);
+    this->SynchPutChar(s[i]);
     i++;
   }
-  SynchPutChar('\n');
+  this->SynchPutChar('\n');
 }
 
 void SynchConsole::SynchGetString(char *s, int n)
@@ -62,7 +62,7 @@ void SynchConsole::SynchGetString(char *s, int n)
 	int i = 0;
 	do {
 	
-      current_char = SynchGetChar();
+      current_char = this->SynchGetChar();
       s[i] = current_char;
       i++;
     } while (i < n && current_char != '\n');
@@ -70,7 +70,7 @@ void SynchConsole::SynchGetString(char *s, int n)
     //vider le buffer noyau pour eviter les fuits noyau
     if (i == n) {
 		do {
-			current_char = SynchGetChar();
+			current_char = this->SynchGetChar();
 		} while (current_char != '\n'); 
 	} else {
 		s[i] = '\0';
