@@ -10,3 +10,7 @@ int UserThreadCreate(void f(void *a), void *arg) {
 
 	return 0;
 }
+
+void do_UserThreadExit(){
+  
+}

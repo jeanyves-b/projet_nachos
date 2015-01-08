@@ -153,6 +153,14 @@ SynchGetInt:
 	syscall
 	j	$31
 	.end SynchGetInt
+	
+	.globl UserThreadExit
+	.ent	UserThreadExit
+UserThreadExit:
+	addiu $2,$0,SC_UserThE
+	syscall
+	j	$31
+	.end UserThreadExit
 
 	.globl Close
 	.ent	Close
