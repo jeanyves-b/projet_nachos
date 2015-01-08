@@ -23,10 +23,15 @@ partie 1:
 
 	do_UserThreadExit
 		tue la thread et nettoie sont espace de travail
+		doit attendre la fin de tous les threads lié à ce thread
 
 	tester!
 
 partie 2:
-	
+	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
+	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore?)
+
+	thread initial quit, qu'est-ce qui se passe?
+		a priori la thread liée n'est pas néttoyée et c'est caca
 	
 partie 3 bonus (à revenir dessus)
