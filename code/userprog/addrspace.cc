@@ -120,6 +120,10 @@ AddrSpace::AddrSpace (OpenFile * executable)
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
 
+	//	initialisation des variables de gestion des threads de l'espace
+	//		d'adressage
+	threads_stack[numPages/THREAD_PAGES] = { false };
+	numThreads = 0;
 }
 
 //----------------------------------------------------------------------
@@ -194,4 +198,71 @@ AddrSpace::RestoreState ()
 {
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::AddThread
+//     Ajouter un thread à l'espace d'adressage.
+//
+//		Dire que la pile du thread ajouté est allouée
+//      Incrémenter le nombre de threads
+//		Retourner l'identifiant du thread ajouté
+//----------------------------------------------------------------------
+
+int 
+AddrSpace::AddThread ()
+{
+	int id = this->GetFirstFreeThreadStackBlockId();
+	if (id<0)
+		return -1;
+		
+	threads_stack[id] = true;
+    return id;
+}
+
+
+//----------------------------------------------------------------------
+// AddrSpace::RemoveThread
+//     Enelever un thread de l'espace d'adressage.
+//
+//		Dire que la pile du thread "thread_id" est non allouée
+//      Décrémenter le nombre de threads
+//
+//----------------------------------------------------------------------
+
+void
+AddrSpace::RemoveThread (int thread_id)
+{
+	threads_stack[thread_id] = false;
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::GetStackAddress
+//     Retourne l'adresse de la pile d'un thread ayant l'identifiant 
+//			threadId
+//
+//----------------------------------------------------------------------
+
+int
+AddrSpace::GetStackAddress (int threadId)
+{
+    return numPages*PageSize - ((PageSize)*THREAD_PAGES*threadId);
+}
+//----------------------------------------------------------------------
+// AddrSpace::GetFirstFreeStackId
+//     Retourne l'identifiant du premier emplacement de pile libre
+//			disponible pour un thread en commençant de la fin de 
+//			l'espace d'adressage
+//
+//----------------------------------------------------------------------
+
+int
+AddrSpace::GetFirstFreeThreadStackBlockId ()
+{
+    while (i<numPages/THREAD_PAGES) {
+		if (!threads_stack[i])
+			return i;
+	}
+	
+	return -1;
 }

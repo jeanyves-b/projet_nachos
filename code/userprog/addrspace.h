@@ -17,6 +17,7 @@
 #include "filesys.h"
 
 #define UserStackSize		1024	// increase this as necessary!
+#define THREAD_PAGES		2		// on alloue THREAD_PAGES pages par thread
 
 class AddrSpace
 {
@@ -37,6 +38,10 @@ class AddrSpace
     // for now!
     unsigned int numPages;	// Number of pages in the virtual 
     // address space
+    unsigned int numThreads;	// Nombre de threads dans l'espace 
+    //	d'adressage virtuel
+    bool *threads_stack;	// Array of if threads's' stack is allocated
+    // in the virtual address space
 };
 
 #endif // ADDRSPACE_H
