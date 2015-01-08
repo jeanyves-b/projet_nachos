@@ -47,6 +47,8 @@ int UserThreadCreate(void f(void*), void *arg) {
 
 
 void do_UserThreadExit(){
-  
+  delete currentThread->space;
+  currentThread->finish();
+  /*NOT REACHED*/
 }
 
