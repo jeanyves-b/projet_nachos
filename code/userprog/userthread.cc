@@ -51,7 +51,6 @@ void do_UserThreadCreate(){
 }
 
 void do_UserThreadExit(){
-  delete currentThread->space;
   currentThread->finish();
   /*NOT REACHED*/
 }
