@@ -1,0 +1,27 @@
+partie 1:
+	action 1
+	
+	action 2
+	
+	action 3
+	
+	action 4
+	
+	action 5
+	
+	action 6
+	
+	action 7
+
+partie 2:
+	action 1
+	
+	action 2
+	
+	action 3
+	
+	action 4
+	
+	action 5
+	
+partie 3
