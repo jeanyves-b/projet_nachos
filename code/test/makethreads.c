@@ -10,9 +10,10 @@ int main(){
 	int n = 10;
 	
 	// Si le thread est bien lancé, un message positif sera affiché à l'ecran
-	UserThreadCreate(thread, (void*)(&n));
+	unsigned id = UserThreadCreate(thread, (void*)(&n));
 	//(UserThreadCreate(thread, (void*)(&n)) != -1)?SynchPutString("\nLe Thread 1 a bien été lancé."):SynchPutString("\nEchec (Thread 1)");
-
+	
+	UserThreadJoin(id);
 	return 0;
 }
 

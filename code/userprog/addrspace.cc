@@ -188,7 +188,7 @@ AddrSpace::InitRegisters ()
     //	Ne pas oublier le thread main
     unsigned tmp_unsigned;
     int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
-    ASSERT(err >= 0 && tmp_unsigned == 0); 
+    ASSERT(err >= 0 && tmp_unsigned == 2); 
     
     err = this->AddThread(&tmp_unsigned);
     ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
