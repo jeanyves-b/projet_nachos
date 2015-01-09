@@ -144,9 +144,5 @@ class Condition
 
   private:
     const char *name;
-    Semaphore *signal;
-    Lock *mut;
-    Lock *mutnbt;
-    int nbt;
 };
 #endif // SYNCH_H

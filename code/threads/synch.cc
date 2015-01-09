@@ -129,33 +129,27 @@ bool isHeldByCurrentThread(){
 
 Condition::Condition (const char *debugName)
 {
-  mut = new Lock("condition");
-  mutnbt = new Lock("safe nbt");
-  signal = new Semaphore ("signal",0);
-  nbt = 0;
+
 }
 
 Condition::~Condition ()
 {
-  delete mut;
-  delete signal;
+
 }
 void
 Condition::Wait (Lock * conditionLock)
 {
-    
-    conditionLock->Release();
-    signal->P();
-    conditionLock->Acquire();
+
 }
 
 void
 Condition::Signal (Lock * conditionLock)
 {
-  signal->V();
+
 }
+ 
 void
 Condition::Broadcast (Lock * conditionLock)
 {
-  
+
 }

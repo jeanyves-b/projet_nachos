@@ -317,5 +317,4 @@ void AddrSpace::Join(unsigned id){
     ASSERT(id != currentThread->id);
   }
   thread_join[id]->P;//on attend la fin du thread
-  thread_join[id]->V;//on a attesté de la fin du thread et on doit continuer de la signaler
 }
