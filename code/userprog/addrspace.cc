@@ -149,19 +149,12 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
 AddrSpace::~AddrSpace ()
 {
-  int i;
   // LB: Missing [] for delete
   // delete pageTable;
   delete [] pageTable;
   // End of modification
-  delete threads_stack;
-  for (i=0;i<(numPages/THREAD_PAGES);i++){
-    if (thread_join[i] != NULL){
-      delete thread_join[i];
-    }
-  }
-  delete thread_join;
-  delete mut;
+  delete stack_blocs;
+  delete threads_stack_id;
 }
 
 //----------------------------------------------------------------------
@@ -197,7 +190,7 @@ AddrSpace::InitRegisters ()
     //	Ne pas oublier le thread main
     unsigned tmp_unsigned;
     int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
-    ASSERT(err >= 0 && tmp_unsigned == 0); 
+    ASSERT(err >= 0 && tmp_unsigned == 2); 
     
     err = this->AddThread(&tmp_unsigned);
     ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
@@ -205,7 +198,6 @@ AddrSpace::InitRegisters ()
     DEBUG ('a', "Initializing stack register to %d\n",
 	   numPages * PageSize - 16);
     
-    thread_join[0] = new Semaphore("First Thread",1);
 }
 
 //----------------------------------------------------------------------
@@ -265,11 +257,6 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 	stack_blocs[id] = true;
 	threads_stack_id[threads_created++] = id;
       *created_thread_id = id;
-      if (thread_join[id] != NULL){
-	  delete thread_join[id];
-	}
-	thread_join[id] = new Semaphore("new Thread",0);
-	nbt++;
     return 0;
 }
 

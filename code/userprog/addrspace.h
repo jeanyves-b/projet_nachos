@@ -65,10 +65,6 @@ class AddrSpace
     //	les threads en attente associés aux threads qu'ils attendent
     
     int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
-        Semaphore **threads_join;
-    bool *wait; //tableau permettant l'arrêt propre des threads
-    Lock *mut;
-    int nbt;
     // dans la pile de taille THREAD_PAGES
     
     

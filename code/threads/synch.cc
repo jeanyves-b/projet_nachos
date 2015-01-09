@@ -119,13 +119,14 @@ Lock::Acquire ()
 void
 Lock::Release ()
 {
-  if (currentThread = thread_mutex){
+  if (currentThread == thread_mutex){
     lock->V();
   }
 }
 
-bool isHeldByCurrentThread(){
+bool Lock::isHeldByCurrentThread(){
   return (currentThread == thread_mutex);
+}
 
 Condition::Condition (const char *debugName)
 {
