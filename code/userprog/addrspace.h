@@ -17,7 +17,8 @@
 #include "filesys.h"
 
 #define UserStackSize		1024	// increase this as necessary!
-#define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread
+#define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+#define MAX_THREADS			1024u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 
 class AddrSpace
 {
@@ -33,10 +34,12 @@ class AddrSpace
     void SaveState ();		// Save/restore address space-specific
     void RestoreState ();	// info on a context switch 
     
-    int AddThread();	// ajouter un thread
-    void RemoveThread(int);	// enlever un thread
-    int GetStackAddress(int);	//récupérer l'adresse d'un thread
+    int AddThread(unsigned*);	// ajouter un thread
+    int RemoveThread(unsigned);	// enlever un thread
+    int GetStackAddress(unsigned*,unsigned);	//récupérer l'adresse d'un thread
     //	dans la pile à partir de son identifiant
+    
+    
     
 
   private:
@@ -44,10 +47,15 @@ class AddrSpace
     // for now!
     unsigned int numPages;	// Number of pages in the virtual 
     // address space
-    bool *threads_stack;	// Array of if threads's' stack is allocated
-    // in the virtual address space
+    unsigned *threads_stack_id;	// Tableau de: identifiant unique -> 
+    //	identifiant dans la pile (0 et 1 sont reservés pour resp.
+    //	jamais créé, et créé mais terminé)
+    bool *stack_blocs; //Tableau representant si oui ou non un bloc
+    //	de la pile est alloué ou non
+    unsigned threads_created; //	Nombre de threads créés depuis
+    //	le début du processus
     
-    int GetFirstFreeThreadStackBlockId(); //	premier bloc allouable
+    int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
     // dans la pile de taille THREAD_PAGES
 };
 
