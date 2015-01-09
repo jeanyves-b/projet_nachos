@@ -4,6 +4,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "console.h"
+#include "synch.h"
 class SynchConsole {
   public:
     SynchConsole(char *readFile, char *writeFile);
@@ -15,9 +16,14 @@ class SynchConsole {
     void SynchPutString(const char *s); // Unix puts(3S)
     void SynchGetString(char *s, int n); // Unix fgets(3S)
     void SynchPutInt(int n); 
-    void SynchGetInt(int *n); 
+    void SynchGetInt(int *n);
+
   private:
+    Semaphore *writing;
+    Semaphore *reading;
     Console *console;
+    void SPutChar(const char ch);
+    char SGetChar();
 };
 #endif // SYNCHCONSOLE_H
 #endif // CHANGED
