@@ -326,7 +326,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 	unsigned offset = 0;
     while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
 		if (stack_blocs[offset]<2) {
-			*stack_thread_id = offset;
+			*stack_thread_id = offset + 2;
 			return 0;
 		}
 		offset++;

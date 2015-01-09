@@ -4,6 +4,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "console.h"
+#include "synch.h"
 class SynchConsole {
   public:
     SynchConsole(char *readFile, char *writeFile);
@@ -21,7 +22,7 @@ class SynchConsole {
     Semaphore *writing;
     Semaphore *reading;
     Console *console;
-    void SPutchar(const char ch);
+    void SPutChar(const char ch);
     char SGetChar();
 };
 #endif // SYNCHCONSOLE_H
