@@ -15,10 +15,16 @@
 
 #include "copyright.h"
 #include "filesys.h"
+#include <vector>
 
 #define UserStackSize		1024	// increase this as necessary!
 #define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 #define MAX_THREADS			1024u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+
+
+//Structure pour stocker les threads en attente
+typedef struct WaitingThread WaitingThread;
+struct WaitingThread; 
 
 class AddrSpace
 {
@@ -38,6 +44,7 @@ class AddrSpace
     int RemoveThread(unsigned);	// enlever un thread
     int GetStackAddress(unsigned*,unsigned);	//récupérer l'adresse d'un thread
     //	dans la pile à partir de son identifiant
+    void JoinThread (unsigned); //	attendre la fin d'un thread
     
     
     
@@ -54,9 +61,12 @@ class AddrSpace
     //	de la pile est alloué ou non
     unsigned threads_created; //	Nombre de threads créés depuis
     //	le début du processus
+    std::vector<WaitingThread*> waiting_threads; //	structure contnenant
+    //	les threads en attente associés aux threads qu'ils attendent
     
     int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
     // dans la pile de taille THREAD_PAGES
 };
+
 
 #endif // ADDRSPACE_H

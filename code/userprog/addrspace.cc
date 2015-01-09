@@ -22,6 +22,12 @@
 
 #include <strings.h>		/* for bzero */
 
+//
+struct WaitingThread {
+	Thread *who;
+	unsigned forId;
+};
+
 //----------------------------------------------------------------------
 // SwapHeader
 //      Do little endian to big endian conversion on the bytes in the 
@@ -132,7 +138,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	for(unsigned int j=0; j<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES; j++)
 		stack_blocs[j] = false;
 		
-	threads_created = 0;
+	threads_created = 0; 
 		
 }
 
@@ -179,9 +185,14 @@ AddrSpace::InitRegisters ()
     // accidentally reference off the end!
     machine->WriteRegister (StackReg, numPages * PageSize - 16);
     
-    unsigned first_free;
-    int err = this->GetFirstFreeThreadStackBlockId(&first_free);
-    ASSERT(err >= 0 && first_free == 0); //
+    //	Ne pas oublier le thread main
+    unsigned tmp_unsigned;
+    int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
+    ASSERT(err >= 0 && tmp_unsigned == 0); 
+    
+    err = this->AddThread(&tmp_unsigned);
+    ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
+    
     DEBUG ('a', "Initializing stack register to %d\n",
 	   numPages * PageSize - 16);
 }
@@ -270,8 +281,17 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 	if (threads_stack_id[unique_thread_id] < 2)
 		return -2;
 		
-	stack_blocs[threads_stack_id[unique_thread_id]] = false;
+	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
 	threads_stack_id[unique_thread_id] = 1;
+	
+	for (unsigned i=0; i<waiting_threads.size(); i++)
+		if (waiting_threads.at(i)->forId == unique_thread_id) {
+			WaitingThread *tmp = waiting_threads.at(i);
+			scheduler->ReadyToRun(tmp->who);
+			waiting_threads.erase(waiting_threads.begin() + i);
+			delete tmp;
+		}	
+	
 	return 0;
 }
 
@@ -334,4 +354,24 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 	
 	//Aucun bloc libre trouvé
 	return -1;
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::JoinThread
+//
+//----------------------------------------------------------------------
+
+void
+AddrSpace::JoinThread (unsigned user_thread_id) {
+	IntStatus oldLevel = interrupt->SetLevel (IntOff);
+	if (threads_stack_id[user_thread_id]!=1) {
+		
+		WaitingThread *waiting_thread = new WaitingThread();
+		waiting_thread->who = currentThread;
+		waiting_thread->forId = user_thread_id;
+		this->waiting_threads.push_back(waiting_thread);
+		
+		currentThread->Sleep();
+	}
+	(void) interrupt->SetLevel (oldLevel);
 }
