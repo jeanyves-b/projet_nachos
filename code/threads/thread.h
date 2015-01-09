@@ -137,6 +137,7 @@ class Thread
     void SaveUserState ();	// save user-level register state
     void RestoreUserState ();	// restore user-level register state
     unsigned id;		// identifiant du thread
+
     AddrSpace *space;		// User code this thread is running.
 #endif
 };
