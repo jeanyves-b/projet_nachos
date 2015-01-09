@@ -284,7 +284,7 @@ AddrSpace::RemoveThread (int thread_id)
 int
 AddrSpace::GetStackAddress (int threadId)
 {
-    return numPages*PageSize - ((PageSize)*THREAD_PAGES*threadId);
+    return UserStackSize - ((PageSize+16)*THREAD_PAGES*threadId);
 }
 //----------------------------------------------------------------------
 // AddrSpace::GetFirstFreeStackId
@@ -307,7 +307,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId ()
 	return -1;
 }
 
-void AddrSpace::Join(int id){
+void AddrSpace::Join(unsigned id){
   ASSERT(id < (int)(numPages/THREAD_PAGES));
   ASSERT(id >= 0);
   ASSERT(threads_stack[id] = TRUE);

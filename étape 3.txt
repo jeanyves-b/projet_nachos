@@ -6,27 +6,49 @@ partie 1:
 	les threads noyaux sont créer en créant une nouvelle structure thread et en la mettant dans l'ordonanceur
 	choix d'implementation :
 		comment passer les informations aux threads :
+			on crée une fonction StartUserThread qui prend en paramètre un entier
+			l'entier en paramètre sera une adresse vers une structure de type FunctionData
+			la structure FunctionData contient:
+				adresse de la fonction à éxecuter
+				adresse de l'argument de la fonction à éxecuter
+				identifiant du thread à créer
 		comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
+			fork qui s'en occupe
 		exit d'un thread (appel de thread::finish + cleanup) :
+			libération des blocs de pile alloué au thread
+			demander au thread de se terminer
+		gestion des identifiants de threads: dans l'espace d'adressage
+			un tableau où chaque case représente un espace disponible (ou pas) pour un thread dans la pile
+			un thread demandera un espace dans la pile à sa création, et le liberera à sa fin
+			l'identifiant d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
+			possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant
 
 	raison du plantage d'un thread (penser a mettre un DEBUG).
+		impossibilité de créer un thread
+			new Thread() échoue
 		pas assez de ressources
-		plus de thread disponible
+			pas assez d'espace restant dans la pile
 		mauvais argument
-		pas la permission de créer un thread
-		
-	Création des appels systèmes UserThreadCreate et UserThreadExit
- 
+			??
+		pas la permission de créer un thread	??
+
 	do_UserThreadCreate
-		Crée un nouveau thread et le fork avec la fonction StartUserThread
-		
+		va appeler la fonction UserThreadCreate au niveau noyaux et lui allouer ce dont elle a besoin
+		initilialisera tous les registres à 0
+		mettra le registre compteur à l'adresse de la fonction à exécuter par le thread
+			(mettra le registre NextPC fonction+4)
+		mettre le registre de pile à l'emplacement de l'espace de pile reservé au thread
+			calculable selon l'identifiant du thread, la taille de la pile, la taille d'une page et le nombre de pages allouées à un thread
+			
+
 	StartUserThread
 		passage de "arg"
-		initialise les registres et lance la fonction demandée
+			//dit plus haut dans "comment passer les infos à un thread"
 
 	do_UserThreadExit
 		tue la thread et nettoie son espace de travail
 		doit attendre la fin de tous les threads lié à ce thread
+			!!pas encore fait
 
 	tester!
 		création d'un thread
@@ -40,24 +62,27 @@ partie 1:
 
 partie 2:
 	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
-	dans SynchConsole, mettre un mutex pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
+	dans SynchConsole, mettre un mutex/semaphore pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
+	mettre un mutex sur les pustring et putchar
 
 	thread initial quite, qu'est-ce qui se passe?
-		a priori les threads liés ne sont néttoyés et c'est caca
-		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, peut etre une static dans UserThreadExit?
+		tout est tué mais proprement
+		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, unr variable par thread
 		/!\ à ce qu'elle ne soie pas modifiée par plusieur thread en même temps.
 	appel unique de UserThreadCreate
-		
 
 	plusieurs threads lancés en même temps?
 		/!\ pas de SaveState fonction a définir pour que les threads puissent reprendre au bon endroit.
 		section critique dans la création de threads?
 
 	très grand nombre de threads?
-		place dans la mémoire?
-		nombre de thread max?
+		retourne une érreur
+		mémoire en fonction du besoin
+			allouer des pages si besoin de plus de mémoires
 
 	UserThreadJoin
-		une cond sur la variable du nombre de thread lié et un tableau référancant les threads?
+		tableau de sémaphore
+		id sert d'identifiant dans ce tableau
+		pour attendre, on attend le sémaphore
 	
 partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)

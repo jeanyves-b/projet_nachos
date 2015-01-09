@@ -37,7 +37,7 @@ class AddrSpace
     void RemoveThread(int);	// enlever un thread
     int GetStackAddress(int);	//récupérer l'adresse d'un thread
     //	dans la pile à partir de son identifiant
-    void Join(int id); //attendre un thread
+    void Join(unsigned id); //attendre un thread
     
 
   private:
