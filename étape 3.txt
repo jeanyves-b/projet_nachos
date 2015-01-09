@@ -17,11 +17,21 @@ partie 1:
 		exit d'un thread (appel de thread::finish + cleanup) :
 			libération des blocs de pile alloué au thread
 			demander au thread de se terminer
-		gestion des identifiants de threads: dans l'espace d'adressage
-			un tableau où chaque case représente un espace disponible (ou pas) pour un thread dans la pile
-			un thread demandera un espace dans la pile à sa création, et le liberera à sa fin
-			l'identifiant d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
-			possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant
+		gestion des identifiants de threads: dans l'espace d'adressage (pile)
+			deux identifiants:
+				un identifiant unique: unique parmi tous les threads du processus
+				un identifiant en pile: pour les processus actifs
+					la pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread
+					l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread
+			structures de stockages des identifiants:
+				un tableau d'identifiants de pile où chaque case représente pris par un thread (true) ou pas (false) dans la pile
+					un thread demandera un espace dans la pile à sa création, et le liberera à sa fin
+					l'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
+						possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile
+				un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en pile + 2 (x)
+					x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé
+					x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais a quitté
+					x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'execution, et sa pile est dans le bloc (x - 2)
 
 	raison du plantage d'un thread (penser a mettre un DEBUG).
 		impossibilité de créer un thread
@@ -39,7 +49,7 @@ partie 1:
 		mettra le registre compteur à l'adresse de la fonction à exécuter par le thread
 			(mettra le registre NextPC fonction+4)
 		mettre le registre de pile à l'emplacement de l'espace de pile reservé au thread
-			calculable selon l'identifiant du thread, la taille de la pile, la taille d'une page et le nombre de pages allouées à un thread
+			calculable selon l'identifiant en pile du thread, la taille de la pile, la taille d'une page et le nombre de pages allouées à un thread
 			
 
 	StartUserThread
