@@ -239,16 +239,16 @@ List::SortedRemove (long long *keyPtr)
 
     thing = first->item;
     if (first == last)
-      {				// list had one item, now has none 
-	  first = NULL;
-	  last = NULL;
-      }
+    {				// list had one item, now has none 
+		first = NULL;
+		last = NULL;
+    }
     else
-      {
-	  first = element->next;
-      }
+    {
+		first = element->next;
+    }
     if (keyPtr != NULL)
-	*keyPtr = element->key;
+		*keyPtr = element->key;
     delete element;
     return thing;
 }

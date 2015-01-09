@@ -9,34 +9,56 @@
 
 typedef struct FunctionData FunctionData;
 struct FunctionData {
-	void (*function)(void*);
-	void *arg;
+	int function;
+	int arg;
+	int id;
 };
 
 void StartUserThread(int data) {	
-	//FunctionData *function_data = (FunctionData*)data;
-	currentThread->space->InitRegisters();
+	FunctionData *function_data = (FunctionData*)data;
+	
+	//Initialisation de tous les registres
+	for (int i = 0; i < NumTotalRegs; i++) {
+		machine->WriteRegister (i, 0);
+	}
+	
+	//	mettre le PC à la fonction qu'on veut éxecuter
+	machine->WriteRegister(PCReg, function_data->function);
+	//	écriture de l'argument dans le registre 4
+    machine->WriteRegister(4, function_data->arg);
+    //	mettre à jour le NextPC avec l'instruction suivant f
+    machine->WriteRegister(NextPCReg, function_data->function + 4);
+    
+    //	mettre le registre de pile au bon endroit
+     machine->WriteRegister(StackReg, currentThread->space->GetStackAddress(function_data->id));
+     
+	delete function_data; //	éviter leak de mémoire
+	
+	//currentThread->space->InitRegisters();
 	currentThread->space->RestoreState();
 	machine->Run();
 }
 
-int UserThreadCreate(void f(void*), void *arg) {
-	
+int do_UserThreadCreate(int f, int arg){
 	// On bloque les interruptions pour rendre ce bout de code atomique
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
 	Thread *newThread = new Thread("new thread");
 	
 	// Si le thread crée est nul, on renvoie -1
-	if(newThread == NULL){
+	if(newThread == NULL)
 		return -1;
-	}
 	
 	//todo: delete
 	FunctionData *data = new FunctionData();
 	data->function = f;
 	data->arg = arg;
+	data->id = currentThread->space->AddThread();
 	
+	if (data->id == -1)
+		return -1;
+		
+	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);
 	
 	// On réactive les interruptions
@@ -45,13 +67,8 @@ int UserThreadCreate(void f(void*), void *arg) {
 	return 0;
 }
 
-
-int do_UserThreadCreate(int f, int arg){
-
-}
-
 void do_UserThreadExit(){
-  currentThread->finish();
-  /*NOT REACHED*/
+  currentThread->space->RemoveThread(currentThread->id);
+  currentThread->Finish();
 }
 

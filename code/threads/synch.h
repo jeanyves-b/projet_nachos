@@ -87,7 +87,8 @@ class Lock
 
   private:
     const char *name;		// for debugging
-    // plus some other stuff you'll need to define
+    Semaphore *lock;
+    Thread* thread_mutex;
 };
 
 // The following class defines a "condition variable".  A condition
@@ -143,6 +144,9 @@ class Condition
 
   private:
     const char *name;
-    // plus some other stuff you'll need to define
+    Semaphore *signal;
+    Lock *mut;
+    Lock *mutnbt;
+    int nbt;
 };
 #endif // SYNCH_H

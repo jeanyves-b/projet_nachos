@@ -132,11 +132,11 @@ class Thread
 // while executing kernel code.
 
     int userRegisters[NumTotalRegs];	// user-level CPU register state
-
+	
   public:
     void SaveUserState ();	// save user-level register state
     void RestoreUserState ();	// restore user-level register state
-
+	int id;		// identifiant du thread
     AddrSpace *space;		// User code this thread is running.
 #endif
 };

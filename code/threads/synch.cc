@@ -103,38 +103,59 @@ Semaphore::V ()
 // the test case in the network assignment won't work!
 Lock::Lock (const char *debugName)
 {
+  lock = new Semaphore("mutex",1);
 }
 
 Lock::~Lock ()
 {
+  delete lock;
 }
 void
 Lock::Acquire ()
 {
+  lock->P();
+  thread_mutex = currentThread;
 }
 void
 Lock::Release ()
 {
+  if (currentThread = thread_mutex){
+    lock->V();
+  }
 }
+
+bool isHeldByCurrentThread(){
+  return (currentThread == thread_mutex);
 
 Condition::Condition (const char *debugName)
 {
+  mut = new Lock("condition");
+  mutnbt = new Lock("safe nbt");
+  signal = new Semaphore ("signal",0);
+  nbt = 0;
 }
 
 Condition::~Condition ()
 {
+  delete mut;
+  delete signal;
 }
 void
 Condition::Wait (Lock * conditionLock)
 {
-    ASSERT (FALSE);
+    
+    conditionLock->Release();
+    signal->P();
+    conditionLock->Acquire();
 }
 
 void
 Condition::Signal (Lock * conditionLock)
 {
+  signal->V();
 }
 void
 Condition::Broadcast (Lock * conditionLock)
 {
+  
 }
