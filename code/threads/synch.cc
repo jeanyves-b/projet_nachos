@@ -108,12 +108,12 @@ Lock::Lock (const char *debugName)
 Lock::~Lock ()
 {
 }
-void
-Lock::Acquire ()
+
+void Lock::Acquire ()
 {
 }
-void
-Lock::Release ()
+
+void Lock::Release ()
 {
 }
 
@@ -124,17 +124,16 @@ Condition::Condition (const char *debugName)
 Condition::~Condition ()
 {
 }
-void
-Condition::Wait (Lock * conditionLock)
+
+void Condition::Wait (Lock * conditionLock)
 {
     ASSERT (FALSE);
 }
 
-void
-Condition::Signal (Lock * conditionLock)
+void Condition::Signal (Lock * conditionLock)
 {
 }
-void
-Condition::Broadcast (Lock * conditionLock)
+
+void Condition::Broadcast (Lock * conditionLock)
 {
 }

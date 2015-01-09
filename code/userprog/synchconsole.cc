@@ -12,6 +12,8 @@ SynchConsole::SynchConsole(char *readFile, char *writeFile)
 {
   readAvail = new Semaphore("read avail", 0);
   writeDone = new Semaphore("write done", 0);
+  writing = new Semaphore("writing", 0);
+  reading = new Semaphore("reading", 0);
   console = new Console(readFile,writeFile,ReadAvail,WriteDone,0);
 }
 
@@ -20,24 +22,43 @@ SynchConsole::~SynchConsole()
   delete console;
   delete writeDone;
   delete readAvail;
+  delete reading;
+  delete writing;
 }
 
-void SynchConsole::SynchPutChar(const char ch)
+void SynchConsole::SPutChar(const char ch)
 {
     console->PutChar (ch);	// echo it!
     writeDone->P ();	// wait for write to finish
 }
 
-char SynchConsole::SynchGetChar()
+void SynchConsole::SynchPutChar(const char ch)
+{
+	writing->P();
+	SPutChar(ch);
+    writing->V();
+}
+
+char SynchConsole::SGetChar()
 {
     readAvail->P ();	// wait for character to arrive
     return console->GetChar ();
 }
 
+char SynchConsole::SynchGetChar()
+{
+	reading->P();
+	char ch = SGetChar();
+	reading->V();
+	return ch;
+}
+
 int SynchConsole::SynchGetChar2(char* c)
 {
+	reading->P();
     readAvail->P ();	// wait for character to arrive
     *c = console->GetChar ();
+    reading->V();
     if (*c == EOF){
       return -1;
     }else{
@@ -48,21 +69,24 @@ int SynchConsole::SynchGetChar2(char* c)
 
 void SynchConsole::SynchPutString(const char s[])
 {
+	writing->P();
 	int i = 0;
-  while (s[i] != '\0'){
-    this->SynchPutChar(s[i]);
-    i++;
-  }
-  this->SynchPutChar('\n');
+  	while (s[i] != '\0'){
+    	this->SPutChar(s[i]);
+    	i++;
+	}
+	this->SPutChar('\n');
+	writing->V();
 }
 
 void SynchConsole::SynchGetString(char *s, int n)
 {
+	reading->P();
 	char current_char;
 	int i = 0;
 	do {
 	
-      current_char = this->SynchGetChar();
+      current_char = this->SGetChar();
       s[i] = current_char;
       i++;
     } while (i < n && current_char != '\n');
@@ -70,11 +94,12 @@ void SynchConsole::SynchGetString(char *s, int n)
     //vider le buffer noyau pour eviter les fuits noyau
     if (i == n) {
 		do {
-			current_char = this->SynchGetChar();
+			current_char = this->SGetChar();
 		} while (current_char != '\n'); 
 	} else {
 		s[i] = '\0';
 	}
+	reading->V();
 }
 
 void SynchConsole::SynchPutInt(int n)
@@ -98,11 +123,10 @@ void SynchConsole::SynchPutInt(int n)
 	buf[digits-1] = '\0';
 	
 	this->SynchPutString(buf);
-	
 }
 
 void SynchConsole::SynchGetInt(int *n)
-{	
+{
 	//récupération d'un nombre dans buf
 	char* buf = new char[MAX_STRING_SIZE];
 	this->SynchGetString(buf, MAX_STRING_SIZE);

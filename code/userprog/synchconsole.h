@@ -15,9 +15,14 @@ class SynchConsole {
     void SynchPutString(const char *s); // Unix puts(3S)
     void SynchGetString(char *s, int n); // Unix fgets(3S)
     void SynchPutInt(int n); 
-    void SynchGetInt(int *n); 
+    void SynchGetInt(int *n);
+
   private:
+    Semaphore *writing;
+    Semaphore *reading;
     Console *console;
+    void SPutchar(const char ch);
+    char SGetChar();
 };
 #endif // SYNCHCONSOLE_H
 #endif // CHANGED

@@ -1,3 +1,8 @@
+choix sur les appels system putstring/getstring
+	chaine de taille max, 
+faire attention a la mémoire système
+faire attention aux arguments
+
 partie 1 :
 	définir l'utilité de la partie pour le rapport
 	définir des fonction d'affichage et de capture de cractère / chaine de caractère utilisable par l'utilisateur.
