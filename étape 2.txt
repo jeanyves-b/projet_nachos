@@ -5,6 +5,8 @@ faire attention aux arguments
 
 partie 1 :
 	définir l'utilité de la partie pour le rapport
+		tout le monde à a peu près le même code car partie très guidée.
+		probablement pas la pein de s'étendre trop dessus.
 	définir des fonction d'affichage et de capture de cractère / chaine de caractère utilisable par l'utilisateur.
 	on a définit le program C putchar
 

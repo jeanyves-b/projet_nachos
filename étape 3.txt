@@ -1,4 +1,8 @@
+travail en cours :
+	user thread join
+
 reste à faire :
+	do exit à modifier pour tuer les fils
 	test unitaire
 	partie 3
 
@@ -29,14 +33,15 @@ structure thread
 			l'identifiant d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
 			possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant
 
-	raison du plantage d'un thread (penser a mettre un DEBUG).
+	raison du plantage d'un thread POSIX (penser a mettre un DEBUG).
 		impossibilité de créer un thread
 			new Thread() échoue
 		pas assez de ressources
 			pas assez d'espace restant dans la pile
 		mauvais argument
+			sécuriser si la fonction ou l'argument pointe dans le vide
 			??
-		pas la permission de créer un thread
+		pas la permission de créer un thread (possible?)
 			??
 
 	do_UserThreadCreate
@@ -67,6 +72,7 @@ structure thread
 		effectue correctement une fonction
 			tester avec les fonctions disponible
 
+
 partie 2:
 	!assertion violation!, protéger les requètes décriture et de lecture noyau avec un verroux
 	dans SynchConsole, mettre un mutex/semaphore pour l'écriture et la lecture (pas déjà le cas avec le sémaphore? partage du sémaphore(static sémaphore)? à tester)
@@ -74,18 +80,18 @@ partie 2:
 
 	thread initial quite, qu'est-ce qui se passe?
 		tout est tué mais proprement
-		rajouter une variable comptant le nombre de thread dérivé et attendre qu'elle vale 0 avant de quitter, unr variable par thread
+		un tableau dans la structure thread définie les thread crées à partir de ces thread. sert à les fermer quand le thread parent fini.
 		/!\ à ce qu'elle ne soie pas modifiée par plusieur thread en même temps.
-	appel unique de UserThreadCreate
+	appel unique de UserThreadCreate? ->non mais pour le moment toutes les thread sont au même niveau (pas de différenciation parent/enfant)
 
 	plusieurs threads lancés en même temps?
-		/!\ pas de SaveState fonction a définir pour que les threads puissent reprendre au bon endroit.
-		section critique dans la création de threads?
+		/!\ pas de SaveState/restoreState fonction a définir pour que les threads puissent reprendre au bon endroit. Jamais implémenté dans les autres programes, sont-elles bien utiles? -> les thread utilisateur peuvent-ils perdre la main?
 
 	très grand nombre de threads?
-		retourne une érreur
-		mémoire en fonction du besoin
-			allouer des pages si besoin de plus de mémoires
+		retourne une erreur
+		mémoire en fonction du besoin : allouer des pages si besoin de plus de mémoires -> impossible
+			doit retourner une erreur en cas de dépasement de la mémoire allouer
+			taille de mémoire à définir au départ -> choix de la taille allouer de base
 
 	UserThreadJoin
 		tableau de sémaphore
@@ -94,7 +100,7 @@ partie 2:
 
 		(suite)
 		attente mutuel
-		attendre pas le bon thread
+		ne pas attendre le bon thread
 
 	
 partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)
