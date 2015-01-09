@@ -11,7 +11,7 @@ typedef struct FunctionData FunctionData;
 struct FunctionData {
 	int function;
 	int arg;
-	int id;
+	unsigned id;
 };
 
 void StartUserThread(int data) {	
@@ -30,11 +30,12 @@ void StartUserThread(int data) {
     machine->WriteRegister(NextPCReg, function_data->function + 4);
     
     //	mettre le registre de pile au bon endroit
-     machine->WriteRegister(StackReg, currentThread->space->GetStackAddress(function_data->id));
+    unsigned stack;
+    currentThread->space->GetStackAddress(&stack, function_data->id);
+    machine->WriteRegister(StackReg, stack);
      
 	delete function_data; //	éviter leak de mémoire
 	
-	//currentThread->space->InitRegisters();
 	currentThread->space->RestoreState();
 	machine->Run();
 }
@@ -53,18 +54,17 @@ int do_UserThreadCreate(int f, int arg){
 	FunctionData *data = new FunctionData();
 	data->function = f;
 	data->arg = arg;
-	data->id = currentThread->space->AddThread();
 	
-	if (data->id == -1)
+	if (currentThread->space->AddThread(&(data->id)) < 0)
 		return -1;
 		
 	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);
 	
 	// On réactive les interruptions
-    interrupt->SetLevel (oldLevel);
+    (void)interrupt->SetLevel (oldLevel);
    
-	return 0;
+	return data->id;
 }
 
 void do_UserThreadExit(){

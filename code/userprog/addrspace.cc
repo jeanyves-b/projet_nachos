@@ -124,13 +124,22 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
-	threads_stack = new bool[numPages/THREAD_PAGES];
-	unsigned int threads_max = UserStackSize/(PageSize+16)/THREAD_PAGES;
-	for(unsigned int j=0; j<threads_max; j++)
-		threads_stack[j] = false;
-	threads_join = new Semaphore*[numPages/THREAD_PAGES];
+	threads_stack_id = new unsigned[MAX_THREADS];
+	stack_blocs = new bool[UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES];
+	for(unsigned int j=0; j<MAX_THREADS; j++)
+		threads_stack_id[j] = 0;
+		
+	for(unsigned int j=0; j<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES; j++)
+		stack_blocs[j] = false;
+		
+	threads_created = 0;
+	threads_join = new Semaphore*[UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES];
 	mut = new Lock("Addr Lock");
 	nbt = 0;
+	wait = new bool[UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES];
+	for (unsigned int j = 0;j<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES;j++){
+	  wait[j] = false;
+
 }
 
 //----------------------------------------------------------------------
@@ -185,7 +194,9 @@ AddrSpace::InitRegisters ()
     // accidentally reference off the end!
     machine->WriteRegister (StackReg, numPages * PageSize - 16);
     
-    ASSERT(this->AddThread() == 0); //
+    unsigned first_free;
+    int err = this->GetFirstFreeThreadStackBlockId(&first_free);
+    ASSERT(err >= 0 && first_free == 0); //
     DEBUG ('a', "Initializing stack register to %d\n",
 	   numPages * PageSize - 16);
     
@@ -225,30 +236,36 @@ AddrSpace::RestoreState ()
 //     Ajouter un thread à l'espace d'adressage.
 //
 //		Dire que la pile du thread ajouté est allouée
-//      Incrémenter le nombre de threads
-//		Retourner l'identifiant du thread ajouté
+//      Incrémenter le nombre de threads créé
+//		Mets l'identifiant unique du thread créé dans created thread id
+//		Retourner 0 si réussite, sinon code d'erreur (-1 ou -2, resp.
+//		nombre de threads max par processus atteint, et pile pleine
+//		; valeur de created_thread_id indéfinie si erreur)
 //----------------------------------------------------------------------
 
 int 
-AddrSpace::AddThread ()
+AddrSpace::AddThread (unsigned *created_thread_id)
 {
-	int id = -1;
-	mut->Acquire();
-	 = this->GetFirstFreeThreadStackBlockId();
-	if (id<0)
+	//Nombre de threads max par processus atteint
+	if (threads_created >= MAX_THREADS)
 		return -1;
 	
-	if (nbt == 0){
-	  thread_join[0]->V;//sécurité
-	}
-	threads_stack[id] = true;
-	if (thread_join[id] != NULL){
+	unsigned id;
+	
+	//	Récupération de l'identifiant dans la pile du premier bloc libre
+	//	Test pas de place sur la pile
+	if (this->GetFirstFreeThreadStackBlockId(&id)<0)
+		return -2;
+	
+	stack_blocs[id] = true;
+	threads_stack_id[threads_created++] = id;
+      *created_thread_id = id;
+      if (thread_join[id] != NULL){
 	  delete thread_join[id];
 	}
 	thread_join[id] = new Semaphore("new Thread",0);
 	nbt++;
-	mut->Release();
-    return id;
+    return 0;
 }
 
 
@@ -256,65 +273,102 @@ AddrSpace::AddThread ()
 // AddrSpace::RemoveThread
 //     Enelever un thread de l'espace d'adressage.
 //
-//		Dire que la pile du thread "thread_id" est non allouée
-//      Décrémenter le nombre de threads
+//		Dire que la pile du thread ayant l'identifiant unique
+//		"unique_thread_id" a été allouée puis désallouée
+//		Retourne 0 en cas de succès, et code d'erreur en cas d'echec
+//		(-1 si unique_thread_id trop grand, -2 si le thread pas 
+//		en cours d'exécution)
 //
 //----------------------------------------------------------------------
 
-void
-AddrSpace::RemoveThread (int thread_id)
+int
+AddrSpace::RemoveThread (unsigned unique_thread_id)
 {
-	threads_stack[thread_id] = false;
+	//	Identifiant unique trop grand
+	if (unique_thread_id >= MAX_THREADS)
+		return -1;
+	
+	//	Thread pas en cours d'exécution
+	if (threads_stack_id[unique_thread_id] < 2)
+		return -2;
+		
+	stack_blocs[threads_stack_id[unique_thread_id]] = false;
 	mut->Acquire();
-	nbt--; //Section critique
-	if (nbt == 0){
-	  thread_join[0]->V;
+	threads_stack_id[unique_thread_id] = 1;
+	if (wait[threads_stack_id[unique_thread_id]-2] = TRUE){
+	  thread_join[id]->V;//on signale notre arrêt
 	}
 	mut->Release();
-	thread_join[id]->V;//on signale notre arrêt
+	return 0;
+
 }
 
 //----------------------------------------------------------------------
 // AddrSpace::GetStackAddress
 //     Retourne l'adresse de la pile d'un thread ayant l'identifiant 
-//			threadId
+//			unique unique_thread_id
+//		Retourne 0 en cas de succès, un code d'erreur sinon: 
+//		(-1 si unique_thread_id trop grand, -2 si thread pas en cours 
+//		d'execution, -3 si taille max de pile dépassée)
 //
 //----------------------------------------------------------------------
 
-int
-AddrSpace::GetStackAddress (int threadId)
+int 
+AddrSpace::GetStackAddress (unsigned *stack_address, unsigned unique_thread_id)
 {
-    return UserStackSize - ((PageSize+16)*THREAD_PAGES*threadId);
+	//Identifiant unique trop grand
+	if (unique_thread_id >= MAX_THREADS)
+		return -1;
+		
+	//Récupération de l'identifiant dans le pile du thread ayant 
+	//	l'identifiant unique unique_thread_id
+	unsigned stack_thread_id = threads_stack_id[unique_thread_id];
+	
+	//Thread pas en cours d'exécution
+	if (stack_thread_id < 2)
+		return -2; 
+		
+	//Identifiant de thread dépasse la taille maximale de pile
+	if (stack_thread_id*THREAD_PAGES*(PageSize+16/THREAD_PAGES) > UserStackSize)
+		return -3;
+		
+	if (stack_thread_id == 2) 
+		*stack_address = numPages * PageSize - 16;
+		
+    *stack_address = numPages * PageSize - ((PageSize+(16/THREAD_PAGES))*THREAD_PAGES*(stack_thread_id - 2));
+    return 0;
 }
 //----------------------------------------------------------------------
 // AddrSpace::GetFirstFreeStackId
 //     Retourne l'identifiant du premier emplacement de pile libre
 //			disponible pour un thread en commençant de la fin de 
 //			l'espace d'adressage
+//		Retourne 0 en cas de succès, un code d'erreur sinon
+//		(-1 si pas de bloc libre trouvé)
 //
 //----------------------------------------------------------------------
 
 int
-AddrSpace::GetFirstFreeThreadStackBlockId ()
+AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 {
 	unsigned offset = 0;
-    while (offset<UserStackSize/(PageSize+16)/THREAD_PAGES) {
-		if (!threads_stack[offset])
-			return offset;
+    while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
+		if (stack_blocs[offset]<2) {
+			*stack_thread_id = offset;
+			return 0;
+		}
 		offset++;
 	}
 	
+	//Aucun bloc libre trouvé
 	return -1;
 }
 
 void AddrSpace::Join(unsigned id){
-  ASSERT(id < (int)(numPages/THREAD_PAGES));
-  ASSERT(id >= 0);
-  ASSERT(threads_stack[id] = TRUE);
-  if (id == 0){
-    ASSERT(currentThread->id == 0);
-  }else{
-    ASSERT(id != currentThread->id);
+  ASSERT(id < threads_created);
+  ASSERT(threads_stack_id[id] != 0);
+  ASSERT(id != currentThread->id);
+  if(theads_stack_id[id] != 1){
+    currentThread->wait = 
   }
-  thread_join[id]->P;//on attend la fin du thread
 }

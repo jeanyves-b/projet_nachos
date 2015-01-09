@@ -46,6 +46,7 @@ Thread::Thread (const char *threadName)
     for (int r=NumGPRegs; r<NumTotalRegs; r++)
       userRegisters[r] = 0;
 #endif
+    wait = NULL;
 }
 
 //----------------------------------------------------------------------
