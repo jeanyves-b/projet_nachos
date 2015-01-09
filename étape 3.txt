@@ -95,7 +95,6 @@ partie 2:
 	appel unique de UserThreadCreate? ->non mais pour le moment toutes les thread sont au même niveau (pas de différenciation parent/enfant)
 
 	plusieurs threads lancés en même temps?
-		/!\ pas de SaveState/restoreState fonction a définir pour que les threads puissent reprendre au bon endroit. Jamais implémenté dans les autres programes, sont-elles bien utiles? -> les thread utilisateur peuvent-ils perdre la main?
 
 	très grand nombre de threads?
 		retourne une erreur
