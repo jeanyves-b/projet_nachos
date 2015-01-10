@@ -1,7 +1,7 @@
 /*
- Copyright (c) 1992-1993 The Regents of the University of California.
- All rights reserved.  See copyright.h for copyright notice and limitation 
- of liability and disclaimer of warranty provisions.
+   Copyright (c) 1992-1993 The Regents of the University of California.
+   All rights reserved.  See copyright.h for copyright notice and limitation 
+   of liability and disclaimer of warranty provisions.
  */
 
 #include "copyright.h"
@@ -35,14 +35,14 @@ system_trap()
 		dump_reg();
 	}
 
-/*	if (Reg[1] == 0)
-/*	{			/* SYS_indir */
-/*		syscallno = Reg[8];	/* out reg 0 */
-/*		o0 = Reg[9];
-/*		o1 = Reg[10];
-/*		o2 = Reg[11];
-/*	}
-/*	else	/* */
+	/*	if (Reg[1] == 0)
+	/*	{			/* SYS_indir */
+	/*		syscallno = Reg[8];	/* out reg 0 */
+	/*		o0 = Reg[9];
+	/*		o1 = Reg[10];
+	/*		o2 = Reg[11];
+	/*	}
+	/*	else	/* */
 	{
 		syscallno = Reg[2];
 		o0 = Reg[4];
@@ -93,7 +93,7 @@ system_trap()
 				{
 					size = 6;
 					o1 = (o1 & ~((IOCPARM_MASK << 16))) 
-					   | (size << 16);
+						| (size << 16);
 				}
 			}
 			Reg[1] = ioctl(u_to_int_fd(o0),o1,u_to_int_addr(o2));
@@ -123,11 +123,11 @@ system_trap()
 }
 
 char *u_to_int_addr(ptr)
-int ptr;
+	int ptr;
 {	/* convert a user pointer to the real address   */
 	/* used in the interpreter			*/
 
-	 return ((char *) ((int) mem - memoffset  + ptr));
+	return ((char *) ((int) mem - memoffset  + ptr));
 }
 
 u_to_int_fd(fd)
@@ -135,9 +135,9 @@ u_to_int_fd(fd)
 	if (fd > 2)
 	{
 		/*
-		printf("No general file descriptors yet\n");
-		exit(2);
-		*/
+		   printf("No general file descriptors yet\n");
+		   exit(2);
+		 */
 	}
 	return (fd);		/* assume we can handle it for now */
 }

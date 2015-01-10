@@ -24,9 +24,9 @@
 
 SynchList::SynchList ()
 {
-    list = new List ();
-    lock = new Lock ("list lock");
-    listEmpty = new Condition ("list empty cond");
+	list = new List ();
+	lock = new Lock ("list lock");
+	listEmpty = new Condition ("list empty cond");
 }
 
 //----------------------------------------------------------------------
@@ -36,9 +36,9 @@ SynchList::SynchList ()
 
 SynchList::~SynchList ()
 {
-    delete list;
-    delete lock;
-    delete listEmpty;
+	delete list;
+	delete lock;
+	delete listEmpty;
 }
 
 //----------------------------------------------------------------------
@@ -50,13 +50,13 @@ SynchList::~SynchList ()
 //              anything.
 //----------------------------------------------------------------------
 
-void
+	void
 SynchList::Append (void *item)
 {
-    lock->Acquire ();		// enforce mutual exclusive access to the list 
-    list->Append (item);
-    listEmpty->Signal (lock);	// wake up a waiter, if any
-    lock->Release ();
+	lock->Acquire ();		// enforce mutual exclusive access to the list 
+	list->Append (item);
+	listEmpty->Signal (lock);	// wake up a waiter, if any
+	lock->Release ();
 }
 
 //----------------------------------------------------------------------
@@ -67,18 +67,18 @@ SynchList::Append (void *item)
 //      The removed item. 
 //----------------------------------------------------------------------
 
-void *
+	void *
 SynchList::Remove ()
 {
-    void *item;
+	void *item;
 
-    lock->Acquire ();		// enforce mutual exclusion
-    while (list->IsEmpty ())
-	listEmpty->Wait (lock);	// wait until list isn't empty
-    item = list->Remove ();
-    ASSERT (item != NULL);
-    lock->Release ();
-    return item;
+	lock->Acquire ();		// enforce mutual exclusion
+	while (list->IsEmpty ())
+		listEmpty->Wait (lock);	// wait until list isn't empty
+	item = list->Remove ();
+	ASSERT (item != NULL);
+	lock->Release ();
+	return item;
 }
 
 //----------------------------------------------------------------------
@@ -89,10 +89,10 @@ SynchList::Remove ()
 //      "func" is the procedure to be applied.
 //----------------------------------------------------------------------
 
-void
+	void
 SynchList::Mapcar (VoidFunctionPtr func)
 {
-    lock->Acquire ();
-    list->Mapcar (func);
-    lock->Release ();
+	lock->Acquire ();
+	list->Mapcar (func);
+	lock->Release ();
 }

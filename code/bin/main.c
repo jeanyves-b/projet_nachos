@@ -1,7 +1,7 @@
 /*
- Copyright (c) 1992-1993 The Regents of the University of California.
- All rights reserved.  See copyright.h for copyright notice and limitation 
- of liability and disclaimer of warranty provisions.
+   Copyright (c) 1992-1993 The Regents of the University of California.
+   All rights reserved.  See copyright.h for copyright notice and limitation 
+   of liability and disclaimer of warranty provisions.
  */
 
 #include "copyright.h"
@@ -29,8 +29,8 @@ int NROWS=64, ASSOC=1, LINESIZE=4, RAND=0, LRD=0;
 extern char *strcpy();
 
 main(argc, argv)
-int argc;
-char *argv[];
+	int argc;
+	char *argv[];
 {
 	register char *s;
 	char *fakeargv[3];
@@ -46,15 +46,15 @@ char *argv[];
 				case 'T':  Traptrace = 1; break;
 				case 'r':  Regtrace = 1; break;
 				case 'm':
-					NROWS = atoi(*++argv);
-					ASSOC = atoi(*++argv);
-					LINESIZE = atoi(*++argv);
-					RAND = ((*++argv)[0] == 'r');
-					LRD = ((*argv)[0] == 'l')
-					   && ((*argv)[1] == 'r')
-					   && ((*argv)[2] == 'd');
-					argc -= 4;
-					break;
+					   NROWS = atoi(*++argv);
+					   ASSOC = atoi(*++argv);
+					   LINESIZE = atoi(*++argv);
+					   RAND = ((*++argv)[0] == 'r');
+					   LRD = ((*argv)[0] == 'l')
+						   && ((*argv)[1] == 'r')
+						   && ((*argv)[2] == 'd');
+					   argc -= 4;
+					   break;
 			}
 	}
 
@@ -79,7 +79,7 @@ char *argv[];
 }
 
 char *string(s)
-char *s;
+	char *s;
 {
 	char *p;
 	extern char *malloc();
@@ -90,7 +90,7 @@ char *s;
 }
 
 load_program(filename)
-char *filename;
+	char *filename;
 {
 	register int pc, i, j, strindex, stl;
 	char str[1111];
@@ -105,7 +105,7 @@ char *filename;
 	if  ( TYPE(ldptr) != 0x162 )
 	{
 		fprintf(stderr,
-			"big-endian object file (little-endian interp)\n");
+				"big-endian object file (little-endian interp)\n");
 		exit(0);
 	}
 
@@ -116,9 +116,9 @@ char *filename;
 		pc = head.s_vaddr; \
 		FSEEK(ldptr, head.s_scnptr, 0); \
 		for  ( i=0; i<head.s_size; ++i ) \
-			*(char *) ((mem-memoffset)+pc++) = getc(fp); \
+		*(char *) ((mem-memoffset)+pc++) = getc(fp); \
 		if (pc-memoffset >= MEMSIZE) \
-			{ printf("MEMSIZE too small. Fix and recompile.\n"); \
+		{ printf("MEMSIZE too small. Fix and recompile.\n"); \
 			exit(1); } \
 	}
 
@@ -127,38 +127,38 @@ char *filename;
 	else
 		LOADSECTION(texthead)
 
-	if  ( ldnshread(ldptr, ".rdata", &rdatahead) != 1 )
-		printf("rdata section header missing\n");
-	else
-		LOADSECTION(rdatahead)
+			if  ( ldnshread(ldptr, ".rdata", &rdatahead) != 1 )
+				printf("rdata section header missing\n");
+			else
+				LOADSECTION(rdatahead)
 
-	if  ( ldnshread(ldptr, ".data", &datahead) != 1 )
-		printf("data section header missing\n");
-	else
-		LOADSECTION(datahead)
+					if  ( ldnshread(ldptr, ".data", &datahead) != 1 )
+						printf("data section header missing\n");
+					else
+						LOADSECTION(datahead)
 
-	if  ( ldnshread(ldptr, ".sdata", &sdatahead) != 1 )
-		printf("sdata section header missing\n");
-	else
-		LOADSECTION(sdatahead)
+							if  ( ldnshread(ldptr, ".sdata", &sdatahead) != 1 )
+								printf("sdata section header missing\n");
+							else
+								LOADSECTION(sdatahead)
 
-	if  ( ldnshread(ldptr, ".sbss", &sbsshead) != 1 )
-		printf("sbss section header missing\n");
-	else
-		LOADSECTION(sbsshead)
+									if  ( ldnshread(ldptr, ".sbss", &sbsshead) != 1 )
+										printf("sbss section header missing\n");
+									else
+										LOADSECTION(sbsshead)
 
-	if  ( ldnshread(ldptr, ".bss", &bsshead) != 1 )
-		printf("bss section header missing\n");
-	else
-		LOADSECTION(bsshead)
+											if  ( ldnshread(ldptr, ".bss", &bsshead) != 1 )
+												printf("bss section header missing\n");
+											else
+												LOADSECTION(bsshead)
 
-	/* BSS is already zeroed (statically-allocated mem) */
-	/* this version ignores relocation info */
+													/* BSS is already zeroed (statically-allocated mem) */
+													/* this version ignores relocation info */
 }
 
 
 int *m_alloc(n)
-int n;
+	int n;
 {
 	extern char *malloc();
 

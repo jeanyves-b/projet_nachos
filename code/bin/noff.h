@@ -10,16 +10,16 @@
 					 */
 
 typedef struct segment {
-  int virtualAddr;		/* location of segment in virt addr space */
-  int inFileAddr;		/* location of segment in this file */
-  int size;			/* size of segment */
+	int virtualAddr;		/* location of segment in virt addr space */
+	int inFileAddr;		/* location of segment in this file */
+	int size;			/* size of segment */
 } Segment;
 
 typedef struct noffHeader {
-   int noffMagic;		/* should be NOFFMAGIC */
-   Segment code;		/* executable code segment */ 
-   Segment initData;		/* initialized data segment */
-   Segment uninitData;		/* uninitialized data segment --
-				 * should be zero'ed before use 
-				 */
+	int noffMagic;		/* should be NOFFMAGIC */
+	Segment code;		/* executable code segment */ 
+	Segment initData;		/* initialized data segment */
+	Segment uninitData;		/* uninitialized data segment --
+					 * should be zero'ed before use 
+					 */
 } NoffHeader;

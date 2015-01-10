@@ -12,15 +12,15 @@
 
 #include "syscall.h"
 
-int
+	int
 main ()
 {
-    int i;
-    i = 0;
-    i = 3+5;
-    i = i + 6;
-    Halt ();
+	int i;
+	i = 0;
+	i = 3+5;
+	i = i + 6;
+	Halt ();
 
-    /* not reached */
-    return 0;
+	/* not reached */
+	return 0;
 }

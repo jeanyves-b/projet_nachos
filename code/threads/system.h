@@ -18,9 +18,9 @@
 
 // Initialization and cleanup routines
 extern void Initialize (int argc, char **argv);	// Initialization,
-						// called before anything else
+// called before anything else
 extern void Cleanup ();		// Cleanup, called when
-						// Nachos is done.
+// Nachos is done.
 
 extern Thread *currentThread;	// the thread holding the CPU
 extern Thread *threadToBeDestroyed;	// the thread that just finished

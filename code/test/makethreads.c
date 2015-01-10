@@ -21,7 +21,7 @@ int main(){
 		UserThreadJoin(id3);
 	if (id2 >= 0)
 		UserThreadJoin(id2);
-		
+
 	SynchPutString("On quitte main");
 	return 0;
 }
@@ -32,8 +32,8 @@ int main(){
 
 void thread(void *n){
 	int i=0;
-	
-	
+
+
 
 	for(i=0; i < *((int*)n); i++){	
 		if (*(int*)n==3)		
@@ -43,7 +43,7 @@ void thread(void *n){
 		else
 			PutChar('k'+i);
 	}
-	
+
 	PutChar('\n');
 	SynchPutString("On quitte un thread \"fils\"");
 	UserThreadExit();
