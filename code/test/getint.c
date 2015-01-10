@@ -1,4 +1,9 @@
 #include "syscall.h"
+
+/*
+ *  Programme de test de l'appel système SynchGetInt
+ */
+
 int main()
 {
 	int i;

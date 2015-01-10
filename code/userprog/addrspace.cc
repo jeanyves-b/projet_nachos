@@ -131,11 +131,11 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
 	threads_stack_id = new unsigned[MAX_THREADS];
-	stack_blocs = new bool[UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES];
+	stack_blocs = new bool[(UserStackSize-16)/(PageSize*THREAD_PAGES + 16)];
 	for(unsigned int j=0; j<MAX_THREADS; j++)
 		threads_stack_id[j] = 0;
 		
-	for(unsigned int j=0; j<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES; j++)
+	for(unsigned int j=0; j<(UserStackSize-16)/(PageSize*THREAD_PAGES + 16); j++)
 		stack_blocs[j] = false;
 		
 	threads_created = 0; 
@@ -193,6 +193,7 @@ AddrSpace::InitRegisters ()
     ASSERT(err >= 0 && tmp_unsigned == 2); 
     
     err = this->AddThread(&tmp_unsigned);
+
     ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
     
     DEBUG ('a', "Initializing stack register to %d\n",
@@ -247,16 +248,16 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 	if (threads_created >= MAX_THREADS)
 		return -1;
 	
-	unsigned id;
+	unsigned id_in_stack;
 	
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
-	if (this->GetFirstFreeThreadStackBlockId(&id)<0)
+	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
 		return -2;
-	
-	stack_blocs[id] = true;
-	threads_stack_id[threads_created++] = id;
-      *created_thread_id = id;
+		
+	stack_blocs[id_in_stack-2] = true;
+	threads_stack_id[threads_created++] = id_in_stack;
+    *created_thread_id = threads_created - 1;
     return 0;
 }
 
@@ -325,13 +326,11 @@ AddrSpace::GetStackAddress (unsigned *stack_address, unsigned unique_thread_id)
 		return -2; 
 		
 	//Identifiant de thread dépasse la taille maximale de pile
-	if (stack_thread_id*THREAD_PAGES*(PageSize+16/THREAD_PAGES) > UserStackSize)
+	if (((PageSize*THREAD_PAGES + 16)*(stack_thread_id - 2)) + 16 > UserStackSize)
 		return -3;
 		
-	if (stack_thread_id == 2) 
-		*stack_address = numPages * PageSize - 16;
-		
-    *stack_address = numPages * PageSize - ((PageSize+(16/THREAD_PAGES))*THREAD_PAGES*(stack_thread_id - 2));
+    *stack_address = numPages * PageSize - ((PageSize*THREAD_PAGES + 16)*(stack_thread_id - 2)) - 16;
+
     return 0;
 }
 //----------------------------------------------------------------------
@@ -349,7 +348,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 {
 	unsigned offset = 0;
     while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
-		if (stack_blocs[offset]<2) {
+		if (!stack_blocs[offset]) {
 			*stack_thread_id = offset + 2;
 			return 0;
 		}

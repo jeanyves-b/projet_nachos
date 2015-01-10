@@ -63,7 +63,7 @@ Thread::Thread (const char *threadName)
 
 Thread::~Thread ()
 {
-    DEBUG ('t', "Deleting thread \"%s\"\n", name);
+    DEBUG ('t', "Deleting thread \"%s %d\"\n", name, id);
     
     ASSERT (this != currentThread);
     if (stack != NULL)
@@ -93,8 +93,8 @@ Thread::~Thread ()
 void
 Thread::Fork (VoidFunctionPtr func, int arg)
 {
-    DEBUG ('t', "Forking thread \"%s\" with func = 0x%x, arg = %d\n",
-	   name, (int) func, arg);
+    DEBUG ('t', "Forking thread \"%s %d\" with func = 0x%x, arg = %d\n",
+	   name, id, (int) func, arg);
 
     StackAllocate (func, arg);
 
@@ -164,7 +164,7 @@ Thread::Finish ()
     (void) interrupt->SetLevel (IntOff);
     ASSERT (this == currentThread);
 
-    DEBUG ('t', "Finishing thread \"%s\"\n", getName ());
+    DEBUG ('t', "Finishing thread \"%s %d\"\n", getName (), id);
 
     // LB: Be careful to guarantee that no thread to be destroyed 
     // is ever lost 
@@ -202,7 +202,7 @@ Thread::Yield ()
 
     ASSERT (this == currentThread);
 
-    DEBUG ('t', "Yielding thread \"%s\"\n", getName ());
+    DEBUG ('t', "Yielding thread \"%s %d\"\n", getName (), id);
 
     nextThread = scheduler->FindNextToRun ();
     if (nextThread != NULL)
@@ -240,7 +240,7 @@ Thread::Sleep ()
     ASSERT (this == currentThread);
     ASSERT (interrupt->getLevel () == IntOff);
 
-    DEBUG ('t', "Sleeping thread \"%s\"\n", getName ());
+    DEBUG ('t', "Sleeping thread \"%s %d\"\n", getName (), id);
 
     status = BLOCKED;
     while ((nextThread = scheduler->FindNextToRun ()) == NULL)

@@ -53,7 +53,7 @@ Scheduler::~Scheduler ()
 void
 Scheduler::ReadyToRun (Thread * thread)
 {
-    DEBUG ('t', "Putting thread %s on ready list.\n", thread->getName ());
+    DEBUG ('t', "Putting thread %s %d on ready list.\n", thread->getName (), thread->id);
 
     thread->setStatus (READY);
     readyList->Append ((void *) thread);
@@ -110,8 +110,8 @@ Scheduler::Run (Thread * nextThread)
     currentThread = nextThread;	// switch to the next thread
     currentThread->setStatus (RUNNING);	// nextThread is now running
 
-    DEBUG ('t', "Switching from thread \"%s\" to thread \"%s\"\n",
-	oldThread->getName (), nextThread->getName ());
+    DEBUG ('t', "Switching from thread \"%s %d\" to thread \"%s %d\"\n",
+	oldThread->getName (), oldThread->id, nextThread->getName (), nextThread->id);
 
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
@@ -120,7 +120,7 @@ Scheduler::Run (Thread * nextThread)
 
     SWITCH (oldThread, nextThread);
 
-    DEBUG ('t', "Now in thread \"%s\"\n", currentThread->getName ());
+    DEBUG ('t', "Now in thread \"%s %d\"\n", currentThread->getName (), currentThread->id);
 
     // If the old thread gave up the processor because it was finishing,
     // we need to delete its carcass.  Note we cannot delete the thread

@@ -7,28 +7,44 @@ void thread(void*);
  */
 
 int main(){
-	int n = 10;
-	
-	// Si le thread est bien lancé, un message positif sera affiché à l'ecran
+	int n = 3;
+	int n2 = 5;
+	int n3 = 7;
+
 	unsigned id = UserThreadCreate(thread, (void*)(&n));
-	//(UserThreadCreate(thread, (void*)(&n)) != -1)?SynchPutString("\nLe Thread 1 a bien été lancé."):SynchPutString("\nEchec (Thread 1)");
-	
-	UserThreadJoin(id);
+	unsigned id2 = UserThreadCreate(thread, (void*)(&n2));
+	unsigned id3 = UserThreadCreate(thread, (void*)(&n3));  
+
+	if (id >= 0)
+		UserThreadJoin(id); 
+	if (id3 >= 0)
+		UserThreadJoin(id3);
+	if (id2 >= 0)
+		UserThreadJoin(id2);
+		
+	SynchPutString("On quitte main");
 	return 0;
 }
 
 /*
- * Affiche des entiers de 0 à n
+ * Affiche des entiers de 0 à *n
  */
 
 void thread(void *n){
-	volatile int i=0;
+	int i=0;
+	
+	
+
+	for(i=0; i < *((int*)n); i++){	
+		if (*(int*)n==3)		
+			PutChar('a'+i);
+		else if (*(int*)n==5)
+			PutChar('z'-i);
+		else
+			PutChar('k'+i);
+	}
 	
 	PutChar('\n');
-
-	for(i=0; i < *((int*)n); i++){
-		SynchPutInt(i);
-	}
-
-	PutChar('\n');
+	SynchPutString("On quitte un thread \"fils\"");
+	UserThreadExit();
 }

@@ -12,8 +12,8 @@ SynchConsole::SynchConsole(char *readFile, char *writeFile)
 {
   readAvail = new Semaphore("read avail", 0);
   writeDone = new Semaphore("write done", 0);
-  writing = new Semaphore("writing", 0);
-  reading = new Semaphore("reading", 0);
+  writing = new Semaphore("writing", 1);
+  reading = new Semaphore("reading", 1);
   console = new Console(readFile,writeFile,ReadAvail,WriteDone,0);
 }
 
@@ -30,6 +30,7 @@ void SynchConsole::SPutChar(const char ch)
 {
     console->PutChar (ch);	// echo it!
     writeDone->P ();	// wait for write to finish
+    
 }
 
 void SynchConsole::SynchPutChar(const char ch)
@@ -105,7 +106,7 @@ void SynchConsole::SynchGetString(char *s, int n)
 void SynchConsole::SynchPutInt(int n)
 {
 	//	récupération du nombre de chiffres de l'entier
-	//	+1 si négative, et +1 pour le byte null
+	//	+1 si négatif, et +1 pour le byte null
 	int digits = 1, tmp = n;
 	if (tmp == 0) 
 		digits = 2;

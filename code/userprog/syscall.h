@@ -140,7 +140,7 @@ void SynchPutInt(int n);
 void SynchGetInt(int *n);
 
 /*Create user thread*/
-int UserThreadCreate(void f(void *arg), void *arg);
+unsigned UserThreadCreate(void f(void *arg), void *arg);
 
 /*Exit current thread*/
 void UserThreadExit();

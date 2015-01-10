@@ -15,6 +15,7 @@ struct FunctionData {
 };
 
 void StartUserThread(int data) {	
+	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 	FunctionData *function_data = (FunctionData*)data;
 	
 	//Initialisation de tous les registres
@@ -31,20 +32,22 @@ void StartUserThread(int data) {
     
     //	mettre le registre de pile au bon endroit
     unsigned stack;
-    currentThread->space->GetStackAddress(&stack, function_data->id);
+    int err = currentThread->space->GetStackAddress(&stack, function_data->id);
+    ASSERT(err >= 0);
+    
     machine->WriteRegister(StackReg, stack);
-     
 	delete function_data; //	éviter leak de mémoire
 	
 	currentThread->space->RestoreState();
 	machine->Run();
+	 (void)interrupt->SetLevel (oldLevel);
 }
 
 int do_UserThreadCreate(int f, int arg){
 	// On bloque les interruptions pour rendre ce bout de code atomique
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
-	Thread *newThread = new Thread("new thread");
+	Thread *newThread = new Thread("user thread");
 	
 	// Si le thread créé est null, on renvoie -1
 	if(newThread == NULL)
@@ -56,7 +59,7 @@ int do_UserThreadCreate(int f, int arg){
 	data->arg = arg;
 	
 	if (currentThread->space->AddThread(&(data->id)) < 0)
-		return -1;
+		return -2;
 		
 	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);

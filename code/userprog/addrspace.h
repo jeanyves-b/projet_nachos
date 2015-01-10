@@ -17,7 +17,7 @@
 #include "filesys.h"
 #include <vector>
 
-#define UserStackSize		1024	// increase this as necessary!
+#define UserStackSize		2024	// increase this as necessary!
 #define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 #define MAX_THREADS			1024u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 
