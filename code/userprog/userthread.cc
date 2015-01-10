@@ -15,7 +15,6 @@ struct FunctionData {
 };
 
 void StartUserThread(int data) {	
-	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 	FunctionData *function_data = (FunctionData*)data;
 	
 	//Initialisation de tous les registres
@@ -40,7 +39,6 @@ void StartUserThread(int data) {
 	
 	currentThread->space->RestoreState();
 	machine->Run();
-	 (void)interrupt->SetLevel (oldLevel);
 }
 
 int do_UserThreadCreate(int f, int arg){
