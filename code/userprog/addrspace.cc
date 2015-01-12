@@ -17,10 +17,11 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "frameprovider.h"
 #include "addrspace.h"
 #include "noff.h"
-
 #include <strings.h>		/* for bzero */
+
 
 //
 struct WaitingThread {
@@ -114,15 +115,19 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
-
+	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
 	pageTable = new TranslationEntry[numPages];
+
+	int ppn;
 	for (i = 0; i < numPages; i++)
 	{
 		pageTable[i].virtualPage = i;	
-		pageTable[i].physicalPage = (i==numPages-1?0:i + 1); //  virtual page # + 1 = phys page #
+		ppn = machine->frameprovider->GetEmptyFrame();
+		ASSERT(ppn >= 0); //	test que la page physique retournée est valide
+		pageTable[i].physicalPage = ppn;
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -176,6 +181,11 @@ AddrSpace::~AddrSpace ()
 	// delete pageTable;
 	delete [] pageTable;
 	// End of modification
+	unsigned i;
+	//liberation de toutes les pages physiques utilisées par le processus
+	for(i = 0; i < numPages; i++)
+		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
+	
 	delete stack_blocs;
 	delete threads_stack_id;
 }

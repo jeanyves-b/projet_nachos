@@ -16,6 +16,7 @@
 #include "copyright.h"
 #include "filesys.h"
 #include <vector>
+#include "bitmap.h"
 
 #define UserStackSize		2024	// increase this as necessary!
 #define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
@@ -64,6 +65,7 @@ class AddrSpace
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant
 		//	les threads en attente associés aux threads qu'ils attendent
+		
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
 		// dans la pile de taille THREAD_PAGES
