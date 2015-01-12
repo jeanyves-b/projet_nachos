@@ -17,16 +17,42 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "frameprovider.h"
 #include "addrspace.h"
 #include "noff.h"
-
 #include <strings.h>		/* for bzero */
+
 
 //
 struct WaitingThread {
 	Thread *who;
 	unsigned forId;
 };
+
+static void
+ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
+    int position, TranslationEntry *pageTable, unsigned numPages){
+    
+    //~ TranslationEntry *oldPT = machine->pageTable;
+    //~ unsigned oldPTS = machine->pageTableSize;
+
+    machine->pageTable = pageTable;
+    machine->pageTableSize = numPages;
+
+    char buffer[numBytes];
+
+
+    int written = executable->ReadAt(buffer, numBytes, position);
+    int i = 0;
+
+    for (i = 0; i < written; i++){
+        machine->WriteMem(virtualaddr+i, 1, buffer[i]);
+    }
+
+
+    //~ machine->pageTable = oldPT;
+    //~ machine->pageTableSize = oldPTS;
+} 
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -91,15 +117,19 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
-
+	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
 	pageTable = new TranslationEntry[numPages];
+
+	int ppn;
 	for (i = 0; i < numPages; i++)
 	{
-		pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-		pageTable[i].physicalPage = i;
+		pageTable[i].virtualPage = i;	
+		ppn = machine->frameprovider->GetEmptyFrame();
+		ASSERT(ppn >= 0); //	test que la page physique retournée est valide
+		pageTable[i].physicalPage = ppn;
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -111,24 +141,22 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// zero out the entire address space, to zero the unitialized data segment 
 	// and the stack segment
 	bzero (machine->mainMemory, size);
-
+	
 	// then, copy in the code and data segments into memory
 	if (noffH.code.size > 0)
 	{
 		DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
 				noffH.code.virtualAddr, noffH.code.size);
-		executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
-				noffH.code.size, noffH.code.inFileAddr);
+		ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size, 
+            noffH.code.inFileAddr, pageTable, numPages);
 	}
 	if (noffH.initData.size > 0)
 	{
 		DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
 				noffH.initData.virtualAddr, noffH.initData.size);
-		executable->ReadAt (&
-				(machine->mainMemory
-				 [noffH.initData.virtualAddr]),
-				noffH.initData.size, noffH.initData.inFileAddr);
-	}
+		ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size, 
+            noffH.initData.inFileAddr, pageTable, numPages); 
+		}
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
@@ -155,6 +183,11 @@ AddrSpace::~AddrSpace ()
 	// delete pageTable;
 	delete [] pageTable;
 	// End of modification
+	unsigned i;
+	//liberation de toutes les pages physiques utilisées par le processus
+	for(i = 0; i < numPages; i++)
+		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
+	
 	delete stack_blocs;
 	delete threads_stack_id;
 }
@@ -295,6 +328,14 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 
 }
 
+//----------------------------------------------------------------------
+// AddrSpace::RunWaitingThread
+//		Cherche le thread ayant l'id "unique_thread_id" dans la liste
+//		des threads en attente "de join", l'enlève de cette liste, et le mets
+//		dans la liste de threads en attente "d'exécution".
+//
+//----------------------------------------------------------------------
+
 void AddrSpace::RunWaitingThread(unsigned unique_thread_id){
 	for (unsigned i=0; i<waiting_threads.size(); i++)
 		if (waiting_threads.at(i)->forId == unique_thread_id) {
@@ -365,6 +406,12 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 }
 //----------------------------------------------------------------------
 // AddrSpace::JoinThread
+//		Cette fonctionne ne retourne que si le thread ayant comme
+//		identfiant "user_thread_id" se termine.
+//		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
+//		identifiant jamais créé, -2 si identifiant ne correspond pas
+//		à un emplacement actif dans la pile, -3 l'identifiant donné
+//		est celui du thread en cours).
 //
 //----------------------------------------------------------------------
 

@@ -114,13 +114,31 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 	(void) interrupt->SetLevel (oldLevel);
 }
 
+//----------------------------------------------------------------------
+// Thread::AddThread
+//      Ajoute le thread ayant l'identifiant "created" à l'espace 
+//		d'adresse, et à la liste des "enfants" du thread.
+//		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
+//		impossible d'ajouter le thread à l'espace d'adressage).
+//
+//----------------------------------------------------------------------
+
 int Thread::AddThread(unsigned *created_thread_id){
 	if (this->space->AddThread(created_thread_id) < 0)
-		return -2;
+		return -1;
 	this->fils.push_back(*created_thread_id);
 
 	return 0;
 }
+
+//----------------------------------------------------------------------
+// Thread::Join
+//      Attends la fin du thread ayant pour identifiant "user_thread_id"
+//		, et l'enlève de la liste des fils s'il y est à la fin.
+//		Retourne 0 en cas de succès, ou un code d'erreur (voir 
+//		erreur AddrSpace::JoinThread).
+//
+//----------------------------------------------------------------------
 
 int Thread::Join(unsigned user_thread_id){
 	int jerror;
@@ -136,6 +154,15 @@ int Thread::Join(unsigned user_thread_id){
 	}
 	return 0;
 }
+
+//----------------------------------------------------------------------
+// Thread::JoinFils
+//      Attends la fin de tous les threads "fils". Ne retourne que si
+//		tous les threads fils se sont terminés.
+//		Retourne 0 en cas de succès, ou un code d'erreur (voir 
+//		erreur AddrSpace::JoinThread).
+//
+//----------------------------------------------------------------------
 
 int Thread::JoinFils(){
 	int jerror;

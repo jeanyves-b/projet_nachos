@@ -70,6 +70,7 @@ Machine::Machine(bool debug)
 	tlb = NULL;
 	pageTable = NULL;
 #endif
+	frameprovider = new FrameProvider(NumPhysPages);
 
 	singleStep = debug;
 	CheckEndian();
@@ -83,6 +84,7 @@ Machine::Machine(bool debug)
 Machine::~Machine()
 {
 	delete [] mainMemory;
+	delete frameprovider;
 	if (tlb != NULL)
 		delete [] tlb;
 }
