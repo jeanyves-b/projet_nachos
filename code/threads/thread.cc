@@ -118,6 +118,7 @@ int Thread::AddThread(unsigned *created_thread_id){
   if (this->space->AddThread(created_thread_id) < 0)
 		return -2;
   this->fils.push_back(*created_thread_id);
+  
   return 0;
 }
 
@@ -138,12 +139,12 @@ int Thread::Join(unsigned user_thread_id){
 
 int Thread::JoinFils(){
    int jerror;
-  for (unsigned i=0; i<fils.size(); i++){
-    jerror = this->space->JoinThread(fils.at(i));
+  while (!this->fils.empty()){
+    jerror = this->space->JoinThread(fils.at(0));
       if (jerror <0){
 	return jerror;
       }
-      this->fils.erase(fils.begin()+i);
+      this->fils.erase(fils.begin());
     }
     return 0;
  }

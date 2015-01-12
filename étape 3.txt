@@ -105,13 +105,17 @@ partie 2:
 			taille de mémoire à définir au départ -> choix de la taille allouer de base
 
 	UserThreadJoin
-		tableau de sémaphore
-		id sert d'identifiant dans ce tableau
-		pour attendre, on attend le sémaphore
+		Tableau d'id pour connaitre tous les threads qui ont été crée et leurs états
+		si le thread à attendre est en cours d'éxécution, on appelle Sleep et le thread
+		attendu nous réveilleras.
+		rajout d'une liste de thread en attente.
 
 		(suite)
 		attente mutuel
 		ne pas attendre le bon thread
 
-	
+	Dépendance entre thread
+		rajout d'une liste de thread fils pour chaque thread
+		dès qu'il y a un appel à threadExit(), on fait un Join tous les fils.
+		
 partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)
