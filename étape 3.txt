@@ -110,6 +110,20 @@ partie 2:
 		attendu nous réveilleras.
 		rajout d'une liste de thread en attente.
 
+		structures:
+			vecteur séquentiel contenant la liste des threads en attente et l'identifiant des threads qu'ils attend
+				élement who: Thread qui attend
+				élement forId: identifiant du thread que who doit attendre
+		dès l'appel à join du thread d'id x
+			on ajoute la paire (thread courant,x) à la liste des threads en attente 
+			appel à Sleep pour le thread courant
+				Sleep l'enlevera de la liste d'attente du scheduler
+		à l'appel de Exit par n'importe quel thread d'id y
+			trouver les couples (t,y) ou t est n'importe quel thread
+			remettre t sur la liste d'attente du scheduler			
+			désallouer la structure pour libérer la mémoire
+
+
 		(suite)
 		attente mutuel
 		ne pas attendre le bon thread

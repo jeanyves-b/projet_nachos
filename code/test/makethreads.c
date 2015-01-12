@@ -4,7 +4,7 @@ void thread(void*);
 void test(void*);
 
 /*
- * Ce programme de test nous permet simplement de tester le nombre de Threads que l'on peut executer
+ * Ce programme de test nous permet simplement de tester l'execution de plusieurs threads (avec Join)
  */
 
 int main(){
@@ -34,7 +34,7 @@ int main(){
 		if (error < 0){
 		  SynchPutString("erreur Thread 3");
 		}
-	}
+	} 
 
 	SynchPutString("On quitte main");
 	return 0;
@@ -46,8 +46,6 @@ int main(){
 
 void thread(void *n){
 	int i=0;
-
-
 
 	for(i=0; i < *((int*)n); i++){	
 		if (*(int*)n==3)		
