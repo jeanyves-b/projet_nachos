@@ -22,6 +22,12 @@
 
 #include <strings.h>		/* for bzero */
 
+//
+struct WaitingThread {
+	Thread *who;
+	unsigned forId;
+};
+
 //----------------------------------------------------------------------
 // SwapHeader
 //      Do little endian to big endian conversion on the bytes in the 
@@ -29,20 +35,20 @@
 //      endian machine, and we're now running on a big endian machine.
 //----------------------------------------------------------------------
 
-static void
+	static void
 SwapHeader (NoffHeader * noffH)
 {
-    noffH->noffMagic = WordToHost (noffH->noffMagic);
-    noffH->code.size = WordToHost (noffH->code.size);
-    noffH->code.virtualAddr = WordToHost (noffH->code.virtualAddr);
-    noffH->code.inFileAddr = WordToHost (noffH->code.inFileAddr);
-    noffH->initData.size = WordToHost (noffH->initData.size);
-    noffH->initData.virtualAddr = WordToHost (noffH->initData.virtualAddr);
-    noffH->initData.inFileAddr = WordToHost (noffH->initData.inFileAddr);
-    noffH->uninitData.size = WordToHost (noffH->uninitData.size);
-    noffH->uninitData.virtualAddr =
-	WordToHost (noffH->uninitData.virtualAddr);
-    noffH->uninitData.inFileAddr = WordToHost (noffH->uninitData.inFileAddr);
+	noffH->noffMagic = WordToHost (noffH->noffMagic);
+	noffH->code.size = WordToHost (noffH->code.size);
+	noffH->code.virtualAddr = WordToHost (noffH->code.virtualAddr);
+	noffH->code.inFileAddr = WordToHost (noffH->code.inFileAddr);
+	noffH->initData.size = WordToHost (noffH->initData.size);
+	noffH->initData.virtualAddr = WordToHost (noffH->initData.virtualAddr);
+	noffH->initData.inFileAddr = WordToHost (noffH->initData.inFileAddr);
+	noffH->uninitData.size = WordToHost (noffH->uninitData.size);
+	noffH->uninitData.virtualAddr =
+		WordToHost (noffH->uninitData.virtualAddr);
+	noffH->uninitData.inFileAddr = WordToHost (noffH->uninitData.inFileAddr);
 }
 
 //----------------------------------------------------------------------
@@ -63,77 +69,77 @@ SwapHeader (NoffHeader * noffH)
 AddrSpace::AddrSpace (OpenFile * executable)
 {
 	ASSERT(UserStackSize>=THREAD_PAGES*(PageSize+16));
-	
-    NoffHeader noffH;
-    unsigned int i, size;
 
-    executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
-    if ((noffH.noffMagic != NOFFMAGIC) &&
-	(WordToHost (noffH.noffMagic) == NOFFMAGIC))
-	SwapHeader (&noffH);
-    ASSERT (noffH.noffMagic == NOFFMAGIC);
+	NoffHeader noffH;
+	unsigned int i, size;
 
-// how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize;	// we need to increase the size
-    // to leave room for the stack
-    numPages = divRoundUp (size, PageSize);
-    size = numPages * PageSize;
+	executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
+	if ((noffH.noffMagic != NOFFMAGIC) &&
+			(WordToHost (noffH.noffMagic) == NOFFMAGIC))
+		SwapHeader (&noffH);
+	ASSERT (noffH.noffMagic == NOFFMAGIC);
 
-    ASSERT (numPages <= NumPhysPages);	// check we're not trying
-    // to run anything too big --
-    // at least until we have
-    // virtual memory
+	// how big is address space?
+	size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize;	// we need to increase the size
+	// to leave room for the stack
+	numPages = divRoundUp (size, PageSize);
+	size = numPages * PageSize;
 
-    DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
-	   numPages, size);
-// first, set up the translation 
-    pageTable = new TranslationEntry[numPages];
-    for (i = 0; i < numPages; i++)
-      {
-	  pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	  pageTable[i].physicalPage = i;
-	  pageTable[i].valid = TRUE;
-	  pageTable[i].use = FALSE;
-	  pageTable[i].dirty = FALSE;
-	  pageTable[i].readOnly = FALSE;	// if the code segment was entirely on 
-	  // a separate page, we could set its 
-	  // pages to be read-only
-      }
+	ASSERT (numPages <= NumPhysPages);	// check we're not trying
+	// to run anything too big --
+	// at least until we have
+	// virtual memory
 
-// zero out the entire address space, to zero the unitialized data segment 
-// and the stack segment
-    bzero (machine->mainMemory, size);
+	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
+			numPages, size);
+	// first, set up the translation 
+	pageTable = new TranslationEntry[numPages];
+	for (i = 0; i < numPages; i++)
+	{
+		pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+		pageTable[i].physicalPage = i;
+		pageTable[i].valid = TRUE;
+		pageTable[i].use = FALSE;
+		pageTable[i].dirty = FALSE;
+		pageTable[i].readOnly = FALSE;	// if the code segment was entirely on 
+		// a separate page, we could set its 
+		// pages to be read-only
+	}
 
-// then, copy in the code and data segments into memory
-    if (noffH.code.size > 0)
-      {
-	  DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
-		 noffH.code.virtualAddr, noffH.code.size);
-	  executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
-			      noffH.code.size, noffH.code.inFileAddr);
-      }
-    if (noffH.initData.size > 0)
-      {
-	  DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
-		 noffH.initData.virtualAddr, noffH.initData.size);
-	  executable->ReadAt (&
-			      (machine->mainMemory
-			       [noffH.initData.virtualAddr]),
-			      noffH.initData.size, noffH.initData.inFileAddr);
-      }
+	// zero out the entire address space, to zero the unitialized data segment 
+	// and the stack segment
+	bzero (machine->mainMemory, size);
+
+	// then, copy in the code and data segments into memory
+	if (noffH.code.size > 0)
+	{
+		DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
+				noffH.code.virtualAddr, noffH.code.size);
+		executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
+				noffH.code.size, noffH.code.inFileAddr);
+	}
+	if (noffH.initData.size > 0)
+	{
+		DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
+				noffH.initData.virtualAddr, noffH.initData.size);
+		executable->ReadAt (&
+				(machine->mainMemory
+				 [noffH.initData.virtualAddr]),
+				noffH.initData.size, noffH.initData.inFileAddr);
+	}
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
 	threads_stack_id = new unsigned[MAX_THREADS];
-	stack_blocs = new bool[UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES];
+	stack_blocs = new bool[(UserStackSize-16)/(PageSize*THREAD_PAGES + 16)];
 	for(unsigned int j=0; j<MAX_THREADS; j++)
 		threads_stack_id[j] = 0;
-		
-	for(unsigned int j=0; j<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES; j++)
+
+	for(unsigned int j=0; j<(UserStackSize-16)/(PageSize*THREAD_PAGES + 16); j++)
 		stack_blocs[j] = false;
-		
-	threads_created = 0;
-		
+
+	threads_created = 0; 
+
 }
 
 //----------------------------------------------------------------------
@@ -143,10 +149,12 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
 AddrSpace::~AddrSpace ()
 {
-  // LB: Missing [] for delete
-  // delete pageTable;
-  delete [] pageTable;
-  // End of modification
+	// LB: Missing [] for delete
+	// delete pageTable;
+	delete [] pageTable;
+	// End of modification
+	delete stack_blocs;
+	delete threads_stack_id;
 }
 
 //----------------------------------------------------------------------
@@ -159,31 +167,38 @@ AddrSpace::~AddrSpace ()
 //      when this thread is context switched out.
 //----------------------------------------------------------------------
 
-void
+	void
 AddrSpace::InitRegisters ()
 {
-    int i;
+	int i;
 
-    for (i = 0; i < NumTotalRegs; i++)
-	machine->WriteRegister (i, 0);
+	for (i = 0; i < NumTotalRegs; i++)
+		machine->WriteRegister (i, 0);
 
-    // Initial program counter -- must be location of "Start"
-    machine->WriteRegister (PCReg, 0);
+	// Initial program counter -- must be location of "Start"
+	machine->WriteRegister (PCReg, 0);
 
-    // Need to also tell MIPS where next instruction is, because
-    // of branch delay possibility
-    machine->WriteRegister (NextPCReg, 4);
+	// Need to also tell MIPS where next instruction is, because
+	// of branch delay possibility
+	machine->WriteRegister (NextPCReg, 4);
 
-    // Set the stack register to the end of the address space, where we
-    // allocated the stack; but subtract off a bit, to make sure we don't
-    // accidentally reference off the end!
-    machine->WriteRegister (StackReg, numPages * PageSize - 16);
-    
-    unsigned first_free;
-    int err = this->GetFirstFreeThreadStackBlockId(&first_free);
-    ASSERT(err >= 0 && first_free == 0); //
-    DEBUG ('a', "Initializing stack register to %d\n",
-	   numPages * PageSize - 16);
+	// Set the stack register to the end of the address space, where we
+	// allocated the stack; but subtract off a bit, to make sure we don't
+	// accidentally reference off the end!
+	machine->WriteRegister (StackReg, numPages * PageSize - 16);
+
+	//	Ne pas oublier le thread main
+	unsigned tmp_unsigned;
+	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
+	ASSERT(err >= 0 && tmp_unsigned == 2); 
+
+	err = this->AddThread(&tmp_unsigned);
+
+	ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
+
+	DEBUG ('a', "Initializing stack register to %d\n",
+			numPages * PageSize - 16);
+
 }
 
 //----------------------------------------------------------------------
@@ -194,7 +209,7 @@ AddrSpace::InitRegisters ()
 //      For now, nothing!
 //----------------------------------------------------------------------
 
-void
+	void
 AddrSpace::SaveState ()
 {
 }
@@ -207,11 +222,11 @@ AddrSpace::SaveState ()
 //      For now, tell the machine where to find the page table.
 //----------------------------------------------------------------------
 
-void
+	void
 AddrSpace::RestoreState ()
 {
-    machine->pageTable = pageTable;
-    machine->pageTableSize = numPages;
+	machine->pageTable = pageTable;
+	machine->pageTableSize = numPages;
 }
 
 //----------------------------------------------------------------------
@@ -226,24 +241,24 @@ AddrSpace::RestoreState ()
 //		; valeur de created_thread_id indéfinie si erreur)
 //----------------------------------------------------------------------
 
-int 
+	int 
 AddrSpace::AddThread (unsigned *created_thread_id)
 {
 	//Nombre de threads max par processus atteint
 	if (threads_created >= MAX_THREADS)
 		return -1;
-	
-	unsigned id;
-	
+
+	unsigned id_in_stack;
+
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
-	if (this->GetFirstFreeThreadStackBlockId(&id)<0)
+	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
 		return -2;
-	
-	stack_blocs[id] = true;
-	threads_stack_id[threads_created++] = id;
-    *created_thread_id = id;
-    return 0;
+
+	stack_blocs[id_in_stack-2] = true;
+	threads_stack_id[threads_created++] = id_in_stack;
+	*created_thread_id = threads_created - 1;
+	return 0;
 }
 
 
@@ -259,20 +274,41 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 //
 //----------------------------------------------------------------------
 
-int
+	int
 AddrSpace::RemoveThread (unsigned unique_thread_id)
 {
 	//	Identifiant unique trop grand
 	if (unique_thread_id >= MAX_THREADS)
 		return -1;
-	
+
 	//	Thread pas en cours d'exécution
 	if (threads_stack_id[unique_thread_id] < 2)
 		return -2;
-		
-	stack_blocs[threads_stack_id[unique_thread_id]] = false;
+
+	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
 	threads_stack_id[unique_thread_id] = 1;
+
+
 	return 0;
+
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::RunWaitingThread
+//		Cherche le thread ayant l'id "unique_thread_id" dans la liste
+//		des threads en attente "de join", l'enlève de cette liste, et le mets
+//		dans la liste de threads en attente "d'exécution".
+//
+//----------------------------------------------------------------------
+
+void AddrSpace::RunWaitingThread(unsigned unique_thread_id){
+	for (unsigned i=0; i<waiting_threads.size(); i++)
+		if (waiting_threads.at(i)->forId == unique_thread_id) {
+			WaitingThread *tmp = waiting_threads.at(i);
+			scheduler->ReadyToRun(tmp->who);
+			waiting_threads.erase(waiting_threads.begin() + i);
+			delete tmp;
+		}	
 }
 
 //----------------------------------------------------------------------
@@ -285,30 +321,28 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 //
 //----------------------------------------------------------------------
 
-int 
+	int 
 AddrSpace::GetStackAddress (unsigned *stack_address, unsigned unique_thread_id)
 {
 	//Identifiant unique trop grand
 	if (unique_thread_id >= MAX_THREADS)
 		return -1;
-		
+
 	//Récupération de l'identifiant dans le pile du thread ayant 
 	//	l'identifiant unique unique_thread_id
 	unsigned stack_thread_id = threads_stack_id[unique_thread_id];
-	
+
 	//Thread pas en cours d'exécution
 	if (stack_thread_id < 2)
 		return -2; 
-		
+
 	//Identifiant de thread dépasse la taille maximale de pile
-	if (stack_thread_id*THREAD_PAGES*(PageSize+16/THREAD_PAGES) > UserStackSize)
+	if (((PageSize*THREAD_PAGES + 16)*(stack_thread_id - 2)) + 16 > UserStackSize)
 		return -3;
-		
-	if (stack_thread_id == 2) 
-		*stack_address = numPages * PageSize - 16;
-		
-    *stack_address = numPages * PageSize - ((PageSize+(16/THREAD_PAGES))*THREAD_PAGES*(stack_thread_id - 2));
-    return 0;
+
+	*stack_address = numPages * PageSize - ((PageSize*THREAD_PAGES + 16)*(stack_thread_id - 2)) - 16;
+
+	return 0;
 }
 //----------------------------------------------------------------------
 // AddrSpace::GetFirstFreeStackId
@@ -320,18 +354,57 @@ AddrSpace::GetStackAddress (unsigned *stack_address, unsigned unique_thread_id)
 //
 //----------------------------------------------------------------------
 
-int
+	int
 AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 {
 	unsigned offset = 0;
-    while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
-		if (stack_blocs[offset]<2) {
+	while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
+		if (!stack_blocs[offset]) {
 			*stack_thread_id = offset + 2;
 			return 0;
 		}
 		offset++;
 	}
-	
+
 	//Aucun bloc libre trouvé
 	return -1;
+}
+//----------------------------------------------------------------------
+// AddrSpace::JoinThread
+//		Cette fonctionne ne retourne que si le thread ayant comme
+//		identfiant "user_thread_id" se termine.
+//		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
+//		identifiant jamais créé, -2 si identifiant ne correspond pas
+//		à un emplacement actif dans la pile, -3 l'identifiant donné
+//		est celui du thread en cours).
+//
+//----------------------------------------------------------------------
+
+int
+AddrSpace::JoinThread (unsigned user_thread_id) {
+
+	if(user_thread_id > threads_created){
+		return -1;
+	}
+	if (threads_stack_id[user_thread_id] == 0){
+		return -2;
+	}
+	if(user_thread_id == currentThread->id){
+		return -3;
+	}
+
+	if (threads_stack_id[user_thread_id]!=1) {
+		IntStatus oldLevel = interrupt->SetLevel (IntOff);
+		if (threads_stack_id[user_thread_id]!=1) {
+
+			WaitingThread *waiting_thread = new WaitingThread();
+			waiting_thread->who = currentThread;
+			waiting_thread->forId = user_thread_id;
+			this->waiting_threads.push_back(waiting_thread);
+
+			currentThread->Sleep();
+		}
+		(void) interrupt->SetLevel (oldLevel);
+	}
+	return 0;
 }

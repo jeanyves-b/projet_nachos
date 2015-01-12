@@ -6,16 +6,16 @@
 
 int main()
 {
-char c;
-while (c!='q') {
+	char c;
+	while (c!='q') {
 		c = SynchGetChar();
-	if (c!='\n') {
-		SynchPutString("Le caractère entré est: ");
-		PutChar(c);
-		PutChar('\n');
+		if (c!='\n') {
+			SynchPutString("Le caractère entré est: ");
+			PutChar(c);
+			PutChar('\n');
+		}
 	}
-}
-	
-return 0;
+
+	return 0;
 
 }

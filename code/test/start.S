@@ -158,6 +158,7 @@ SynchGetInt:
 	.ent	UserThreadCreate
 UserThreadCreate:
 	addiu $2,$0,SC_UserThC
+	addiu $8,$0,UserThreadExit
 	syscall
 	j	$31
 	.end UserThreadCreate
@@ -169,6 +170,14 @@ UserThreadExit:
 	syscall
 	j	$31
 	.end UserThreadExit
+	
+	.globl UserThreadJoin
+	.ent	UserThreadJoin
+UserThreadJoin:
+	addiu $2,$0,SC_UserThJ
+	syscall
+	j	$31
+	.end UserThreadJoin
 
 	.globl Close
 	.ent	Close

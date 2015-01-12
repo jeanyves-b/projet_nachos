@@ -21,29 +21,29 @@
 //      memory, and jump to it.
 //----------------------------------------------------------------------
 
-void
+	void
 StartProcess (char *filename)
 {
-    OpenFile *executable = fileSystem->Open (filename);
-    AddrSpace *space;
+	OpenFile *executable = fileSystem->Open (filename);
+	AddrSpace *space;
 
-    if (executable == NULL)
-      {
-	  printf ("Unable to open file %s\n", filename);
-	  return;
-      }
-    space = new AddrSpace (executable);
-    currentThread->space = space;
+	if (executable == NULL)
+	{
+		printf ("Unable to open file %s\n", filename);
+		return;
+	}
+	space = new AddrSpace (executable);
+	currentThread->space = space;
 
-    delete executable;		// close file
+	delete executable;		// close file
 
-    space->InitRegisters ();	// set the initial register values
-    space->RestoreState ();	// load page table register
+	space->InitRegisters ();	// set the initial register values
+	space->RestoreState ();	// load page table register
 
-    machine->Run ();		// jump to the user progam
-    ASSERT (FALSE);		// machine->Run never returns;
-    // the address space exits
-    // by doing the syscall "exit"
+	machine->Run ();		// jump to the user progam
+	ASSERT (FALSE);		// machine->Run never returns;
+	// the address space exits
+	// by doing the syscall "exit"
 }
 
 // Data structures needed for the console test.  Threads making
@@ -58,15 +58,15 @@ static Semaphore *writeDone;
 //      Wake up the thread that requested the I/O.
 //----------------------------------------------------------------------
 
-static void
+	static void
 ReadAvail (int arg)
 {
-    readAvail->V ();
+	readAvail->V ();
 }
-static void
+	static void
 WriteDone (int arg)
 {
-    writeDone->V ();
+	writeDone->V ();
 }
 
 //----------------------------------------------------------------------
@@ -75,57 +75,57 @@ WriteDone (int arg)
 //      the output.  Stop when the user types a 'q'.
 //----------------------------------------------------------------------
 
-void
+	void
 ConsoleTest (char *in, char *out)
 {
 
-    char ch, prevch = 0;
+	char ch, prevch = 0;
 
-    delete synchconsole;
-    console = new Console (in, out, ReadAvail, WriteDone, 0);
-    readAvail = new Semaphore ("read avail", 0);
-    writeDone = new Semaphore ("write done", 0);
+	delete synchconsole;
+	console = new Console (in, out, ReadAvail, WriteDone, 0);
+	readAvail = new Semaphore ("read avail", 0);
+	writeDone = new Semaphore ("write done", 0);
 
-    for (;;)
-      {
-	  readAvail->P ();	// wait for character to arrive
-	  ch = console->GetChar ();
-	   //if q or EOF in begining of newline
-	  if ((prevch == '\n' || prevch == 0) && (ch == EOF)) {
-		   delete console;
-		   delete readAvail;
-		   delete writeDone;
-		   synchconsole = new SynchConsole(NULL,NULL);
-		  return; //quit
-	  }
-	  
-	  if (ch=='c') {
-		console->PutChar ('<');
-		writeDone->P ();
-	  } 
+	for (;;)
+	{
+		readAvail->P ();	// wait for character to arrive
+		ch = console->GetChar ();
+		//if q or EOF in begining of newline
+		if ((prevch == '\n' || prevch == 0) && (ch == EOF)) {
+			delete console;
+			delete readAvail;
+			delete writeDone;
+			synchconsole = new SynchConsole(NULL,NULL);
+			return; //quit
+		}
 
-	  console->PutChar (ch);	// echo it!	
-	  writeDone->P ();	// wait for write to finish
-	  
-	  if (ch=='c') {
-		console->PutChar ('>');
-		writeDone->P ();
-	  }
-	  prevch = ch;
-      }
-      
+		if (ch=='c') {
+			console->PutChar ('<');
+			writeDone->P ();
+		} 
+
+		console->PutChar (ch);	// echo it!	
+		writeDone->P ();	// wait for write to finish
+
+		if (ch=='c') {
+			console->PutChar ('>');
+			writeDone->P ();
+		}
+		prevch = ch;
+	}
+
 }
 
 #ifdef CHANGED
-void
+	void
 SynchConsoleTest (char *in, char *out)
 {
-  char ch;
-  delete synchconsole;
-  synchconsole = new SynchConsole(in, out);
-  while ((ch = synchconsole->SynchGetChar()) != EOF)
+	char ch;
+	delete synchconsole;
+	synchconsole = new SynchConsole(in, out);
+	while ((ch = synchconsole->SynchGetChar()) != EOF)
 
-	synchconsole->SynchPutChar(ch);
-  //fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
+		synchconsole->SynchPutChar(ch);
+	//fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
 }
 #endif //CHANGED

@@ -10,10 +10,10 @@ int main()
 	int i;
 	for (i = -2; i <= 11; i++)
 		SynchPutInt(i);
-		
+
 	//Affichage d'un entier très grand
 	SynchPutInt(1234567890);
-	
+
 	return 0;
 
 }
