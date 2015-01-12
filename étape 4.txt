@@ -5,26 +5,34 @@ partie 1 : adressage virtuel par une table de pages
 		écrire un petit programe de test qui écrit des caractère entrelacé à l'écran.
 	action 2
 		examiner executable->ReadAt
-			écrit directement en mémoire
+			lis depuis un fichier et mets dans un emplacement mémoire
+			l'emplacement mémoire choisit est la mémoire principale (pas de virtualisation)
 	action 3
 		écrire une fonction qui écrit en mémoire en utilisant l'adressage virtuel
-			définir le system de pagination
-				utilisation d'une bitmap?
-				system vu en cours?
+			utilisation d'un buffer dans lequel on lit avec ReadAt
+			on ecrit ce qu'il y a dans le buffer vers la page virtuelle choisie avec WriteMem
+				on doit mettre à jour la PageTable et la PageTableSize de la machine afin d'écrire aux bons endroits
+					peut être qu'il faudra réstaurer après l'ecriture dans le cas du multithreading
 	action 4
-		projeté sur le cadre physique?
-			intéret?
+		projeté sur le cadre physique
+			une page virtuelle est mappée sur la page physique suivante
+				on remarque que le ppn (physical page number) = vpn (virtual page number) + 128 (taille d'une page)
 	action 5
 		frame provider
-			s'appuie sur les bitmap pour gérer des cadres
-			récupérer un cadre libre et l'initialiser			GetEmptyFrame()
-			free un cadres 										ReleaseFrame()
-			demander le nombre de cadre dispo					NumAvailableFrame
+			utilisation d'une bitmap
+				utilisation des méthodes proposées pour:
+					chercher un cadre vide et l'utiliser
+					libérer un cadre				NumAvailableFrame
 	action 6
 		refaire addrspace pour utiliser la pagination
+			ppn = GetEmptyFrame de FrameProvider
+				vérifier que page valide: >=0
+			libérer toutes les pages physiques de la pageTable de l'espace d'adressage à sa destruction
 
 choix d'implémentation
 	façon d'écrire dans la mémoire
+		Ecriture dans buffer avec ReadAt
+		Ecriture du buffer vers page virtuelle avec WriteMem
 	allocation et sytem de cadre/pagination
 
 	modification de machine page table size :

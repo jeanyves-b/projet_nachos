@@ -17,16 +17,42 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "frameprovider.h"
 #include "addrspace.h"
 #include "noff.h"
-
 #include <strings.h>		/* for bzero */
+
 
 //
 struct WaitingThread {
 	Thread *who;
 	unsigned forId;
 };
+
+static void
+ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
+    int position, TranslationEntry *pageTable, unsigned numPages){
+    
+    //~ TranslationEntry *oldPT = machine->pageTable;
+    //~ unsigned oldPTS = machine->pageTableSize;
+
+    machine->pageTable = pageTable;
+    machine->pageTableSize = numPages;
+
+    char buffer[numBytes];
+
+
+    int written = executable->ReadAt(buffer, numBytes, position);
+    int i = 0;
+
+    for (i = 0; i < written; i++){
+        machine->WriteMem(virtualaddr+i, 1, buffer[i]);
+    }
+
+
+    //~ machine->pageTable = oldPT;
+    //~ machine->pageTableSize = oldPTS;
+} 
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -51,6 +77,8 @@ SwapHeader (NoffHeader * noffH)
 	noffH->uninitData.inFileAddr = WordToHost (noffH->uninitData.inFileAddr);
 }
 
+  
+
 //----------------------------------------------------------------------
 // AddrSpace::AddrSpace
 //      Create an address space to run a user program.
@@ -66,7 +94,7 @@ SwapHeader (NoffHeader * noffH)
 //      "executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
-AddrSpace::AddrSpace (OpenFile * executable)
+AddrSpace::AddrSpace (OpenFile *executable)
 {
 	ASSERT(UserStackSize>=THREAD_PAGES*(PageSize+16));
 
@@ -89,15 +117,20 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
-
+	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
 	pageTable = new TranslationEntry[numPages];
+
+	int ppn;
+	printf("nombre de page:%i\n", machine->frameprovider->NumAvailFrame());
 	for (i = 0; i < numPages; i++)
 	{
-		pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-		pageTable[i].physicalPage = i;
+		pageTable[i].virtualPage = i;	
+		ppn = machine->frameprovider->GetEmptyFrame();
+		ASSERT(ppn >= 0); //	test que la page physique retournée est valide
+		pageTable[i].physicalPage = ppn;
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -109,24 +142,22 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	// zero out the entire address space, to zero the unitialized data segment 
 	// and the stack segment
 	bzero (machine->mainMemory, size);
-
+	
 	// then, copy in the code and data segments into memory
 	if (noffH.code.size > 0)
 	{
 		DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
 				noffH.code.virtualAddr, noffH.code.size);
-		executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
-				noffH.code.size, noffH.code.inFileAddr);
+		ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size, 
+            noffH.code.inFileAddr, pageTable, numPages);
 	}
 	if (noffH.initData.size > 0)
 	{
 		DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
 				noffH.initData.virtualAddr, noffH.initData.size);
-		executable->ReadAt (&
-				(machine->mainMemory
-				 [noffH.initData.virtualAddr]),
-				noffH.initData.size, noffH.initData.inFileAddr);
-	}
+		ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size, 
+            noffH.initData.inFileAddr, pageTable, numPages); 
+		}
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
@@ -153,6 +184,11 @@ AddrSpace::~AddrSpace ()
 	// delete pageTable;
 	delete [] pageTable;
 	// End of modification
+	unsigned i;
+	//liberation de toutes les pages physiques utilisées par le processus
+	for(i = 0; i < numPages; i++)
+		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
+	
 	delete stack_blocs;
 	delete threads_stack_id;
 }
@@ -189,7 +225,10 @@ AddrSpace::InitRegisters ()
 
 	//	Ne pas oublier le thread main
 	unsigned tmp_unsigned;
+	printf("Stack_block_id(0):%d\n",stack_blocs[0]);
 	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
+	printf("err:%i\ntmp_unsigned:%i\n",err,tmp_unsigned);
+	
 	ASSERT(err >= 0 && tmp_unsigned == 2); 
 
 	err = this->AddThread(&tmp_unsigned);
@@ -244,6 +283,7 @@ AddrSpace::RestoreState ()
 	int 
 AddrSpace::AddThread (unsigned *created_thread_id)
 {
+
 	//Nombre de threads max par processus atteint
 	if (threads_created >= MAX_THREADS)
 		return -1;
@@ -254,7 +294,7 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
 		return -2;
-
+	printf("thread created:%i\n",id_in_stack);
 	stack_blocs[id_in_stack-2] = true;
 	threads_stack_id[threads_created++] = id_in_stack;
 	*created_thread_id = threads_created - 1;
