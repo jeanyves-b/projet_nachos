@@ -122,10 +122,9 @@ partie 2:
 			remettre t sur la liste d'attente du scheduler			
 			désallouer la structure pour libérer la mémoire
 
-
 		(suite)
 		attente mutuel
-		ne pas attendre le bon thread
+		ne pas attendre le bon thread -> done
 
 	Dépendance entre thread
 		rajout d'une liste de thread fils pour chaque thread

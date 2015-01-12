@@ -5,7 +5,6 @@ partie 1 : adressage virtuel par une table de pages
 		écrire un petit programe de test qui écrit des caractère entrelacé à l'écran.
 	action 2
 		examiner executable->ReadAt
-				pas trouvé la fonction...
 			écrit directement en mémoire
 	action 3
 		écrire une fonction qui écrit en mémoire en utilisant l'adressage virtuel
@@ -27,6 +26,9 @@ partie 1 : adressage virtuel par une table de pages
 choix d'implémentation
 	façon d'écrire dans la mémoire
 	allocation et sytem de cadre/pagination
+
+	modification de machine page table size :
+
 
 test
 	allouer des pages
