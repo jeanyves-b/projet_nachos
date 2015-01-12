@@ -1,0 +1,76 @@
+adresse virtuel
+
+partie 1 : adressage virtuel par une table de pages
+	action 1
+		écrire un petit programe de test qui écrit des caractère entrelacé à l'écran.
+	action 2
+		examiner executable->ReadAt
+				pas trouvé la fonction...
+			écrit directement en mémoire
+	action 3
+		écrire une fonction qui écrit en mémoire en utilisant l'adressage virtuel
+			définir le system de pagination
+				utilisation d'une bitmap?
+				system vu en cours?
+	action 4
+		projeté sur le cadre physique?
+			intéret?
+	action 5
+		frame provider
+			s'appuie sur les bitmap pour gérer des cadres
+			récupérer un cadre libre et l'initialiser			GetEmptyFrame()
+			free un cadres 										ReleaseFrame()
+			demander le nombre de cadre dispo					NumAvailableFrame
+	action 6
+		refaire addrspace pour utiliser la pagination
+
+choix d'implémentation
+	façon d'écrire dans la mémoire
+	allocation et sytem de cadre/pagination
+
+test
+	allouer des pages
+	allouer un nombre de gapes max
+	free des pages
+	faire une succession d'alloc et de free
+	essayer de finir sans free et vois si c'est crade
+
+partie 2 : executer plusieurs programmes en même temps
+	action 1
+		appel system : ForkExec()
+			fait un fork()
+	action 2
+		faire en sorte que le dernier processus arrete la machine
+			faire une liste de process
+			si first->next est NULL et que first s'arrete, alors on fait un halt()
+	action 3
+		faire un gros test
+	action 4
+		vérifier que tout se fini correctement
+
+choix d'implémentation
+	dernier process arrete la machine
+
+test
+
+
+partie 3 : shell
+	comprendre ce que fait le programme
+	faire un petit shell pour faire un truc similaire
+
+choix d'implémentation
+	
+
+test
+
+
+partie 4 : allocation dynamique de mémoire
+	
+	action 1
+	action 2
+	action 3
+
+choix d'implémentation
+	
+
+test
