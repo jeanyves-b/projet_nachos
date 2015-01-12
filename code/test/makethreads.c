@@ -4,7 +4,7 @@ void thread(void*);
 void test(void*);
 
 /*
- * Ce programme de test nous permet simplement de tester l'execution de plusieurs threads (avec Join)
+ * Programme de test l'execution de plusieurs threads (avec Join)
  */
 
 int main(){
@@ -26,13 +26,13 @@ int main(){
 	if (id3 >= 0){
 		error=UserThreadJoin(id3);
 		if (error < 0){
-			SynchPutString("erreur Thread 2");
+			SynchPutString("erreur Thread 3");
 		}
 	}
 	if (id2 >= 0){
 		error = UserThreadJoin(id2);
 		if (error < 0){
-			SynchPutString("erreur Thread 3");
+			SynchPutString("erreur Thread 2");
 		}
 	} 
 

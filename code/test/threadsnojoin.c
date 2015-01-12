@@ -4,7 +4,7 @@ void test(void*);
 void thread(void*);
 
 /*
- * Ce programme de test nous permet simplement de tester l'execution de plusieurs threads (sans Join)
+ * Programme de test de l'execution de plusieurs threads sans join
  */
 
 int main(){
