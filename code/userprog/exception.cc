@@ -26,6 +26,7 @@
 #include "syscall.h"
 #include "limits.h"
 #include "userthread.h"
+#include "userprocess.h"
 
 //----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
@@ -209,6 +210,11 @@ ExceptionHandler (ExceptionType which)
 			case SC_UserThJ: { //UserThreadJoin
 						 DEBUG('a', "Joining a thread, initiated by user program.\n");
 						 currentThread->Join(machine->ReadRegister(4));
+						 break;
+					 }
+			case SC_ForkExec:{ //ForkExec
+						 DEBUG('a', "Starting a new process, initiated by user program.\n");
+						 do_UserProcessCreate((char*)machine->ReadRegister(4)); 
 						 break;
 					 }
 			default: {

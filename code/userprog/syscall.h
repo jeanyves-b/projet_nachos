@@ -38,6 +38,7 @@
 #define SC_UserThC	17 //UserThreadCreate
 #define SC_UserThE	18 //UserThreadExit
 #define SC_UserThJ	19 //UserThreadJoin
+#define SC_ForkExec	20 //ForkExec
 
 #ifdef IN_USER_MODE
 
@@ -147,6 +148,9 @@ void UserThreadExit();
 
 /*join an existing thread*/
 int UserThreadJoin(int id);
+
+/*Start a new process which start the executable 's'*/
+int ForkExec( char *s);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

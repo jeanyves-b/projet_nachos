@@ -51,6 +51,8 @@ SwapHeader (NoffHeader * noffH)
 	noffH->uninitData.inFileAddr = WordToHost (noffH->uninitData.inFileAddr);
 }
 
+  
+
 //----------------------------------------------------------------------
 // AddrSpace::AddrSpace
 //      Create an address space to run a user program.
@@ -66,7 +68,7 @@ SwapHeader (NoffHeader * noffH)
 //      "executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
-AddrSpace::AddrSpace (OpenFile * executable)
+AddrSpace::AddrSpace (OpenFile *executable)
 {
 	ASSERT(UserStackSize>=THREAD_PAGES*(PageSize+16));
 

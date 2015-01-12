@@ -47,7 +47,7 @@ void StartUserThread(int data) {
 
 int do_UserThreadCreate(int f, int arg, int exit){
 	// On bloque les interruptions pour rendre ce bout de code atomique
-	IntStatus oldLevel = interrupt->SetLevel (IntOff);
+	//IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
 	Thread *newThread = new Thread("user thread");
 
@@ -68,7 +68,7 @@ int do_UserThreadCreate(int f, int arg, int exit){
 	newThread->Fork(StartUserThread, (int)data);
 
 	// On réactive les interruptions
-	(void)interrupt->SetLevel (oldLevel);
+	//(void)interrupt->SetLevel (oldLevel);
 
 	return data->id;
 }
