@@ -47,13 +47,13 @@ int main(){
 void thread(void *n){
 	int i=0;
 
-	for(i=0; i < *((int*)n); i++){	
+	for(i=0; i <  *((int*)n)  ; i++){	
 		if (*(int*)n==3)		
-			PutChar('a'+i);
+			PutChar('1');
 		else if (*(int*)n==5)
-			PutChar('z'-i);
+			PutChar('2');
 		else
-			PutChar('k'+i);
+			PutChar('3');
 	}
 
 	PutChar('\n');

@@ -133,3 +133,8 @@ partie 2:
 		dès qu'il y a un appel à threadExit(), on fait un Join tous les fils.
 		
 partie 3 bonus (à revenir dessus, pour le moment ce n'est pas une priorité)
+	terminaison automatique
+		mettre le registre d'adresse de retour à l'adresse de l'appel système UserThreadExit
+			mettre l'adresse de UserThreadExit dans un registre temporaire
+			appeler do_UserThreadCreate avec en troisième arguement la valeur du reg temp
+			mettre la valeur du troisième argument dans le registre d'adresse de retour

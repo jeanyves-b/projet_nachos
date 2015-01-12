@@ -35,6 +35,7 @@ void SynchConsole::SPutChar(const char ch)
 
 void SynchConsole::SynchPutChar(const char ch)
 {
+	//printf("trying to get writing by %c\n", ch);
 	writing->P();
 	SPutChar(ch);
 	writing->V();

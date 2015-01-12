@@ -11,6 +11,7 @@ typedef struct FunctionData FunctionData;
 struct FunctionData {
 	int function;
 	int arg;
+	int exit;
 	unsigned id;
 };
 
@@ -29,6 +30,8 @@ void StartUserThread(int data) {
 	machine->WriteRegister(4, function_data->arg);
 	//	mettre à jour le NextPC avec l'instruction suivant f
 	machine->WriteRegister(NextPCReg, function_data->function + 4);
+	//	mettre la valeur de retour à l'adresse de UserThreadExit
+	machine->WriteRegister(RetAddrReg, function_data->exit);
 
 	//	mettre le registre de pile au bon endroit
 	unsigned stack;
@@ -42,7 +45,7 @@ void StartUserThread(int data) {
 	machine->Run();
 }
 
-int do_UserThreadCreate(int f, int arg){
+int do_UserThreadCreate(int f, int arg, int exit){
 	// On bloque les interruptions pour rendre ce bout de code atomique
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
@@ -56,6 +59,7 @@ int do_UserThreadCreate(int f, int arg){
 	FunctionData *data = new FunctionData();
 	data->function = f;
 	data->arg = arg;
+	data->exit = exit;
 
 	if (currentThread->AddThread(&(data->id)) < 0){
 	  return -2;
