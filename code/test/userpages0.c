@@ -22,7 +22,7 @@
 
 int main()
 {
-
+	SynchPutString("test");
 	unsigned id = UserThreadCreate(thread1, 0);
 	unsigned id2 = UserThreadCreate(thread2, 0);
 	int error;

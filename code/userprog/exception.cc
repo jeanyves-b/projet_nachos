@@ -214,7 +214,9 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_ForkExec:{ //ForkExec
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
-						 do_UserProcessCreate((char*)machine->ReadRegister(4)); 
+						 char buf[MAX_STRING_SIZE];
+						 copyStringFromMachine(machine->ReadRegister(4),buf,MAX_STRING_SIZE);
+						 do_UserProcessCreate(buf);
 						 break;
 					 }
 			default: {
