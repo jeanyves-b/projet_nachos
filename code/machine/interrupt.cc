@@ -245,8 +245,8 @@ Interrupt::Halt()
 {
 	printf("Machine halting!\n\n");
 	stats->Print();
-	//currentThread->space->joinThread(0);
-	Cleanup();     // Never returns.
+	currentThread->JoinFils();
+	Cleanup();   // Never returns.
 }
 
 //----------------------------------------------------------------------

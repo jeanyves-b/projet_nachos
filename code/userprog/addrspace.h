@@ -42,9 +42,10 @@ class AddrSpace
 
 		int AddThread(unsigned*);	// ajouter un thread
 		int RemoveThread(unsigned);	// enlever un thread
+		void RunWaitingThread(unsigned);// lancer les threads en attente
 		int GetStackAddress(unsigned*,unsigned);	//récupérer l'adresse d'un thread
 		//	dans la pile à partir de son identifiant
-		void JoinThread (unsigned); //	attendre la fin d'un thread
+		int JoinThread (unsigned); //	attendre la fin d'un thread
 
 
 

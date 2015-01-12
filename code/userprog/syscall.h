@@ -140,13 +140,13 @@ void SynchPutInt(int n);
 void SynchGetInt(int *n);
 
 /*Create user thread*/
-unsigned UserThreadCreate(void f(void *arg), void *arg);
+int UserThreadCreate(void f(void *arg), void *arg);
 
 /*Exit current thread*/
 void UserThreadExit();
 
 /*join an existing thread*/
-void UserThreadJoin(int id);
+int UserThreadJoin(int id);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

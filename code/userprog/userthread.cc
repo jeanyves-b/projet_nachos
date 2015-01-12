@@ -14,7 +14,8 @@ struct FunctionData {
 	unsigned id;
 };
 
-void StartUserThread(int data) {	
+void StartUserThread(int data) {
+	//synchconsole->SynchPutString("here");
 	FunctionData *function_data = (FunctionData*)data;
 
 	//Initialisation de tous les registres
@@ -56,9 +57,9 @@ int do_UserThreadCreate(int f, int arg){
 	data->function = f;
 	data->arg = arg;
 
-	if (currentThread->space->AddThread(&(data->id)) < 0)
-		return -2;
-
+	if (currentThread->AddThread(&(data->id)) < 0){
+	  return -2;
+	}
 	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);
 
@@ -69,7 +70,9 @@ int do_UserThreadCreate(int f, int arg){
 }
 
 void do_UserThreadExit(){
-	currentThread->space->RemoveThread(currentThread->id);
+	currentThread->JoinFils();
+	currentThread->space->RunWaitingThread(currentThread->id);
+	//currentThread->space->RemoveThread(currentThread->id);
 	currentThread->Finish();
 }
 

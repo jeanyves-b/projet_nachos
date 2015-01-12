@@ -46,7 +46,6 @@ Thread::Thread (const char *threadName)
 	for (int r=NumGPRegs; r<NumTotalRegs; r++)
 		userRegisters[r] = 0;
 #endif
-	wait = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -109,12 +108,46 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 	this->space = currentThread->space;
 
 #endif // USER_PROGRAM
-
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 	scheduler->ReadyToRun (this);	// ReadyToRun assumes that interrupts 
 	// are disabled!
 	(void) interrupt->SetLevel (oldLevel);
 }
+
+int Thread::AddThread(unsigned *created_thread_id){
+  if (this->space->AddThread(created_thread_id) < 0)
+		return -2;
+  this->fils.push_back(*created_thread_id);
+  return 0;
+}
+
+int Thread::Join(unsigned user_thread_id){
+  int jerror;
+  jerror = this->space->JoinThread(user_thread_id);
+  if (jerror <0){
+    return jerror;
+  }
+  for (unsigned i=0; i<fils.size(); i++){
+    if (fils.at(i) == user_thread_id){
+      this->fils.erase(fils.begin()+i);
+      break;
+    }
+  }
+  return 0;
+}
+
+int Thread::JoinFils(){
+   int jerror;
+  for (unsigned i=0; i<fils.size(); i++){
+    jerror = this->space->JoinThread(fils.at(i));
+      if (jerror <0){
+	return jerror;
+      }
+      this->fils.erase(fils.begin()+i);
+    }
+    return 0;
+ }
+
 
 //----------------------------------------------------------------------
 // Thread::CheckOverflow

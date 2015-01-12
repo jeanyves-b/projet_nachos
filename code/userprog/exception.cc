@@ -208,7 +208,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_UserThJ: { //UserThreadJoin
 						 DEBUG('a', "Joining a thread, initiated by user program.\n");
-						 currentThread->space->JoinThread(machine->ReadRegister(4));
+						 currentThread->Join(machine->ReadRegister(4));
 						 break;
 					 }
 			default: {

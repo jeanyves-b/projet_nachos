@@ -288,16 +288,19 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
 	threads_stack_id[unique_thread_id] = 1;
 
-	for (unsigned i=0; i<waiting_threads.size(); i++)
+	
+	return 0;
+
+}
+
+void AddrSpace::RunWaitingThread(unsigned unique_thread_id){
+  for (unsigned i=0; i<waiting_threads.size(); i++)
 		if (waiting_threads.at(i)->forId == unique_thread_id) {
 			WaitingThread *tmp = waiting_threads.at(i);
 			scheduler->ReadyToRun(tmp->who);
 			waiting_threads.erase(waiting_threads.begin() + i);
 			delete tmp;
 		}	
-
-	return 0;
-
 }
 
 //----------------------------------------------------------------------
@@ -363,11 +366,19 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 //
 //----------------------------------------------------------------------
 
-void
+int
 AddrSpace::JoinThread (unsigned user_thread_id) {
-	ASSERT(user_thread_id < threads_created);
-	ASSERT(threads_stack_id[user_thread_id] != 0);
-	ASSERT(user_thread_id != currentThread->id);
+	
+	if(user_thread_id > threads_created){
+	  return -1;
+	}
+	if (threads_stack_id[user_thread_id] == 0){
+	  return -2;
+	}
+	if(user_thread_id == currentThread->id){
+	  return -3;
+	}
+	
 	if (threads_stack_id[user_thread_id]!=1) {
 		IntStatus oldLevel = interrupt->SetLevel (IntOff);
 		if (threads_stack_id[user_thread_id]!=1) {
@@ -381,5 +392,5 @@ AddrSpace::JoinThread (unsigned user_thread_id) {
 		}
 		(void) interrupt->SetLevel (oldLevel);
 	}
-
+      return 0;
 }

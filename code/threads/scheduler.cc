@@ -127,7 +127,8 @@ Scheduler::Run (Thread * nextThread)
 	// before now (for example, in Thread::Finish()), because up to this
 	// point, we were still running on the old thread's stack!
 	if (threadToBeDestroyed != NULL)
-	{
+	{	
+		threadToBeDestroyed->space->RemoveThread(threadToBeDestroyed->id);
 		delete threadToBeDestroyed;
 		threadToBeDestroyed = NULL;
 	}
