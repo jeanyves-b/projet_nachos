@@ -293,6 +293,14 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 
 }
 
+//----------------------------------------------------------------------
+// AddrSpace::RunWaitingThread
+//		Cherche le thread ayant l'id "unique_thread_id" dans la liste
+//		des threads en attente "de join", l'enlève de cette liste, et le mets
+//		dans la liste de threads en attente "d'exécution".
+//
+//----------------------------------------------------------------------
+
 void AddrSpace::RunWaitingThread(unsigned unique_thread_id){
 	for (unsigned i=0; i<waiting_threads.size(); i++)
 		if (waiting_threads.at(i)->forId == unique_thread_id) {
@@ -363,6 +371,12 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 }
 //----------------------------------------------------------------------
 // AddrSpace::JoinThread
+//		Cette fonctionne ne retourne que si le thread ayant comme
+//		identfiant "user_thread_id" se termine.
+//		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
+//		identifiant jamais créé, -2 si identifiant ne correspond pas
+//		à un emplacement actif dans la pile, -3 l'identifiant donné
+//		est celui du thread en cours).
 //
 //----------------------------------------------------------------------
 
