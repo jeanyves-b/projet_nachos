@@ -11,12 +11,12 @@ int main(){
 	int n = 3;
 	int n2 = 5;
 	int n3 = 7;
-	
+
 	UserThreadCreate(thread, (void*)(&n));
 	UserThreadCreate(thread, (void*)(&n2));
 	UserThreadCreate(thread, (void*)(&n3));
 	UserThreadCreate(test, (void*)(&n3)); 
-	
+
 	SynchPutString("On quitte main");
 	return 0;
 }
@@ -43,6 +43,6 @@ void thread(void *n){
 }
 
 void test(void *n){
-  SynchPutString("thread test");
-  UserThreadExit();
+	SynchPutString("thread test");
+	UserThreadExit();
 }

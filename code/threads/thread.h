@@ -143,7 +143,7 @@ class Thread
 
 		AddrSpace *space;		// User code this thread is running.
 	private:
-		 std::vector<unsigned> fils;			//les threads fils
+		std::vector<unsigned> fils;			//les threads fils
 #endif
 };
 

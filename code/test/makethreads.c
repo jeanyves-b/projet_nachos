@@ -20,19 +20,19 @@ int main(){
 	if (id >= 0){
 		error = UserThreadJoin(id); 
 		if (error < 0){
-		  SynchPutString("erreur Thread 1");
+			SynchPutString("erreur Thread 1");
 		}
 	}
 	if (id3 >= 0){
 		error=UserThreadJoin(id3);
 		if (error < 0){
-		  SynchPutString("erreur Thread 2");
+			SynchPutString("erreur Thread 2");
 		}
 	}
 	if (id2 >= 0){
 		error = UserThreadJoin(id2);
 		if (error < 0){
-		  SynchPutString("erreur Thread 3");
+			SynchPutString("erreur Thread 3");
 		}
 	} 
 
@@ -62,6 +62,6 @@ void thread(void *n){
 }
 
 void test(void *n){
-  SynchPutString("thread test");
-  UserThreadExit();
+	SynchPutString("thread test");
+	UserThreadExit();
 }
