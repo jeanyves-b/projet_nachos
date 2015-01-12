@@ -4,6 +4,7 @@
 
 
 void StartUserProcess(int data) {
+  synchconsole->SynchPutString("test");
 	currentThread->space->InitRegisters ();	// set the initial register values
 	currentThread->space->RestoreState ();		// load page table register
 	machine->Run();
@@ -11,6 +12,7 @@ void StartUserProcess(int data) {
 
 int do_UserProcessCreate(char *s){
 	Thread *newThread = new Thread("user process");
+	synchconsole->SynchPutString(s);
 	OpenFile *executable = fileSystem->Open (s);
 	AddrSpace *space;
 	
@@ -18,16 +20,15 @@ int do_UserProcessCreate(char *s){
 	if(newThread == NULL)
 		return -1;
 	
-	newThread->id = 0;
-
 
 	if (executable == NULL)
 	{
-		printf ("Unable to open file %s\n", s);
+		synchconsole->SynchPutString ("Unable to open file");
 		return -2;
 	}
 	space = new AddrSpace (executable);
-
+	 
+	newThread->id = 0;
 	
 	newThread->space = space;
 	
@@ -39,4 +40,5 @@ int do_UserProcessCreate(char *s){
 }
 
 void do_UserProcessExit(){
+
 }

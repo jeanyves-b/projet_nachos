@@ -1,0 +1,94 @@
+système de fichier actuel
+	système de fichier à un seul niveau
+	dossier -> fichier
+	au plus 10 entrées
+
+tester les fonction avant utilisation
+
+au moment de l'ouverture, Nachos lit sur le disque les info d'espace libre et du repertoire
+
+gros choix
+	implémentation d'un structure parallèle ou bien uniquement des lecture sur le disque?
+
+partie 1 : implantation d'une hiérarchie de répertoires
+aller lire partie 6
+	->répertoire peu contenir un répertoire
+
+	création de fonction :
+		créer un repertoire
+		se déplacer (avant/arrière)
+		supprimer un répertoire
+
+	2 des entrée des répertoire sont réservé pour .(actuel) et ..(précédent)
+
+	problème :
+		choix d'une architecture pour les fichiers
+			tableaux chainé?
+		enregistrement de la structure à la fermeture de la machine
+		restoration de la structure au moment de l'initialisation de la machine
+			écriture/lecture sur le disque
+
+partie 2 : implantation de la table système des fichiers ouverts
+aller lire partie 7
+	nb max de fichiers ouvert : 10
+
+	choix :
+		tableau de fichier ouvert?
+
+	problème :
+		ne pas avoir plus de 10 fichiers ouvert
+		possibilité d'ouvrir 10 fichier
+		orienter correctement les lecture/écriture
+		vérifier la fermeture correct des fichiers
+		enregistrer les fichiers/répertoire à la bonne place sur le disque
+
+partie 3 : support des accès concurents
+	modification des accès concurent
+		plusieur lecteur
+		un seul écrivain
+		même problème dans la structure de fichier
+
+	choix :
+		on met les locks sur les structure ou bien sur les threads?
+		structure -> plus simple, risque d'empécher des fichiers d'acceder au même ressources alors qu'ils devraient pouvoir
+		threads -> plus complexe, bien reflechir à où mettre les lock
+
+partie 4 + 5 : augmentation de la taille max des fichiers + implantation de fichiers de taille variable
+	fichiers de taille variable suivant les besoins avec une taille max de presque celle du disque
+	modification de l'entête à chaque modification du contenu d'un fichier
+		les action d'écriture et de suppression dans un fichier doivent avoir accès à l'entête du fichier
+
+partie 6 : implantation des noms de chemin (path name)
+	faire un interpreteur de commande qui va analyser les nom passer en argument
+		faire un parseur qui va appeler les fonction de déplacement
+		doit se souvenir du dossier courant pour y revenir facilement
+		création fichier/répertoire
+			une ou deux fonctions? plutot 2
+		suppression de fichier/repertoire
+			une ou deux fonctions? plutot 1
+			repertoire vide, tout supprimer ou bien annuler la suppression
+			possibilité d'appel récursif pour tout supprimer
+		déplacement dans le systeme de fichier
+			une seule fonction
+				pointe sur un répertoire, le répertoire précédant est considérer comme un sous répertoire
+
+partie 7 : amélioration des accès concurents
+	possibilité d'avoir plusieurs lecteur mais un seul écrivain
+		->chaque thread doit avoir son propre conteur pour chaque fichier ouvert
+	/!\ sychronisation des accès aux entêtes
+
+partie 8 : optimisation des entrée/sortie
+	optimisation des accès disques
+		rassembler les blocs de données des fichiers
+		ordonner les accès à la mémoire en fonction de leur proximité avec l'entrée précédente
+			ajout d'une demande d'accès
+				on redéfinie toute la file/on place la nouvelle requete et on ne touche pas au reste
+	utilisation de tampons d'entrée/sortie
+		stocker les opérations dans des tampons de façon à les ordonner au mieux
+		stocker les fichiers ouverts dans un tampon pour y avoir accès plus rapidement?
+
+partie 9 : robustesse
+	intéruption lors d'une écriture
+		en retrouvant la dernière oération dans le tampon?
+		moment où l'on modifie l'entête
+		autres idées?
