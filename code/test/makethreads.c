@@ -47,8 +47,6 @@ int main(){
 void thread(void *n){
 	int i=0;
 
-
-
 	for(i=0; i < *((int*)n); i++){	
 		if (*(int*)n==3)		
 			PutChar('a'+i);
