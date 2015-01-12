@@ -3,6 +3,7 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "frameprovider.h"
 
 //----------------------------------------------------------------------
 // FrameProvider::FrameProvider
@@ -15,8 +16,6 @@ FrameProvider::FrameProvider(int frames)
 	numFrames = numFrames;
 	processCount = 0;
 	this->bitmap = new BitMap(frames);
-	
-	
 }
 
 //----------------------------------------------------------------------
