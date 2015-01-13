@@ -1,4 +1,3 @@
-#ifdef CHANGED
 #ifndef SYNCHCONSOLE_H
 #define SYNCHCONSOLE_H
 #include "copyright.h"
@@ -26,4 +25,3 @@ class SynchConsole {
 		char SGetChar();
 };
 #endif // SYNCHCONSOLE_H
-#endif // CHANGED

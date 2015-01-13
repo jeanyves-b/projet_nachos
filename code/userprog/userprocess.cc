@@ -28,11 +28,17 @@ int do_UserProcessCreate(char *s){
 	newThread->space = addrSpace;
 	newThread->id = 0;
 	
+	machine->processCount++;
+	
 	newThread->ForkExec(StartUserProcess, 0);
 	currentThread->Yield();
 	return 0;
 }
 
 void do_UserProcessExit(){
-  
+	machine->processCount--; 
+	currentThread->JoinFils();
+	delete currentThread->space;
+	currentThread->Finish();
+	
 }

@@ -134,9 +134,13 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-					      DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
-					      interrupt->Halt();
-					      break;
+						if(machine->processCount==0){
+						  DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+						  interrupt->Halt();
+						} else {
+							do_UserProcessExit();
+						}
+					    break;
 				      }
 			case SC_PutChar: {
 						 DEBUG('a', "Writing character on standard output, initiated by user program.\n");

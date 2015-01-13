@@ -1,4 +1,3 @@
-#ifdef CHANGED
 #include "copyright.h"
 #include "system.h"
 #include "synchconsole.h"
@@ -134,5 +133,3 @@ void SynchConsole::SynchGetInt(int *n)
 	this->SynchGetString(buf, MAX_STRING_SIZE);
 	sscanf(buf, "%d", n);
 }
-
-#endif // CHANGED

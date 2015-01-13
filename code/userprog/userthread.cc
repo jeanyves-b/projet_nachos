@@ -1,11 +1,6 @@
 #include "copyright.h"
 #include "system.h"
 #include "userthread.h"
-//---------------------------------------------------------------------
-// UserThreadCreate
-//	Permet de créer un thread exécutant la fonction f avec 
-//	l'argument arg
-//---------------------------------------------------------------------
 
 typedef struct FunctionData FunctionData;
 struct FunctionData {
@@ -44,6 +39,13 @@ void StartUserThread(int data) {
 	currentThread->space->RestoreState();
 	machine->Run();
 }
+
+//---------------------------------------------------------------------
+// do_UserThreadCreate
+//	Permet de créer un thread exécutant la fonction f avec 
+//	l'argument arg et mets exit dans le registre de retour.
+//	
+//---------------------------------------------------------------------
 
 int do_UserThreadCreate(int f, int arg, int exit){
 	// On bloque les interruptions pour rendre ce bout de code atomique

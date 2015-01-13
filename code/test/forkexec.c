@@ -1,9 +1,11 @@
 #include "syscall.h"
+
+// Programme de tester qui lance deux processus en fork
+
 int main()
 {
-SynchPutString("entring in main");
-ForkExec("putint");
-//~ ForkExec("userpages1");
+	ForkExec("userpages0");
+	ForkExec("userpages1");
 
-return 0;
+	return 0;
 }
