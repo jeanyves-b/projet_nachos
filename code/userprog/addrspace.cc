@@ -31,13 +31,13 @@ struct WaitingThread {
 
 static void
 ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
-    int position, TranslationEntry *pageTable, unsigned numPages){
+    int position, TranslationEntry *pageTableA, unsigned numPagesA){
     
     TranslationEntry *oldPT = machine->pageTable;
     unsigned oldPTS = machine->pageTableSize;
 
-    machine->pageTable = pageTable;
-    machine->pageTableSize = numPages;
+    machine->pageTable = pageTableA;
+    machine->pageTableSize = numPagesA;
 
     char buffer[numBytes];
 
@@ -123,14 +123,11 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// first, set up the translation 
 	pageTable = new TranslationEntry[numPages];
 
-	int ppn;
-	
 	for (i = 0; i < numPages; i++)
 	{
 		pageTable[i].virtualPage = i;	
-		ppn = machine->frameprovider->GetEmptyFrame();
-		ASSERT(ppn >= 0); //	test que la page physique retournée est valide
-		pageTable[i].physicalPage = ppn;
+		ASSERT(machine->frameprovider->NumAvailFrame() > 0); //	test que la page physique retournée est valide
+		pageTable[i].physicalPage = machine->frameprovider->GetEmptyFrame();
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -181,14 +178,14 @@ AddrSpace::AddrSpace (OpenFile *executable)
 AddrSpace::~AddrSpace ()
 {
 	// LB: Missing [] for delete
-	// delete pageTable;
-	delete [] pageTable;
+
 	// End of modification
 	unsigned i;
 	//liberation de toutes les pages physiques utilisées par le processus
 	for(i = 0; i < numPages; i++)
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
-	
+		// delete pageTable;
+	delete [] pageTable;
 	delete stack_blocs;
 	delete threads_stack_id;
 }

@@ -1,7 +1,8 @@
 #include "syscall.h"
 int main()
 {
-ForkExec("userpages0");
+SynchPutString("entring in main");
+ForkExec("putint");
 //~ ForkExec("userpages1");
 
 return 0;
