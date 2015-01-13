@@ -14,7 +14,6 @@
 FrameProvider::FrameProvider(int frames)
 {
 	numFrames = numFrames;
-	processCount = 0;
 	this->bitmap = new BitMap(frames);
 }
 

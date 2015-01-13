@@ -91,7 +91,7 @@ Machine::ReadMem(int addr, int size, int *value)
 	ExceptionType exception;
 	int physicalAddress;
 
-	DEBUG('a', "Reading VA 0x%x, size %d\n", addr, size);
+	DEBUG('a', "Reading VA 0x%x, size %d, thread %s\n", addr, size, currentThread->getName());
 
 	exception = Translate(addr, &physicalAddress, size, FALSE);
 	if (exception != NoException) {
@@ -207,8 +207,9 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
 	// from the virtual address
 	vpn = (unsigned) virtAddr / PageSize;
 	offset = (unsigned) virtAddr % PageSize;
-
+	//~ printf("Current PT %p, currentThread %p %s\n",pageTable, currentThread, currentThread->getName());
 	if (tlb == NULL) {		// => page table => vpn is index into table
+		
 		if (vpn >= pageTableSize) {
 			DEBUG('a', "virtual page # %d too large for page table size %d!\n", 
 					virtAddr, pageTableSize);

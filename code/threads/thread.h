@@ -93,6 +93,7 @@ class Thread
 		// basic thread operations
 
 		void Fork (VoidFunctionPtr func, int arg);	// Make thread run (*func)(arg)
+		void ForkExec (VoidFunctionPtr func, int arg);	// Make thread run (*func)(arg)
 		void Yield ();		// Relinquish the CPU if any 
 		// other thread is runnable
 		void Sleep ();		// Put the thread to sleep and 
@@ -140,7 +141,6 @@ class Thread
 		int AddThread(unsigned *created_thread_id); //ajoute un fils à ce thread
 		int Join(unsigned user_thread_id); //on attend un thread
 		int JoinFils(); //on attend tous les fils
-		int ForkExec(char *); //on démarre un nouveau processus
 		unsigned id;		// identifiant du thread
 
 		AddrSpace *space;		// User code this thread is running.

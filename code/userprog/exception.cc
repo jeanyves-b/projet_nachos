@@ -216,7 +216,7 @@ ExceptionHandler (ExceptionType which)
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
 						 char buf[MAX_STRING_SIZE];
 						 copyStringFromMachine(machine->ReadRegister(4),buf,MAX_STRING_SIZE);
-						 do_UserProcessCreate(buf);
+						 machine->WriteRegister(2, do_UserProcessCreate(buf));
 						 break;
 					 }
 			default: {

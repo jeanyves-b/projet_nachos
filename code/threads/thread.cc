@@ -117,6 +117,41 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 	(void) interrupt->SetLevel (oldLevel);
 }
 
+
+//----------------------------------------------------------------------
+// Thread::ForkExec
+//      Invoke (*func)(arg), allowing caller and callee to execute 
+//      concurrently.
+//
+//      NOTE: although our definition allows only a single integer argument
+//      to be passed to the procedure, it is possible to pass multiple
+//      arguments by making them fields of a structure, and passing a pointer
+//      to the structure as "arg".
+//
+//      Implemented as the following steps:
+//              1. Allocate a stack
+//              2. Initialize the stack so that a call to SWITCH will
+//              cause it to run the procedure
+//              3. Put the thread on the ready queue
+//      
+//      "func" is the procedure to run concurrently.
+//      "arg" is a single argument to be passed to the procedure.
+//----------------------------------------------------------------------
+
+	void
+Thread::ForkExec (VoidFunctionPtr func, int arg)
+{
+	DEBUG ('t', "Forking thread \"%s %d\" with func = 0x%x, arg = %d\n",
+			name, id, (int) func, arg);
+
+	StackAllocate (func, arg);
+
+	IntStatus oldLevel = interrupt->SetLevel (IntOff);
+	scheduler->ReadyToRun (this);	// ReadyToRun assumes that interrupts 
+	// are disabled!
+	(void) interrupt->SetLevel (oldLevel);
+}
+
 //----------------------------------------------------------------------
 // Thread::AddThread
 //      Ajoute le thread ayant l'identifiant "created" à l'espace 
@@ -176,26 +211,6 @@ int Thread::JoinFils(){
 		}
 		this->fils.erase(fils.begin());
 	}
-	return 0;
-}
-
-int Thread::ForkExec(char *s){
-   OpenFile *executable = fileSystem->Open (s);
-	
-	if (executable == NULL)
-	{
-		return -1;
-	}
-	AddrSpace *addrspace = new AddrSpace (executable);
-	if (addrspace == NULL){
-	  return -2;
-	}
-	this->space = addrspace;
-	delete executable;		// close file
-	StackAllocate(StartUserProcess,0); //on alloue la pile pour éxécuter le thread sans remplacer l'espace
-	IntStatus oldLevel = interrupt->SetLevel (IntOff);
-	scheduler->ReadyToRun(this);
-	(void)interrupt->SetLevel (oldLevel);
 	return 0;
 }
 //----------------------------------------------------------------------
