@@ -34,6 +34,8 @@
 
 Thread::Thread (const char *threadName)
 {
+	DEBUG ('t', "Creating thread \"%s\"\n",
+			threadName);
 	name = threadName;
 	stackTop = NULL;
 	stack = NULL;

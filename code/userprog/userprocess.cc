@@ -4,41 +4,40 @@
 
 
 void StartUserProcess(int data) {
-  synchconsole->SynchPutString("test");
+	currentThread->space = (AddrSpace*)data;
 	currentThread->space->InitRegisters ();	// set the initial register values
 	currentThread->space->RestoreState ();		// load page table register
 	machine->Run();
 }
 
 int do_UserProcessCreate(char *s){
-	Thread *newThread = new Thread("user process");
-	synchconsole->SynchPutString(s);
 	OpenFile *executable = fileSystem->Open (s);
-	AddrSpace *space;
+	
+	if (executable == NULL)
+	{
+		printf ("Unable to open file\n");
+		return -1;
+	}
+	
+	Thread *newThread = new Thread("user process");
 	
 	// Si le thread créé est null, on renvoie -1
 	if(newThread == NULL)
-		return -1;
-	
-
-	if (executable == NULL)
-	{
-		synchconsole->SynchPutString ("Unable to open file");
 		return -2;
-	}
-	space = new AddrSpace (executable);
 	 
 	newThread->id = 0;
+	AddrSpace *addrspace = new AddrSpace (executable);
 	
-	newThread->space = space;
+	if(addrspace == NULL)
+		return -3;
 	
 	delete executable;		// close file
 	
-	newThread->Fork(StartUserProcess, 0);
+	newThread->Fork(StartUserProcess, (int)addrspace);
 
 	return 0;
 }
 
 void do_UserProcessExit(){
-
+  
 }

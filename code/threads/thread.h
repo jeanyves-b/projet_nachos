@@ -110,7 +110,7 @@ class Thread
 		}
 		void Print ()
 		{
-			printf ("%s, ", name);
+			printf ("%s %d, ", name, id);
 		}
 
 	private:

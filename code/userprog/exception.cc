@@ -227,7 +227,7 @@ ExceptionHandler (ExceptionType which)
 	}
 	else if (which == AddressErrorException)
 	{
-		printf ("Address Error exception %d\n", type);
+		printf ("Address translation exception %d\n", type);
 		ASSERT (FALSE);
 	}
 	else
