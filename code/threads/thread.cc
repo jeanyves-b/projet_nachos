@@ -19,6 +19,7 @@
 #include "switch.h"
 #include "synch.h"
 #include "system.h"
+#include "userprocess.h"
 
 #define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
 // execution stack, for detecting 
@@ -34,6 +35,8 @@
 
 Thread::Thread (const char *threadName)
 {
+	DEBUG ('t', "Creating thread \"%s\"\n",
+			threadName);
 	name = threadName;
 	stackTop = NULL;
 	stack = NULL;
@@ -176,7 +179,25 @@ int Thread::JoinFils(){
 	return 0;
 }
 
-
+int Thread::ForkExec(char *s){
+   OpenFile *executable = fileSystem->Open (s);
+	
+	if (executable == NULL)
+	{
+		return -1;
+	}
+	AddrSpace *addrspace = new AddrSpace (executable);
+	if (addrspace == NULL){
+	  return -2;
+	}
+	this->space = addrspace;
+	delete executable;		// close file
+	StackAllocate(StartUserProcess,0); //on alloue la pile pour éxécuter le thread sans remplacer l'espace
+	IntStatus oldLevel = interrupt->SetLevel (IntOff);
+	scheduler->ReadyToRun(this);
+	(void)interrupt->SetLevel (oldLevel);
+	return 0;
+}
 //----------------------------------------------------------------------
 // Thread::CheckOverflow
 //      Check a thread's stack to see if it has overrun the space

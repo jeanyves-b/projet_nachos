@@ -33,8 +33,8 @@ static void
 ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
     int position, TranslationEntry *pageTable, unsigned numPages){
     
-    //~ TranslationEntry *oldPT = machine->pageTable;
-    //~ unsigned oldPTS = machine->pageTableSize;
+    TranslationEntry *oldPT = machine->pageTable;
+    unsigned oldPTS = machine->pageTableSize;
 
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
@@ -50,8 +50,8 @@ ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
     }
 
 
-    //~ machine->pageTable = oldPT;
-    //~ machine->pageTableSize = oldPTS;
+    machine->pageTable = oldPT;
+    machine->pageTableSize = oldPTS;
 } 
 
 //----------------------------------------------------------------------
@@ -124,7 +124,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	pageTable = new TranslationEntry[numPages];
 
 	int ppn;
-	printf("nombre de page:%i\n", machine->frameprovider->NumAvailFrame());
+	
 	for (i = 0; i < numPages; i++)
 	{
 		pageTable[i].virtualPage = i;	
@@ -225,10 +225,9 @@ AddrSpace::InitRegisters ()
 
 	//	Ne pas oublier le thread main
 	unsigned tmp_unsigned;
-	printf("Stack_block_id(0):%d\n",stack_blocs[0]);
-	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
-	printf("err:%i\ntmp_unsigned:%i\n",err,tmp_unsigned);
 	
+	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
+
 	ASSERT(err >= 0 && tmp_unsigned == 2); 
 
 	err = this->AddThread(&tmp_unsigned);
@@ -294,7 +293,7 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
 		return -2;
-	printf("thread created:%i\n",id_in_stack);
+		
 	stack_blocs[id_in_stack-2] = true;
 	threads_stack_id[threads_created++] = id_in_stack;
 	*created_thread_id = threads_created - 1;

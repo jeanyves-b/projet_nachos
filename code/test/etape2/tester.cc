@@ -1,3 +1,13 @@
+//----------------------------------------------------------------------
+//ce programme est utilisé pour tester l'étape 2
+//il éxécute ./nachos-step2 avec plusieurs fichiers différent
+//puis compare la sortie attendue et la sortie effective
+//si les deux diffères, le programme print qu'il y a eu une erreur
+//sinon il print que tout va bien
+//le programme s'arrète quand un nombre de fichier équivalent à NBTEST
+//à été tésté.
+//----------------------------------------------------------------------
+
 #include <stdio.h>
 #include <string>
 
@@ -32,11 +42,11 @@ int main()
 
 		filein[3] = *itoa(i);
 		fileout[4] = *itoa(i);
-
-		arg = {"./../../build/nachos-step2", filein, fileout, NULL};
-		execve("./../../build/nachos-step2", argv, envp);
 		ifstream in(filein);
 		ifstream out(fileout);
+
+		arg = {"./../../build/nachos-step2 -sc", filein, fileout, NULL};
+		execve("./../../build/nachos-step2 -sc", argv, envp);
 
 		while(!(in.eof || out.eof))
 		{

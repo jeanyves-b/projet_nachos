@@ -479,7 +479,7 @@ AllocBoundedArray(int size)
 	int pgSize = getpagesize();
 	char *ptr = new char[pgSize * 2 + size];
 
-	mprotect(ptr, pgSize, 0);
+	mprotect(ptr, 	pgSize, 0);
 	mprotect(ptr + pgSize + size, pgSize, 0);
 	return ptr + pgSize;
 }

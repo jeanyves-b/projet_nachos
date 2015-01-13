@@ -43,6 +43,7 @@
 #ifdef USER_PROGRAM
 #include "machine.h"
 #include "addrspace.h"
+
 #endif
 
 // CPU register state to be saved on context switch.  
@@ -110,7 +111,7 @@ class Thread
 		}
 		void Print ()
 		{
-			printf ("%s, ", name);
+			printf ("%s %d, ", name, id);
 		}
 
 	private:
@@ -139,6 +140,7 @@ class Thread
 		int AddThread(unsigned *created_thread_id); //ajoute un fils à ce thread
 		int Join(unsigned user_thread_id); //on attend un thread
 		int JoinFils(); //on attend tous les fils
+		int ForkExec(char *); //on démarre un nouveau processus
 		unsigned id;		// identifiant du thread
 
 		AddrSpace *space;		// User code this thread is running.
