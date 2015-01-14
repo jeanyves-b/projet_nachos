@@ -134,7 +134,7 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-						if(machine->processCount==0){
+						if(machine->GetProcessCount()==0){
 						  DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 						  interrupt->Halt();
 						} else {

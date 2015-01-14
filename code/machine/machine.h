@@ -25,6 +25,7 @@
 #include "utility.h"
 #include "translate.h"
 #include "disk.h"
+#include "synch.h"
 #include "frameprovider.h"
 
 // Definitions related to the size, and format of user memory
@@ -184,14 +185,18 @@ class Machine {
 		unsigned int pageTableSize;
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
-		unsigned processCount; //	compteur de processus lancés par la machine
+		 //	compteur de processus lancés par la machine
+		 unsigned IncrProcess();
+		 void DecrProcess();
+		 unsigned GetProcessCount();
 
 	private:
 		bool singleStep;		// drop back into the debugger after each
 		// simulated instruction
 		int runUntilTime;		// drop back into the debugger when simulated
 		// time reaches this value
-		
+		unsigned processCount;
+		Lock *pCount;
 };
 
 extern void ExceptionHandler(ExceptionType which);

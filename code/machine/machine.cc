@@ -75,6 +75,8 @@ Machine::Machine(bool debug)
 	
 	singleStep = debug;
 	CheckEndian();
+	processCount = 0;
+	pCount = new Lock("pCount");
 }
 
 //----------------------------------------------------------------------
@@ -88,6 +90,7 @@ Machine::~Machine()
 	delete frameprovider;
 	if (tlb != NULL)
 		delete [] tlb;
+	delete pCount;
 }
 
 //----------------------------------------------------------------------
@@ -219,5 +222,23 @@ void Machine::WriteRegister(int num, int value)
 	ASSERT((num >= 0) && (num < NumTotalRegs));
 	// DEBUG('m', "WriteRegister %d, value %d\n", num, value);
 	registers[num] = value;
+}
+
+unsigned Machine::IncrProcess(){
+  unsigned id;
+  pCount->Acquire();
+  id = processCount++;
+  pCount->Release();
+  return id;
+}
+
+void Machine::DecrProcess(){
+  pCount->Acquire();
+  processCount--;
+  pCount->Release();
+}
+
+unsigned Machine::GetProcessCount(){
+  return processCount;
 }
 

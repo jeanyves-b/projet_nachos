@@ -173,6 +173,8 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	
 
 	threads_created = 0; 
+	addT = new Lock("addT");
+	waitT = new Lock("waitT");
 
 }
 
@@ -195,6 +197,8 @@ AddrSpace::~AddrSpace ()
 	delete stack_blocs;
 	delete threads_stack_id;
 	waiting_threads.clear();
+	delete addT;
+	delete waitT;
 }
 
 //----------------------------------------------------------------------
@@ -230,8 +234,11 @@ AddrSpace::InitRegisters ()
 	//	Ne pas oublier le thread main
 	unsigned tmp_unsigned;
 	
-	int err = this->AddThread(&tmp_unsigned);
+	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
 
+	ASSERT(err >= 0 && tmp_unsigned == 2); 
+
+	err = this->AddThread(&tmp_unsigned);
 	ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
 
 	DEBUG ('a', "Initializing stack register to %d\n",
@@ -289,14 +296,19 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 
 	unsigned id_in_stack;
 
+	 addT->Acquire();
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
-	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
+	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0){
+		addT->Release();
 		return -2;
+	}
 		
+	*created_thread_id = threads_created++;
+	addT->Release();
 	stack_blocs[id_in_stack-2] = true;
-	threads_stack_id[threads_created++] = id_in_stack;
-	*created_thread_id = threads_created - 1;
+	threads_stack_id[*created_thread_id] = id_in_stack;
+	
 	return 0;
 }
 
@@ -340,13 +352,18 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 //----------------------------------------------------------------------
 
 void AddrSpace::RunWaitingThread(unsigned unique_thread_id){
-	for (unsigned i=0; i<waiting_threads.size(); i++)
-		if (waiting_threads.at(i)->forId == unique_thread_id) {
-			WaitingThread *tmp = waiting_threads.at(i);
+  unsigned cpt = 0;
+	waitT->Acquire();
+	while (cpt < waiting_threads.size())
+		if (waiting_threads.at(cpt)->forId == unique_thread_id) {
+			WaitingThread *tmp = waiting_threads.at(cpt);
 			scheduler->ReadyToRun(tmp->who);
-			waiting_threads.erase(waiting_threads.begin() + i);
-			delete tmp;
-		}	
+			waiting_threads.erase(waiting_threads.begin() + cpt);
+			//delete tmp;
+		}else{
+		  cpt++;
+		}
+	waitT->Release();
 }
 
 //----------------------------------------------------------------------
@@ -398,6 +415,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 	unsigned offset = 0;
 	while (offset<UserStackSize/(PageSize+16/THREAD_PAGES)/THREAD_PAGES) {
 		if (!stack_blocs[offset]) {
+		 
 			*stack_thread_id = offset + 2;
 			return 0;
 		}
@@ -431,9 +449,9 @@ AddrSpace::JoinThread (unsigned user_thread_id) {
 		return -3;
 	}
 
-	if (threads_stack_id[user_thread_id]!=1) {
+	if (threads_stack_id[user_thread_id]!=1) { //premier test pour le cas usuel
 		IntStatus oldLevel = interrupt->SetLevel (IntOff);
-		if (threads_stack_id[user_thread_id]!=1) {
+		if (threads_stack_id[user_thread_id]!=1) { //deuxième test pour les cas particuliers
 
 			WaitingThread *waiting_thread = new WaitingThread();
 			waiting_thread->who = currentThread;
