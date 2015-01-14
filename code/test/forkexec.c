@@ -9,11 +9,11 @@ int main()
 {
 	//UserThreadCreate(test, 0);
 	
-	 int i, pid;
+	int i, pid;
 	for (i=0;i<8;i++)
 		if ( (pid = ForkExec("userpages0")) < 0)
 			PutChar('}');
 	//ForkExec("userpages1");
-	SynchPutString("Finished main"); 
+
 	return 0;
 }

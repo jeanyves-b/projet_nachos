@@ -87,7 +87,7 @@ class Lock
 	private:
 		const char *name;		// for debugging
 		Semaphore *lock;
-		unsigned id;
+		int tid;
 		int pid;
 };
 

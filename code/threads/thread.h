@@ -138,14 +138,14 @@ class Thread
 	public:
 		void SaveUserState ();	// save user-level register state
 		void RestoreUserState ();	// restore user-level register state
-		int AddThread(unsigned *created_thread_id); //ajoute un fils à ce thread
-		int Join(unsigned user_thread_id); //on attend un thread
+		int AddThread(); //ajoute un fils à ce thread
+		int Join(int user_thread_id); //on attend un thread
 		int JoinFils(); //on attend tous les fils
-		unsigned id;		// identifiant du thread
+		int id;		// identifiant du thread
 
 		AddrSpace *space;		// User code this thread is running.
 	private:
-		std::vector<unsigned> fils;			//les threads fils
+		std::vector<int> fils;	//les threads fils
 #endif
 };
 

@@ -19,14 +19,15 @@
 #include <vector>
 #include "bitmap.h"
 
+
 #define UserStackSize		2048	// increase this as necessary!
-#define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
-#define MAX_THREADS			1024u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+#define ThreadPages			2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+#define MaxThreads			1024		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+#define MaxRunningThreads 	(UserStackSize-16)/(PageSize*ThreadPages + 16)	// nombre de threads maximum en cours d'execution dans un processus
 
 
 //Structure pour stocker les threads en attente
 typedef struct WaitingThread WaitingThread;
-struct WaitingThread; 
 
 class AddrSpace
 {
@@ -42,13 +43,14 @@ class AddrSpace
 		void SaveState ();		// Save/restore address space-specific
 		void RestoreState ();	// info on a context switch 
 
-		int AddThread(unsigned*);	// ajouter un thread
-		int RemoveThread(unsigned);	// enlever un thread
-		void RunWaitingThread(unsigned);// lancer les threads en attente
-		int GetStackAddress(unsigned*,unsigned);	//récupérer l'adresse d'un thread
+		int AddThread();	// ajouter un thread
+		int RemoveThread(int);	// enlever un thread
+		void RunWaitingThread(int);// lancer les threads en attente
+		int GetStackAddress(unsigned*,int);	//récupérer l'adresse d'un thread
 		//	dans la pile à partir de son identifiant
-		int JoinThread (unsigned); //	attendre la fin d'un thread
+		int JoinThread (int); //	attendre la fin d'un thread
 		bool HasFailed(); //	si le mapping vpn->ppn a échoué
+		bool StackIsEmpty ();
 
 		int pid; // pid du processus associé
 
@@ -62,13 +64,14 @@ class AddrSpace
 		//	jamais créé, et créé mais terminé)
 		bool *stack_blocs; //Tableau representant si oui ou non un bloc
 		//	de la pile est alloué ou non
-		unsigned threads_created; //	Nombre de threads créés depuis
+		int threads_created; //	Nombre de threads créés depuis
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant
 		//	les threads en attente associés aux threads qu'ils attendent
 
 		unsigned assigned_vpn; //	nombre de pages virtuelles assignées
 		Lock *waitT; //mutex pout la manipulation du vecteur
+		Lock *addT; //mutex pout l'ajout de thread
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
 		// dans la pile de taille THREAD_PAGES

@@ -116,7 +116,7 @@ Lock::Acquire ()
 {		
 	lock->P();
 	
-	id = currentThread->id;
+	tid = currentThread->id;
 	
 	pid = currentThread->space->pid;
 }
@@ -129,7 +129,7 @@ Lock::Release ()
 }
 
 bool Lock::isHeldByCurrentThread(){
-	return (id == currentThread->id && pid == currentThread->space->pid);
+	return (tid == currentThread->id && pid == currentThread->space->pid);
 }
 
 Condition::Condition (const char *debugName)

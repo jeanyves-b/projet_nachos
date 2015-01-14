@@ -132,7 +132,7 @@ Scheduler::Run (Thread * nextThread)
 		//~ threadToBeDestroyed->Print();
 		//~ printf("===\n");
 		ASSERT(threadToBeDestroyed->space->RemoveThread(threadToBeDestroyed->id) >= 0);
-		if (threadToBeDestroyed->id == 0) {
+		if (threadToBeDestroyed->space->StackIsEmpty()) {
 			delete threadToBeDestroyed->space;
 		}
 		delete threadToBeDestroyed;
