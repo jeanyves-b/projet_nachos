@@ -188,6 +188,7 @@ AddrSpace::~AddrSpace ()
 	delete [] pageTable;
 	delete stack_blocs;
 	delete threads_stack_id;
+	waiting_threads.clear();
 }
 
 //----------------------------------------------------------------------
