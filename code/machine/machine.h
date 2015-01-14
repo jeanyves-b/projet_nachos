@@ -34,7 +34,7 @@
 // the disk sector size, for
 // simplicity
 
-#define NumPhysPages    128
+#define NumPhysPages    512
 #define MemorySize 	(NumPhysPages * PageSize)
 #define TLBSize		4		// if there is a TLB, make it small
 
@@ -186,9 +186,8 @@ class Machine {
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
 		 //	compteur de processus lancés par la machine
-		 unsigned IncrProcess();
-		 void DecrProcess();
-		 unsigned GetProcessCount();
+		 int IncrProcess();
+		 int DecrProcess();
 
 	private:
 		bool singleStep;		// drop back into the debugger after each

@@ -12,7 +12,7 @@
 void StartUserProcess(int data) {
 	currentThread->space->InitRegisters ();	// set the initial register values
 	currentThread->space->RestoreState ();		// load page table register
-
+	//~ printf("Starting process %d\n",currentThread->space->pid);
 	machine->Run();
 }
 
@@ -44,27 +44,14 @@ int do_UserProcessCreate(char *s){
    	Thread *newThread = new Thread(s);
    	if (newThread == NULL)
 		return -4;
-		
+	
+	
 	newThread->space = addrSpace;
 	newThread->id = 0;
-	
-	unsigned pid = machine->IncrProcess();
+	addrSpace->pid = machine->IncrProcess();
 	
 	newThread->ForkExec(StartUserProcess, 0);
 	
-	return pid;
+	return addrSpace->pid;
 }
 
-//---------------------------------------------------------------------
-// do_UserProcessExit
-//	Permet de quitter le processus en cours, en mettant à jour le
-//		nombre de processus total, en attendant les threads "fils"
-//		de ce processus.
-//
-//---------------------------------------------------------------------
-void do_UserProcessExit(){
-	machine->DecrProcess(); 
-	currentThread->JoinFils();
-	delete currentThread->space;
-	currentThread->Finish();
-}

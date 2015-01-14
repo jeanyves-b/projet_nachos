@@ -127,6 +127,10 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	for(unsigned int j=0; j<(UserStackSize-16)/(PageSize*THREAD_PAGES + 16); j++)
 		stack_blocs[j] = false;
+		
+	threads_created = 0; 
+	//~ addT = new Lock("addT");
+	waitT = new Lock("waitT");
 	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
@@ -172,9 +176,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	
 
-	threads_created = 0; 
-	addT = new Lock("addT");
-	waitT = new Lock("waitT");
+	
 
 }
 
@@ -197,7 +199,7 @@ AddrSpace::~AddrSpace ()
 	delete stack_blocs;
 	delete threads_stack_id;
 	waiting_threads.clear();
-	delete addT;
+	//~ delete addT;
 	delete waitT;
 }
 
@@ -239,8 +241,10 @@ AddrSpace::InitRegisters ()
 	ASSERT(err >= 0 && tmp_unsigned == 2); 
 
 	err = this->AddThread(&tmp_unsigned);
-	ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
+	
 
+	ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
+	
 	DEBUG ('a', "Initializing stack register to %d\n",
 			numPages * PageSize - 16);
 
@@ -295,19 +299,36 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 		return -1;
 
 	unsigned id_in_stack;
-
-	 addT->Acquire();
+	
+	
+	 //~ addT->Acquire();
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
+	
+	// On bloque les interruptions pour rendre ce bout de code atomique
+	IntStatus old = interrupt->SetLevel (IntOff);
+	
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0){
-		addT->Release();
+		// On réactive les interruptions
+		(void)interrupt->SetLevel (old);
+		//~ addT->Release();
 		return -2;
 	}
+	
+	printf("\nProcess %d: ", pid);
+		unsigned errr;
+	for(errr=0;errr<5;errr++)
+		printf("%d | ", threads_stack_id[errr]);
 		
 	*created_thread_id = threads_created++;
-	addT->Release();
-	stack_blocs[id_in_stack-2] = true;
+	
+	
 	threads_stack_id[*created_thread_id] = id_in_stack;
+	
+	// On réactive les interruptions
+	(void)interrupt->SetLevel (old);
+	//~ addT->Release();
+	stack_blocs[id_in_stack-2] = true;
 	
 	return 0;
 }
@@ -331,7 +352,7 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 	//	Identifiant unique trop grand
 	if (unique_thread_id >= MAX_THREADS)
 		return -1;
-	printf("\t i have id %d and sid %d\t",unique_thread_id,threads_stack_id[unique_thread_id]);
+	//~ printf("\nXLe thread #%d (%d) est en pile à #%d\t",unique_thread_id,pid,threads_stack_id[unique_thread_id]-2);
 	//	Thread pas en cours d'exécution ou identifiant en pile invalide
 	if (threads_stack_id[unique_thread_id] < 2 || threads_stack_id[unique_thread_id] >= (UserStackSize-16)/(PageSize*THREAD_PAGES + 16))
 		return -2;

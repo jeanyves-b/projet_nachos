@@ -128,10 +128,13 @@ Scheduler::Run (Thread * nextThread)
 	// point, we were still running on the old thread's stack!
 	if (threadToBeDestroyed != NULL)
 	{	
-		printf("\n=== destroying ");
-		threadToBeDestroyed->Print();
-		printf("===\n");
+		//~ printf("\n=== destroying ");
+		//~ threadToBeDestroyed->Print();
+		//~ printf("===\n");
 		ASSERT(threadToBeDestroyed->space->RemoveThread(threadToBeDestroyed->id) >= 0);
+		if (threadToBeDestroyed->id == 0) {
+			delete threadToBeDestroyed->space;
+		}
 		delete threadToBeDestroyed;
 		threadToBeDestroyed = NULL;
 	}

@@ -134,11 +134,13 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-						if(machine->GetProcessCount()==0){
+						currentThread->JoinFils();
+						if(machine->DecrProcess() < 0){
 						  DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 						  interrupt->Halt();
 						} else {
-							do_UserProcessExit();
+							DEBUG('a', "Exiting process with return value %d.\n",machine->ReadRegister(8));
+							currentThread->Finish();
 						}
 					    break;
 				      }
@@ -213,7 +215,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_UserThJ: { //UserThreadJoin
 						 DEBUG('a', "Joining a thread, initiated by user program.\n");
-						 currentThread->Join(machine->ReadRegister(4));
+						 machine->WriteRegister(2, currentThread->Join(machine->ReadRegister(4)));
 						 break;
 					 }
 			case SC_ForkExec:{ //ForkExec

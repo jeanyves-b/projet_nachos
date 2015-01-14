@@ -162,8 +162,10 @@ Thread::ForkExec (VoidFunctionPtr func, int arg)
 //----------------------------------------------------------------------
 
 int Thread::AddThread(unsigned *created_thread_id){
+	
 	if (this->space->AddThread(created_thread_id) < 0)
 		return -1;
+
 	this->fils.push_back(*created_thread_id);
 
 	return 0;
@@ -204,7 +206,9 @@ int Thread::Join(unsigned user_thread_id){
 
 int Thread::JoinFils(){
 	int jerror;
+	
 	while (!this->fils.empty()){
+		//~ printf("Thread #%d is waiting for #%d (%d)",id,fils.at(0),space->pid);
 		jerror = this->space->JoinThread(fils.at(0));
 		if (jerror <0){
 			return jerror;

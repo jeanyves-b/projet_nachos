@@ -6,7 +6,7 @@
  
  void thread1(void *n){
 	 int i=0;
-	 while (i<5) {
+	 while (i<1) {
 		PutChar('a'+i);
 		i++;
 	}
@@ -15,7 +15,7 @@
 
  void thread2(void *n){
 	 int i=0;
-	 while (i<5) {
+	 while (i<1) {
 		PutChar('0'+i);
 		i++;
 	}
@@ -24,24 +24,23 @@
 
 int main()
 {
-	unsigned id = UserThreadCreate(thread1, 0);
-	unsigned id2 = UserThreadCreate(thread2, 0);
-	//~ SynchPutString("\tentring");
+	int id = UserThreadCreate(thread1, 0);
+	int id2 = UserThreadCreate(thread2, 0);
 	int error;
 	
-	if (id >= 0){
+	//~ if (id >= 0){
 		error = UserThreadJoin(id); 
 		if (error < 0){
-			SynchPutString("erreur Thread 1");
+			SynchPutInt(id);
+			SynchPutInt(error);
 		}
-	}
-	if (id2 >= 0){
+	//~ }
+	//~ if (id2 >= 0){
 		error = UserThreadJoin(id2);
 		if (error < 0){
 			SynchPutString("erreur Thread 2");
 		}
-	} 
-	//~ PutChar('{');
+	//~ } 
 	return 0;
 
 }

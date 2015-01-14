@@ -71,7 +71,6 @@ Machine::Machine(bool debug)
 	pageTable = NULL;
 #endif
 	frameprovider = new FrameProvider(NumPhysPages);
-	processCount = 0;
 	
 	singleStep = debug;
 	CheckEndian();
@@ -224,21 +223,20 @@ void Machine::WriteRegister(int num, int value)
 	registers[num] = value;
 }
 
-unsigned Machine::IncrProcess(){
-  unsigned id;
+int Machine::IncrProcess(){
+  int id;
   pCount->Acquire();
   id = processCount++;
   pCount->Release();
   return id;
 }
 
-void Machine::DecrProcess(){
+int Machine::DecrProcess(){
+  int id;
   pCount->Acquire();
-  processCount--;
+  id = --processCount;
   pCount->Release();
+  return id;
 }
 
-unsigned Machine::GetProcessCount(){
-  return processCount;
-}
 

@@ -50,7 +50,7 @@ class AddrSpace
 		int JoinThread (unsigned); //	attendre la fin d'un thread
 		bool HasFailed(); //	si le mapping vpn->ppn a échoué
 
-
+		int pid; // pid du processus associé
 
 	private:
 		TranslationEntry * pageTable;	// Assume linear page table translation
@@ -68,7 +68,6 @@ class AddrSpace
 		//	les threads en attente associés aux threads qu'ils attendent
 
 		unsigned assigned_vpn; //	nombre de pages virtuelles assignées
-		Lock *addT; //mutex pour l'ajout d'un thread
 		Lock *waitT; //mutex pout la manipulation du vecteur
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable

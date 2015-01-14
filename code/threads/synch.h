@@ -88,6 +88,7 @@ class Lock
 		const char *name;		// for debugging
 		Semaphore *lock;
 		unsigned id;
+		int pid;
 };
 
 // The following class defines a "condition variable".  A condition
