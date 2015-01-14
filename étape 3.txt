@@ -1,10 +1,6 @@
-travail en cours :
-	user thread join
 
 reste à faire :
-	do exit à modifier pour tuer les fils
 	test unitaire
-	partie 3
 
 partie 1:
 structure thread
