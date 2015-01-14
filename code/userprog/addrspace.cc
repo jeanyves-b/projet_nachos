@@ -31,13 +31,13 @@ struct WaitingThread {
 
 static void
 ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
-    int position, TranslationEntry *pageTable, unsigned numPages){
+    int position, TranslationEntry *pageTableA, unsigned numPagesA){
     
-    //~ TranslationEntry *oldPT = machine->pageTable;
-    //~ unsigned oldPTS = machine->pageTableSize;
+    TranslationEntry *oldPT = machine->pageTable;
+    unsigned oldPTS = machine->pageTableSize;
 
-    machine->pageTable = pageTable;
-    machine->pageTableSize = numPages;
+    machine->pageTable = pageTableA;
+    machine->pageTableSize = numPagesA;
 
     char buffer[numBytes];
 
@@ -50,8 +50,8 @@ ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
     }
 
 
-    //~ machine->pageTable = oldPT;
-    //~ machine->pageTableSize = oldPTS;
+    machine->pageTable = oldPT;
+    machine->pageTableSize = oldPTS;
 } 
 
 //----------------------------------------------------------------------
@@ -123,14 +123,11 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// first, set up the translation 
 	pageTable = new TranslationEntry[numPages];
 
-	int ppn;
-	printf("nombre de page:%i\n", machine->frameprovider->NumAvailFrame());
 	for (i = 0; i < numPages; i++)
 	{
 		pageTable[i].virtualPage = i;	
-		ppn = machine->frameprovider->GetEmptyFrame();
-		ASSERT(ppn >= 0); //	test que la page physique retournée est valide
-		pageTable[i].physicalPage = ppn;
+		ASSERT(machine->frameprovider->NumAvailFrame() > 0); //	test que la page physique retournée est valide
+		pageTable[i].physicalPage = machine->frameprovider->GetEmptyFrame();
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -141,7 +138,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	// zero out the entire address space, to zero the unitialized data segment 
 	// and the stack segment
-	bzero (machine->mainMemory, size);
+	//~ bzero (machine->mainMemory, size);
 	
 	// then, copy in the code and data segments into memory
 	if (noffH.code.size > 0)
@@ -181,14 +178,14 @@ AddrSpace::AddrSpace (OpenFile *executable)
 AddrSpace::~AddrSpace ()
 {
 	// LB: Missing [] for delete
-	// delete pageTable;
-	delete [] pageTable;
+
 	// End of modification
 	unsigned i;
 	//liberation de toutes les pages physiques utilisées par le processus
 	for(i = 0; i < numPages; i++)
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
-	
+		// delete pageTable;
+	delete [] pageTable;
 	delete stack_blocs;
 	delete threads_stack_id;
 }
@@ -225,10 +222,9 @@ AddrSpace::InitRegisters ()
 
 	//	Ne pas oublier le thread main
 	unsigned tmp_unsigned;
-	printf("Stack_block_id(0):%d\n",stack_blocs[0]);
-	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
-	printf("err:%i\ntmp_unsigned:%i\n",err,tmp_unsigned);
 	
+	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
+
 	ASSERT(err >= 0 && tmp_unsigned == 2); 
 
 	err = this->AddThread(&tmp_unsigned);
@@ -294,7 +290,7 @@ AddrSpace::AddThread (unsigned *created_thread_id)
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack)<0)
 		return -2;
-	printf("thread created:%i\n",id_in_stack);
+		
 	stack_blocs[id_in_stack-2] = true;
 	threads_stack_id[threads_created++] = id_in_stack;
 	*created_thread_id = threads_created - 1;

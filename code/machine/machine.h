@@ -33,7 +33,7 @@
 // the disk sector size, for
 // simplicity
 
-#define NumPhysPages    64
+#define NumPhysPages    128
 #define MemorySize 	(NumPhysPages * PageSize)
 #define TLBSize		4		// if there is a TLB, make it small
 
@@ -184,12 +184,14 @@ class Machine {
 		unsigned int pageTableSize;
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
+		unsigned processCount; //	compteur de processus lancés par la machine
 
 	private:
 		bool singleStep;		// drop back into the debugger after each
 		// simulated instruction
 		int runUntilTime;		// drop back into the debugger when simulated
 		// time reaches this value
+		
 };
 
 extern void ExceptionHandler(ExceptionType which);

@@ -134,9 +134,13 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-					      DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
-					      interrupt->Halt();
-					      break;
+						if(machine->processCount==0){
+						  DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+						  interrupt->Halt();
+						} else {
+							do_UserProcessExit();
+						}
+					    break;
 				      }
 			case SC_PutChar: {
 						 DEBUG('a', "Writing character on standard output, initiated by user program.\n");
@@ -216,7 +220,7 @@ ExceptionHandler (ExceptionType which)
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
 						 char buf[MAX_STRING_SIZE];
 						 copyStringFromMachine(machine->ReadRegister(4),buf,MAX_STRING_SIZE);
-						 do_UserProcessCreate(buf);
+						 machine->WriteRegister(2, do_UserProcessCreate(buf));
 						 break;
 					 }
 			default: {
@@ -227,7 +231,7 @@ ExceptionHandler (ExceptionType which)
 	}
 	else if (which == AddressErrorException)
 	{
-		printf ("Address Error exception %d\n", type);
+		printf ("Address translation exception %d\n", type);
 		ASSERT (FALSE);
 	}
 	else

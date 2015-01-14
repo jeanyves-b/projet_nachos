@@ -48,13 +48,29 @@ test
 partie 2 : executer plusieurs programmes en même temps
 	action 1
 		appel system : ForkExec()
-			fait un fork()
+			inspiré de StartProcess
+			do_UserProcessCreate
+				Ouvre l'executable
+				Alloue la mémoire (addrspace)
+				Crée le thread et y attache la mémoire allouée
+				Mets à jour le nombre de processus créés
+				ForkExec le thread créé sur StartUserProcess
+					ForkExec = Fork sans mettre la mémoire à la même adresse que celle du thread en cours
+			StartUserProcess
+				Initalise les registres et charge la pageTable du nouveau processus
+				Lance le programme
+			do_UserProcessExit
+				Mets à jour le nombre de processus créés
+				Attends que ses threads finissent (join)
+				Désalloue la mémoire
+				Demande sa destruction
 	action 2
 		faire en sorte que le dernier processus arrete la machine
-			faire une liste de process
-			si first->next est NULL et que first s'arrete, alors on fait un halt()
+			garder un compteur de processus forkés
+			si dernier processus alors halt la machine, sinon quitter le processus
 	action 3
 		faire un gros test
+			enelver ASSERT pas assez de pages physiques
 	action 4
 		vérifier que tout se fini correctement
 

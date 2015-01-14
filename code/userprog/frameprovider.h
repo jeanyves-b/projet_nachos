@@ -19,8 +19,7 @@ class FrameProvider {
 		// considère comme utilisé
         void ReleaseFrame(int n); // libère un cadre
         int NumAvailFrame(); // retourne le nombre de cadres libres
-        
-        unsigned processCount; //	compteur de processus lancés
+
 
 	private:
 		BitMap *bitmap;

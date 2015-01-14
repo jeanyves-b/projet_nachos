@@ -2,43 +2,64 @@
 #include "system.h"
 #include "userprocess.h"
 
+//---------------------------------------------------------------------
+// StartUserProcess
+//	Permet d'inistaliser les registres du processus créé et de mettre 
+//		en place les informations sur la table des pages.
+//
+//---------------------------------------------------------------------
 
 void StartUserProcess(int data) {
-  synchconsole->SynchPutString("test");
 	currentThread->space->InitRegisters ();	// set the initial register values
 	currentThread->space->RestoreState ();		// load page table register
+
 	machine->Run();
 }
 
+//---------------------------------------------------------------------
+// do_UserProcessCreate
+//	Permet de forker un processus qui lance le fichier executable donné
+//		dans s. 
+//
+//	Retourne le pid du processus.
+//---------------------------------------------------------------------
 int do_UserProcessCreate(char *s){
-	Thread *newThread = new Thread("user process");
-	synchconsole->SynchPutString(s);
-	OpenFile *executable = fileSystem->Open (s);
-	AddrSpace *space;
-	
-	// Si le thread créé est null, on renvoie -1
-	if(newThread == NULL)
+
+	OpenFile *executable = fileSystem->Open(s);
+	if (executable == NULL)
 		return -1;
 	
-
-	if (executable == NULL)
-	{
-		synchconsole->SynchPutString ("Unable to open file");
+	AddrSpace *addrSpace = new AddrSpace(executable);
+	
+	delete executable;
+	if(addrSpace == NULL)
 		return -2;
-	}
-	space = new AddrSpace (executable);
-	 
+
+   	Thread *newThread = new Thread(s);
+   	if (newThread == NULL)
+		return -3;
+		
+	newThread->space = addrSpace;
 	newThread->id = 0;
 	
-	newThread->space = space;
+	unsigned pid = machine->processCount++;
 	
-	delete executable;		// close file
-	
-	newThread->Fork(StartUserProcess, 0);
-
-	return 0;
+	newThread->ForkExec(StartUserProcess, 0);
+	currentThread->Yield();
+	return pid;
 }
 
+//---------------------------------------------------------------------
+// do_UserProcessExit
+//	Permet de quitter le processus en cours, en mettant à jour le
+//		nombre de processus total, en attendant les threads "fils"
+//		de ce processus.
+//
+//---------------------------------------------------------------------
 void do_UserProcessExit(){
-  
+	machine->processCount--; 
+	currentThread->JoinFils();
+	delete currentThread->space;
+	currentThread->Finish();
+	
 }
