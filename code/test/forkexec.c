@@ -8,6 +8,9 @@ void test(void *a) {
 int main()
 {
 	//UserThreadCreate(test, 0);
+	
+	//~ int i;
+	//~ for (i=0;i<3;i++)
 	ForkExec("userpages0");
 	ForkExec("userpages1");
 	PutChar('\n');

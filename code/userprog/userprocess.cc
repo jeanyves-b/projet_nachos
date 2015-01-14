@@ -21,7 +21,8 @@ void StartUserProcess(int data) {
 //	Permet de forker un processus qui lance le fichier executable donné
 //		dans s. 
 //
-//	Retourne le pid du processus.
+//	Retourne le pid du processus en cas de succès, un code d'erreur
+//		négatif sinon.
 //---------------------------------------------------------------------
 int do_UserProcessCreate(char *s){
 
@@ -34,10 +35,16 @@ int do_UserProcessCreate(char *s){
 	delete executable;
 	if(addrSpace == NULL)
 		return -2;
+	
+	if (addrSpace->HasFailed()) {
+		printf("Pas assez d'espace\n");
+		delete addrSpace;
+		return -3;
+	}
 
    	Thread *newThread = new Thread(s);
    	if (newThread == NULL)
-		return -3;
+		return -4;
 		
 	newThread->space = addrSpace;
 	newThread->id = 0;

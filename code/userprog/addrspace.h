@@ -47,7 +47,7 @@ class AddrSpace
 		int GetStackAddress(unsigned*,unsigned);	//récupérer l'adresse d'un thread
 		//	dans la pile à partir de son identifiant
 		int JoinThread (unsigned); //	attendre la fin d'un thread
-
+		bool HasFailed(); //	si le mapping vpn->ppn a échoué
 
 
 
@@ -65,7 +65,8 @@ class AddrSpace
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant
 		//	les threads en attente associés aux threads qu'ils attendent
-		
+		bool not_enough_memory; //	booléen qui indique si toutes les pages virtuelles
+		//	ont été affectées à une page physique (false) ou non (true)
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
 		// dans la pile de taille THREAD_PAGES

@@ -121,13 +121,20 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
+	
+	not_enough_memory = false;
+	
 	pageTable = new TranslationEntry[numPages];
-
+		
 	for (i = 0; i < numPages; i++)
 	{
 		pageTable[i].virtualPage = i;	
-		ASSERT(machine->frameprovider->NumAvailFrame() > 0); //	test que la page physique retournée est valide
-		pageTable[i].physicalPage = machine->frameprovider->GetEmptyFrame();
+		if (machine->frameprovider->NumAvailFrame() > 0) //	on vérifie qu'il y a assez de pages pages
+			pageTable[i].physicalPage = machine->frameprovider->GetEmptyFrame();
+		else {
+			not_enough_memory = true;
+			return;
+		}
 		pageTable[i].valid = TRUE;
 		pageTable[i].use = FALSE;
 		pageTable[i].dirty = FALSE;
@@ -223,11 +230,7 @@ AddrSpace::InitRegisters ()
 	//	Ne pas oublier le thread main
 	unsigned tmp_unsigned;
 	
-	int err = this->GetFirstFreeThreadStackBlockId(&tmp_unsigned);
-
-	ASSERT(err >= 0 && tmp_unsigned == 2); 
-
-	err = this->AddThread(&tmp_unsigned);
+	int err = this->AddThread(&tmp_unsigned);
 
 	ASSERT(err >= 0 && tmp_unsigned < MAX_THREADS); 
 
@@ -443,4 +446,16 @@ AddrSpace::JoinThread (unsigned user_thread_id) {
 		(void) interrupt->SetLevel (oldLevel);
 	}
 	return 0;
+}
+
+//----------------------------------------------------------------------
+// AddrSpace::HasFailed
+//		Cette fonction verfie si il y a eu assez de pages physiques
+//			pour cet espace d'adressage
+//
+//----------------------------------------------------------------------
+
+bool
+AddrSpace::HasFailed () {
+	return not_enough_memory;
 }
