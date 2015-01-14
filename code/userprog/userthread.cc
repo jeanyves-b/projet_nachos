@@ -1,6 +1,11 @@
 #include "copyright.h"
 #include "system.h"
 #include "userthread.h"
+//---------------------------------------------------------------------
+// UserThreadCreate
+//	Permet de créer un thread exécutant la fonction f avec 
+//	l'argument arg
+//---------------------------------------------------------------------
 
 //---------------------------------------------------------------------
 // StartUserThread

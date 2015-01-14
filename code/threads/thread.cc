@@ -19,6 +19,7 @@
 #include "switch.h"
 #include "synch.h"
 #include "system.h"
+#include "userprocess.h"
 
 #define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
 // execution stack, for detecting 
@@ -212,8 +213,6 @@ int Thread::JoinFils(){
 	}
 	return 0;
 }
-
-
 //----------------------------------------------------------------------
 // Thread::CheckOverflow
 //      Check a thread's stack to see if it has overrun the space

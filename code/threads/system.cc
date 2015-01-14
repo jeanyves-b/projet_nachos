@@ -189,6 +189,7 @@ Cleanup ()
 #endif
 
 #ifdef USER_PROGRAM
+	delete currentThread->space;
 	delete machine;
 	delete synchconsole;
 #endif
@@ -205,5 +206,6 @@ Cleanup ()
 	delete scheduler;
 	delete interrupt;
 	delete stats;
+	
 	Exit (0);
 }

@@ -68,5 +68,4 @@ void do_UserProcessExit(){
 	currentThread->JoinFils();
 	delete currentThread->space;
 	currentThread->Finish();
-	
 }
