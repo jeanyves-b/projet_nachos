@@ -99,7 +99,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	ASSERT(UserStackSize>=THREAD_PAGES*(PageSize+16));
 
 	NoffHeader noffH;
-	unsigned int i, size;
+	unsigned size;
 
 	executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
 	if ((noffH.noffMagic != NOFFMAGIC) &&
@@ -118,27 +118,34 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// at least until we have
 	// virtual memory
 	
+	//	initialisation des variables de gestion des threads de l'espace
+	//		d'adressage
+	threads_stack_id = new unsigned[MAX_THREADS];
+	stack_blocs = new bool[(UserStackSize-16)/(PageSize*THREAD_PAGES + 16)];
+	for(unsigned int j=0; j<MAX_THREADS; j++)
+		threads_stack_id[j] = 0;
+
+	for(unsigned int j=0; j<(UserStackSize-16)/(PageSize*THREAD_PAGES + 16); j++)
+		stack_blocs[j] = false;
+	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
 	
-	not_enough_memory = false;
-	
 	pageTable = new TranslationEntry[numPages];
 		
-	for (i = 0; i < numPages; i++)
+	for (assigned_vpn = 0; assigned_vpn < numPages; assigned_vpn++)
 	{
-		pageTable[i].virtualPage = i;	
-		if (machine->frameprovider->NumAvailFrame() > 0) //	on vérifie qu'il y a assez de pages pages
-			pageTable[i].physicalPage = machine->frameprovider->GetEmptyFrame();
-		else {
-			not_enough_memory = true;
+		pageTable[assigned_vpn].virtualPage = assigned_vpn;	
+		if (machine->frameprovider->NumAvailFrame() > 0) { //	on vérifie qu'il y a assez de pages pages 
+			pageTable[assigned_vpn].physicalPage = machine->frameprovider->GetEmptyFrame();
+		} else {
 			return;
 		}
-		pageTable[i].valid = TRUE;
-		pageTable[i].use = FALSE;
-		pageTable[i].dirty = FALSE;
-		pageTable[i].readOnly = FALSE;	// if the code segment was entirely on 
+		pageTable[assigned_vpn].valid = TRUE;
+		pageTable[assigned_vpn].use = FALSE;
+		pageTable[assigned_vpn].dirty = FALSE;
+		pageTable[assigned_vpn].readOnly = FALSE;	// if the code segment was entirely on 
 		// a separate page, we could set its 
 		// pages to be read-only
 	}
@@ -163,15 +170,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
             noffH.initData.inFileAddr, pageTable, numPages); 
 		}
 
-	//	initialisation des variables de gestion des threads de l'espace
-	//		d'adressage
-	threads_stack_id = new unsigned[MAX_THREADS];
-	stack_blocs = new bool[(UserStackSize-16)/(PageSize*THREAD_PAGES + 16)];
-	for(unsigned int j=0; j<MAX_THREADS; j++)
-		threads_stack_id[j] = 0;
-
-	for(unsigned int j=0; j<(UserStackSize-16)/(PageSize*THREAD_PAGES + 16); j++)
-		stack_blocs[j] = false;
+	
 
 	threads_created = 0; 
 
@@ -189,7 +188,7 @@ AddrSpace::~AddrSpace ()
 	// End of modification
 	unsigned i;
 	//liberation de toutes les pages physiques utilisées par le processus
-	for(i = 0; i < numPages; i++)
+	for(i = 0; i < assigned_vpn; i++)
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
 		// delete pageTable;
 	delete [] pageTable;
@@ -320,14 +319,13 @@ AddrSpace::RemoveThread (unsigned unique_thread_id)
 	//	Identifiant unique trop grand
 	if (unique_thread_id >= MAX_THREADS)
 		return -1;
-
-	//	Thread pas en cours d'exécution
-	if (threads_stack_id[unique_thread_id] < 2)
+	printf("\t i have id %d and sid %d\t",unique_thread_id,threads_stack_id[unique_thread_id]);
+	//	Thread pas en cours d'exécution ou identifiant en pile invalide
+	if (threads_stack_id[unique_thread_id] < 2 || threads_stack_id[unique_thread_id] >= (UserStackSize-16)/(PageSize*THREAD_PAGES + 16))
 		return -2;
-
+		
 	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
 	threads_stack_id[unique_thread_id] = 1;
-
 
 	return 0;
 
@@ -458,5 +456,5 @@ AddrSpace::JoinThread (unsigned user_thread_id) {
 
 bool
 AddrSpace::HasFailed () {
-	return not_enough_memory;
+	return assigned_vpn != numPages;
 }

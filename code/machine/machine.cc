@@ -71,7 +71,8 @@ Machine::Machine(bool debug)
 	pageTable = NULL;
 #endif
 	frameprovider = new FrameProvider(NumPhysPages);
-
+	processCount = 0;
+	
 	singleStep = debug;
 	CheckEndian();
 }

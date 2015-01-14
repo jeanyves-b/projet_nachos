@@ -18,7 +18,7 @@
 #include <vector>
 #include "bitmap.h"
 
-#define UserStackSize		2024	// increase this as necessary!
+#define UserStackSize		2048	// increase this as necessary!
 #define THREAD_PAGES		2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 #define MAX_THREADS			1024u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 
@@ -65,8 +65,7 @@ class AddrSpace
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant
 		//	les threads en attente associés aux threads qu'ils attendent
-		bool not_enough_memory; //	booléen qui indique si toutes les pages virtuelles
-		//	ont été affectées à une page physique (false) ou non (true)
+		unsigned assigned_vpn; //	nombre de pages virtuelles assignées
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
 		// dans la pile de taille THREAD_PAGES

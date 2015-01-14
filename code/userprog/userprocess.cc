@@ -37,7 +37,6 @@ int do_UserProcessCreate(char *s){
 		return -2;
 	
 	if (addrSpace->HasFailed()) {
-		printf("Pas assez d'espace\n");
 		delete addrSpace;
 		return -3;
 	}
@@ -52,7 +51,7 @@ int do_UserProcessCreate(char *s){
 	unsigned pid = machine->processCount++;
 	
 	newThread->ForkExec(StartUserProcess, 0);
-	currentThread->Yield();
+	
 	return pid;
 }
 

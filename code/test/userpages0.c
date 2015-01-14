@@ -6,25 +6,27 @@
  
  void thread1(void *n){
 	 int i=0;
-	 while (i<10) {
+	 while (i<5) {
 		PutChar('a'+i);
 		i++;
 	}
+	
 }
 
  void thread2(void *n){
 	 int i=0;
-	 while (i<10) {
+	 while (i<5) {
 		PutChar('0'+i);
 		i++;
 	}
+	
 }
 
 int main()
 {
 	unsigned id = UserThreadCreate(thread1, 0);
 	unsigned id2 = UserThreadCreate(thread2, 0);
-	SynchPutString("here");
+	//~ SynchPutString("\tentring");
 	int error;
 	
 	if (id >= 0){
@@ -39,7 +41,7 @@ int main()
 			SynchPutString("erreur Thread 2");
 		}
 	} 
-	PutChar('\n');
+	//~ PutChar('{');
 	return 0;
 
 }

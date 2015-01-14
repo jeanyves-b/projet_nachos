@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------
 
 void StartUserThread(int data) {
-	//synchconsole->SynchPutString("here");
+
 	FunctionData *function_data = (FunctionData*)data;
 
 	//Initialisation de tous les registres
