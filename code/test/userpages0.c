@@ -25,6 +25,7 @@ int main()
 	SynchPutString("zest");
 	unsigned id = UserThreadCreate(thread1, 0);
 	unsigned id2 = UserThreadCreate(thread2, 0);
+	SynchPutString("here");
 	int error;
 	
 	if (id >= 0){

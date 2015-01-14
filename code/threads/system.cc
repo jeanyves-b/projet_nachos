@@ -204,8 +204,6 @@ Cleanup ()
 	delete timer;
 	delete scheduler;
 	delete interrupt;
-#ifdef CHANGED
 	delete stats;
-#endif //CHANGED
 	Exit (0);
 }

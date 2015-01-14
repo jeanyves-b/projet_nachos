@@ -184,12 +184,14 @@ class Machine {
 		unsigned int pageTableSize;
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
+		unsigned processCount; //	compteur de processus lancés par la machine
 
 	private:
 		bool singleStep;		// drop back into the debugger after each
 		// simulated instruction
 		int runUntilTime;		// drop back into the debugger when simulated
 		// time reaches this value
+		
 };
 
 extern void ExceptionHandler(ExceptionType which);

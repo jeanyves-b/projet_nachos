@@ -21,7 +21,8 @@ bin:
 mips-progs:
 	$(MAKE) -C build $@
 
-check: origin build
+#check: origin build
+check: build
 
 origin: bin
 	@set -e; RET= ;\
