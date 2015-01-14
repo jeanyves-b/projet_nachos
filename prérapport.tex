@@ -5,83 +5,76 @@ janvier 2015
 
 Amine Ait-Mouloud, Sébastien Avril, El Hadji Malick Diagne, Jean-Yves Bottraud
 
-étape 1
-	je vois rien a mettre pour cette partie là...
-	on a rien fait de particulier, il s'agit juste d'une section où on nous explique comment installer et utiliser
+\part{Fonctionalité du noyau}
+Voici les partie que nous avons réussi à implémenter jusque là :
+\begin{itemize}
+\item appel system : toutes ces fonction on été porté au niveau utilisateur et sont 'thread safe'. Nous avons aussi utilisé des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran
+\item threads : toutes les fonctions permettant de créer, détruire et gérer des threads on été porté au niveau utilisateur.
+\item mémoire virtuel : work in progress (ce sera peut-etre fini d'ici la date de rendue, mais je ne sais pas si nous auront le temps d'en parler ici)
+\end{itemize}
+Nous somme actuellement entrain de finr de débugger dette dernière partie.
 
-étape 2 : mise en place des appel system : syscall
+\part{Spécification des fonction utilisateur}
+\section{appels système}
+NOM : SynchGetChar
+DESCRIPTION : fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.
+UTILISATION : Cette fonction ne prend rien en argument et retourne un caractère.
 
-	question encore ouverte :
-		on parle des appel system? pourquoi? -> ils sont très guidé et n'implique aucun choix de conception.
-		on parle des fonctions de la console? -> ces fonction ne m'ont pas parue très intéressante
-	
-le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonction utilisateur. Les appels système appelent les descriptions des fonctions utilisateur.
-Comme cette section est très guidée, nous avons décidé de ne pas trop nous étaler ici et de ne vous présenter que les 4 fonctions utilisateurs. Les appels systèmes ne sont pas détaillés ici car ils ne comportaient aucun choix de conception, leur description aurait donc été un simple copier/coller du sujet.
+NOM : SynchGetString
+DESCRIPTION : fonction utilisateur servant à récuperer une chaine de caractère. Elle est basé sur la fonction précédente qu'elle répéte en stockant les caractères ainsi récupéré dans un 'char *'.
+UTILISATION : cette fonction ne prend rien en argument et retourne un pointeur sur char
 
-SynchGetChar
-	fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.
-	char SynchConsole::SynchGetChar()
-	{
-		readAvail->P ();	// wait for character to arrive
-		return console->GetChar ();
-	}
+NOM : SynchPutChar
+DECRITPION : fonction utilisateur servant à afficher un caractère. Basé sur la fonction PutChar de la console sécurisé avec un sémaphore de façon à être sur que l'on attend bien que l'écriture soit finie avant de continuer le programme.
+UTILISATION : Cette fonction prend un caractère en argument et ne retourne rien.
 
-SynchGetString
-	fonction utilisateur servant à récuperer une chaine de caractère. Elle est basé sur la fonction précédente qu'elle répéte en stockant les caractères ainsi récupéré dans un 'char *'.
-	void SynchConsole::SynchGetString(char *s, int n){
-		reading->P();
-		char current_char;
-		int i = 0;
-		do {
+NOM : SynchPutString
+DESCRIPTION : fonction utilisateur servant à afficher une chaine de caractère à l'écran, cette fonction utilise la fonction précédente pour afficher une chaine caractère par caractère.
+UTILISATION : cette fonction prend un pointeur sur char en argument et ne retourne rien
 
-			current_char = this->SynchGetChar();
-			s[i] = current_char;
-			i++;
-		} while (i < n && current_char != '\n');
+\section{threads}
+\section{mémoire virtuelle}
 
-		//vider le buffer noyau pour eviter les fuits noyau
-		if (i == n) {
-			do {
-				current_char = this->SynchGetChar();
-			} while (current_char != '\n'); 
-		} else {
-			s[i] = '\0';
-		}
-		reading->V();
-	}
+\part{Test}
+\section{organisation}
+script
+tester
+fichier
+Tous nos programme de test son situé dans le dossier code/test. Ils sont classé par étape avec un dossier par étape.
+\section{fonctionnement}
 
-SynchPutChar
-	fonction utilisateur servant à afficher un caractère. Basé sur la fonction PutChar de la console sécurisé avec un sémaphore de façon à être sur que l'on attend bien que l'écriture soit finie avant de continuer le programme.
-	void SynchConsole::SynchPutChar(const char ch)
-	{
-		console->PutChar (ch);	// echo it!
-		writeDone->P ();	// wait for write to finish
-	}
+\section{utilisation}
+pour lancer les test, ils suffit 
 
-SynchPutString
-	fonction utilisateur servant à afficher une chaine de caractère à l'écran, cette fonction utilise la fonction précédente pour afficher une chaine caractère par caractère.
-	void SynchConsole::SynchPutString(const char s[])
-	{
-		writing->P();
-		int i = 0;
-		while (s[i] != '\0'){
-			this->SynchPutChar(s[i]);
-			i++;
-		}
-		this->SynchPutChar('\n');
-		writing->V();
-	}
+\section{test effectué et comportement}
+\subsection{appel système via synchconsole}
+\begin{itemize}
+\item une chaine de 1 caractères 			validé : écrit le caractère	correctement à l'écran ou bien dans le fichier de destination
+\item utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
+\item ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
+\item trop de caractères					validé : sépare la chaine écrire en plusieurs chaines de taille équivalante à taillemax (situer dans le fichier .cc)
+\item pas de caractère 						validé : si rien n'est entrée, rien ne se passe et si on entre juste le caractère retour chariot, il est traité comme n'importe quelle lettre
+\item arrêt avec EOF 						validé : arrete la lecture de fichier.
+\end{itemize}
+\subsection{thread}
+\begin{itemize}
+\item 
+\end{itemize}
+\subsection{virtual memory}
+\begin{itemize}
+\item 
+\end{itemize}
 
-	tests :
-		utilisation courante 				validé : marche, heureusement
-		ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
-		trop de caractères					validé : sépare les chaines
-		pas de caractère 					validé : rien
-		arrêt avec EOF 						validé : arrete la capture
-		avec une chaine cohérente			validé : la chaine est rendu correctement
-		avec une chaine vide 				validé : ne lance rien/fait juste un entrer
-		avec trop de caractères 			validé : sépare la chaine en plusieurs petites chaines
-		avec une chaine de 1 caractères 	validé : écrit le caractère	
+\part{Choix d'implémentation}
+\section{appels système}
+Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulié.
+
+\section{threads}
+
+\section{mémoire virtuelle}
+
+\part{organisation du travail}
+\section{fonctionement du groupe}
 
 étape 3 :mise en place des threads utilisateur
 
