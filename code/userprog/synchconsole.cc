@@ -29,7 +29,6 @@ void SynchConsole::SPutChar(const char ch)
 {
 	console->PutChar (ch);	// echo it!
 	writeDone->P ();	// wait for write to finish
-
 }
 
 void SynchConsole::SynchPutChar(const char ch)

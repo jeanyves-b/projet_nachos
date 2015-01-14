@@ -7,13 +7,13 @@
 //	l'argument arg
 //---------------------------------------------------------------------
 
-typedef struct FunctionData FunctionData;
-struct FunctionData {
-	int function;
-	int arg;
-	int exit;
-	unsigned id;
-};
+//---------------------------------------------------------------------
+// StartUserThread
+//	Fonction qui permet de mettre en place les registres (et la pile)
+//		d'un thread, les données sont transimses dans "data" sous forme
+//		d'un pointeur vers une structure FunctionData. 
+//	
+//---------------------------------------------------------------------
 
 void StartUserThread(int data) {
 	//synchconsole->SynchPutString("here");
@@ -45,6 +45,15 @@ void StartUserThread(int data) {
 	machine->Run();
 }
 
+//---------------------------------------------------------------------
+// do_UserThreadCreate
+//	Permet de créer un thread exécutant la fonction f avec 
+//	l'argument arg et mets exit dans le registre de retour.
+//	
+//	Retourne l'id unique du thread créé (dans le processus), un nombre 
+//		négatif en cas d'erreur
+//---------------------------------------------------------------------
+
 int do_UserThreadCreate(int f, int arg, int exit){
 	// On bloque les interruptions pour rendre ce bout de code atomique
 	//IntStatus oldLevel = interrupt->SetLevel (IntOff);
@@ -73,10 +82,16 @@ int do_UserThreadCreate(int f, int arg, int exit){
 	return data->id;
 }
 
+//---------------------------------------------------------------------
+// do_UserThreadExit
+//	Permet de quitter le thread en cours en ayant attendu ses "fils", 
+//		et ayant remis sur la file d'attente les threads qui
+//		l'attendaient
+//	
+//---------------------------------------------------------------------
 void do_UserThreadExit(){
 	currentThread->JoinFils();
 	currentThread->space->RunWaitingThread(currentThread->id);
-	//currentThread->space->RemoveThread(currentThread->id);
 	currentThread->Finish();
 }
 

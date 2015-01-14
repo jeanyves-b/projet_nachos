@@ -83,8 +83,7 @@ Console::~Console()
 //	put into the buffer. 
 //----------------------------------------------------------------------
 
-	void
-Console::CheckCharAvail()
+void Console::CheckCharAvail()
 {
 	char c;
 	int n;
@@ -111,8 +110,7 @@ Console::CheckCharAvail()
 //	completed.
 //----------------------------------------------------------------------
 
-	void
-Console::WriteDone()
+void Console::WriteDone()
 {
 	putBusy = FALSE;
 	stats->numConsoleCharsWritten++;
@@ -125,11 +123,9 @@ Console::WriteDone()
 //	Either return the character, or EOF if none buffered.
 //----------------------------------------------------------------------
 
-	char
-Console::GetChar()
+char Console::GetChar()
 {
 	char ch = incoming;
-
 	incoming = EOF;
 	return ch;
 }
@@ -140,8 +136,7 @@ Console::GetChar()
 //	to occur in the future, and return.
 //----------------------------------------------------------------------
 
-	void
-Console::PutChar(char ch)
+void Console::PutChar(char ch)
 {
 	ASSERT(putBusy == FALSE);
 	WriteFile(writeFileNo, &ch, sizeof(char));

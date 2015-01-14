@@ -9,6 +9,11 @@ extern int do_UserThreadCreate(int f, int arg, int exit);
 void do_UserThreadExit();
 
 //Structure pour stocker les paramètres d'une fonction
-struct FunctionData; 
+typedef struct FunctionData {
+	int function;
+	int arg;
+	int exit;
+	unsigned id;
+} FunctionData;
 
 #endif // USERTHREAD_H

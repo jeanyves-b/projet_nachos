@@ -1,0 +1,181 @@
+pré rapport
+M1 informatique
+projet nachos
+janvier 2015
+
+Amine Ait-Mouloud, Sébastien Avril, Diagne,Jean-Yves Bottraud
+
+étape 1
+	je vois rien a mettre pour cette partie là...
+	on a rien fait de particulier, il s'agit juste d'une section où on nous explique comment installer et utiliser
+
+étape 2 : mise en place des appel system : syscall
+
+	question encore ouverte :
+		on parle des appel system? pourquoi? -> ils sont très guidé et n'implique aucun choix de conception.
+		on parle des fonctions de la console? -> ces fonction ne m'ont pas parue très intéressante
+	
+le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonction utilisateur. Les appels système appelent les descriptions des fonctions utilisateur.
+Comme cette section est très guidée, nous avons décidé de ne pas trop nous étaler ici et de ne vous présenter que les 4 fonctions utilisateurs. Les appels systèmes ne sont pas détaillés ici car ils ne comportaient aucun choix de conception, leur description aurait donc été un simple copier/coller du sujet.
+
+SynchGetChar
+	fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.
+	char SynchConsole::SynchGetChar()
+	{
+		readAvail->P ();	// wait for character to arrive
+		return console->GetChar ();
+	}
+
+SynchGetString
+	fonction utilisateur servant à récuperer une chaine de caractère. Elle est basé sur la fonction précédente qu'elle répéte en stockant les caractères ainsi récupéré dans un 'char *'.
+	void SynchConsole::SynchGetString(char *s, int n){
+		reading->P();
+		char current_char;
+		int i = 0;
+		do {
+
+			current_char = this->SynchGetChar();
+			s[i] = current_char;
+			i++;
+		} while (i < n && current_char != '\n');
+
+		//vider le buffer noyau pour eviter les fuits noyau
+		if (i == n) {
+			do {
+				current_char = this->SynchGetChar();
+			} while (current_char != '\n'); 
+		} else {
+			s[i] = '\0';
+		}
+		reading->V();
+	}
+
+SynchPutChar
+	fonction utilisateur servant à afficher un caractère. Basé sur la fonction PutChar de la console sécurisé avec un sémaphore de façon à être sur que l'on attend bien que l'écriture soit finie avant de continuer le programme.
+	void SynchConsole::SynchPutChar(const char ch)
+	{
+		console->PutChar (ch);	// echo it!
+		writeDone->P ();	// wait for write to finish
+	}
+
+SynchPutString
+	fonction utilisateur servant à afficher une chaine de caractère à l'écran, cette fonction utilise la fonction précédente pour afficher une chaine caractère par caractère.
+	void SynchConsole::SynchPutString(const char s[])
+	{
+		writing->P();
+		int i = 0;
+		while (s[i] != '\0'){
+			this->SynchPutChar(s[i]);
+			i++;
+		}
+		this->SynchPutChar('\n');
+		writing->V();
+	}
+
+	tests :
+		utilisation courante 				validé : marche, heureusement
+		ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
+		trop de caractères					validé : sépare les chaines
+		pas de caractère 					validé : rien
+		arrêt avec EOF 						validé : arrete la capture
+		avec une chaine cohérente			validé : la chaine est rendu correctement
+		avec une chaine vide 				validé : ne lance rien/fait juste un entrer
+		avec trop de caractères 			validé : sépare la chaine en plusieurs petites chaines
+		avec une chaine de 1 caractères 	validé : écrit le caractère	
+
+étape 3 :mise en place des threads utilisateur
+
+question ouverte :
+
+intro
+	présenté ce qu'on a fait pour les thread :
+		une structure
+		un appel system
+		des fonctions
+
+Pour faire cette partie, nous nous sommes inspiré du fonctionement et du comportement des thread POSIX étudié en cours.
+possibilité d'erreur lors de la création d'un thread POSIX :
+	impossibilité de créer un thread, plus de threads disponile... : new Thread() échoue et retourne une erreur
+	pas assez de ressources : pas assez d'espace restant dans la pile
+	mauvais argument : sécuriser si la fonction ou l'argument pointe dans le vide ou au mauvais endroit, le thread ne doit pas être créer mais le prgrame est censé tourner.
+
+La structure thread
+	id : son id, permetant d'acceder à son adresse mémoire
+	liste de tout ses fils : utilisé pour faire une join sur les fils au moment de UserThreadExit
+
+Les thread noyaux
+les threads noyaux sont initialisé en créant une nouvelle structure thread et en la mettant dans l'ordonanceur qui en lancera l'execution dès que leur tour viendra.
+
+do_UserThreadCreate/UserThreadCreate
+	'do_UserThreadCreate' va appeler la fonction 'UserThreadCreate' au niveau noyaux et lui allouer ce dont elle a besoin pour fonctioner correctement
+	initilialisera tous les registres de la thread à 0, le registre compteur à l'adresse de la fonction à exécuter par le thread (et le registre NextPC à fonction+4) et mettra le registre de pile à l'emplacement de l'espace de la pile reservé au thread. Cet emplacement est calculable selon l'identifiant en pile du thread, la taille de la pile, la taille d'une page et le nombre de pages allouées à un thread
+
+StartUserThread
+	C'est cette fonction qui permet de passer des arguments aux threads. Elle prend un entier en paramètre qui représente une adresse vers une structure de type fonctionData laquelle contien :
+		l'adresse de la fonction à éxecuter
+		l'adresse de l'argument de la fonction à éxecuter
+		l'identifiant du thread à créer
+
+do_UserThreadExit
+	cette fonction est utilisée pour tuer le thread courant et nettoyer son espace de travail. Elle attend la fin de tous les threads fils de ce thread avant de terminer son execution en utilisant la fonction UserThreadJoin.
+		!!pas encore fait??
+
+choix d'implementation :
+	comment il est ajouter dans l'ordonanceur (début/fin/milieu...) :
+		fork qui s'en occupe
+	gestion des identifiants de threads: dans l'espace d'adressage (pile)
+		deux identifiants:
+			un identifiant unique: unique parmi tous les threads du processus
+			un identifiant en pile: pour les processus actifs
+				la pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread
+		Pour stocker ces identifiants, nous avons utilisé :
+			Un tableau d'identifiants de pile où chaque case contien un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile
+			un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en pile + 2 (x) :
+				x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé
+				x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais a quitté
+				x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'execution, et sa pile est dans le bloc (x - 2)
+
+tester!
+	création d'un thread
+		tester toutes les possibilités d'échecs (voir plus haut)
+	arreter un thread "proprement"
+		vérifier les fuites mémoires
+		plus dans l'ordonanceur
+		état du parent, et des enfants.
+	effectue correctement une fonction
+		tester avec les fonctions disponible
+	plusieurs threads lancés en même temps?	
+		marche très bien
+	très grand nombre de threads?
+		retourne une erreur
+
+
+
+partie 2:
+	sécurisation des lecture/écriture pour du multithreading
+	*à décrire*
+
+	mémoire en fonction du besoin : allouer des pages si besoin de plus de mémoires -> impossible
+		doit retourner une erreur en cas de dépasement de la mémoire allouer
+		taille de mémoire à définir au départ -> choix de la taille allouer de base
+
+	UserThreadJoin
+		Tableau d'id pour connaitre tous les threads qui ont été crée et leurs états
+		si le thread à attendre est en cours d'éxécution, on appelle Sleep et le thread
+		attendu nous réveilleras.
+		rajout d'une liste de thread en attente.
+
+		structures:
+			vecteur séquentiel contenant la liste des threads en attente et l'identifiant des threads qu'ils attend
+				élement who: Thread qui attend
+				élement forId: identifiant du thread que who doit attendre
+		dès l'appel à join du thread d'id x
+			on ajoute la paire (thread courant,x) à la liste des threads en attente 
+			appel à Sleep pour le thread courant
+				Sleep l'enlevera de la liste d'attente du scheduler
+		à l'appel de Exit par n'importe quel thread d'id y
+			trouver les couples (t,y) ou t est n'importe quel thread
+			remettre t sur la liste d'attente du scheduler			
+			désallouer la structure pour libérer la mémoire
+
+étape 4
