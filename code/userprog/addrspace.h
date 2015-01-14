@@ -15,6 +15,7 @@
 
 #include "copyright.h"
 #include "filesys.h"
+#include "synch.h"
 #include <vector>
 #include "bitmap.h"
 
@@ -65,7 +66,8 @@ class AddrSpace
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant
 		//	les threads en attente associés aux threads qu'ils attendent
-		
+		Lock *addT; //mutex pour l'ajout d'un thread
+		Lock *waitT; //mutex pout la manipulation du vecteur
 
 		int GetFirstFreeThreadStackBlockId(unsigned*); //	premier bloc allouable
 		// dans la pile de taille THREAD_PAGES

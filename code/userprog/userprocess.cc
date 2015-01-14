@@ -42,7 +42,7 @@ int do_UserProcessCreate(char *s){
 	newThread->space = addrSpace;
 	newThread->id = 0;
 	
-	unsigned pid = machine->processCount++;
+	unsigned pid = machine->IncrProcess();
 	
 	newThread->ForkExec(StartUserProcess, 0);
 	currentThread->Yield();
@@ -57,7 +57,7 @@ int do_UserProcessCreate(char *s){
 //
 //---------------------------------------------------------------------
 void do_UserProcessExit(){
-	machine->processCount--; 
+	machine->DecrProcess(); 
 	currentThread->JoinFils();
 	delete currentThread->space;
 	currentThread->Finish();
