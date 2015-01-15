@@ -71,9 +71,11 @@ Machine::Machine(bool debug)
 	pageTable = NULL;
 #endif
 	frameprovider = new FrameProvider(NumPhysPages);
-
+	
 	singleStep = debug;
 	CheckEndian();
+	processCount = 0;
+	pCount = new Lock("pCount");
 }
 
 //----------------------------------------------------------------------
@@ -87,6 +89,7 @@ Machine::~Machine()
 	delete frameprovider;
 	if (tlb != NULL)
 		delete [] tlb;
+	delete pCount;
 }
 
 //----------------------------------------------------------------------
@@ -219,4 +222,21 @@ void Machine::WriteRegister(int num, int value)
 	// DEBUG('m', "WriteRegister %d, value %d\n", num, value);
 	registers[num] = value;
 }
+
+int Machine::IncrProcess(){
+  int id;
+  pCount->Acquire();
+  id = processCount++;
+  pCount->Release();
+  return id;
+}
+
+int Machine::DecrProcess(){
+  int id;
+  pCount->Acquire();
+  id = --processCount;
+  pCount->Release();
+  return id;
+}
+
 

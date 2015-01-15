@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------
 
 void StartUserThread(int data) {
-	//synchconsole->SynchPutString("here");
+
 	FunctionData *function_data = (FunctionData*)data;
 
 	//Initialisation de tous les registres
@@ -55,8 +55,6 @@ void StartUserThread(int data) {
 //---------------------------------------------------------------------
 
 int do_UserThreadCreate(int f, int arg, int exit){
-	// On bloque les interruptions pour rendre ce bout de code atomique
-	//IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
 	Thread *newThread = new Thread("user thread");
 
@@ -69,17 +67,16 @@ int do_UserThreadCreate(int f, int arg, int exit){
 	data->function = f;
 	data->arg = arg;
 	data->exit = exit;
-
-	if (currentThread->AddThread(&(data->id)) < 0){
+	data->id = currentThread->AddThread();
+	
+	if (data->id < 0){
 		return -2;
 	}
+	
 	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);
 
-	// On réactive les interruptions
-	//(void)interrupt->SetLevel (oldLevel);
-
-	return data->id;
+	return newThread->id;
 }
 
 //---------------------------------------------------------------------

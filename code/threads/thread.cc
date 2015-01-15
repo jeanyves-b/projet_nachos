@@ -70,6 +70,8 @@ Thread::~Thread ()
 	ASSERT (this != currentThread);
 	if (stack != NULL)
 		DeallocBoundedArray ((char *) stack, StackSize * sizeof (int));
+	fils.clear();
+	std::vector<int>().swap(fils);
 }
 
 //----------------------------------------------------------------------
@@ -154,35 +156,40 @@ Thread::ForkExec (VoidFunctionPtr func, int arg)
 
 //----------------------------------------------------------------------
 // Thread::AddThread
-//      Ajoute le thread ayant l'identifiant "created" à l'espace 
-//		d'adresse, et à la liste des "enfants" du thread.
-//		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
-//		impossible d'ajouter le thread à l'espace d'adressage).
+//      Ajoute le thread à l'espace d'adressage et à la liste des 
+//		"enfants" du thread en cours.
+//
+//		Retourne l'identifiant du thread créé en cas de succès, 
+//		code d'erreur sinon (voir codes AddrSpace::AddThread).
 //
 //----------------------------------------------------------------------
 
-int Thread::AddThread(unsigned *created_thread_id){
-	if (this->space->AddThread(created_thread_id) < 0)
-		return -1;
-	this->fils.push_back(*created_thread_id);
+int Thread::AddThread(){
+	int created_id = this->space->AddThread();
+	
+	if (created_id < 0)
+		return created_id;
 
-	return 0;
+	this->fils.push_back(id);
+
+	return created_id;
 }
 
 //----------------------------------------------------------------------
 // Thread::Join
 //      Attends la fin du thread ayant pour identifiant "user_thread_id"
 //		, et l'enlève de la liste des fils s'il y est à la fin.
+//
 //		Retourne 0 en cas de succès, ou un code d'erreur (voir 
 //		erreur AddrSpace::JoinThread).
 //
 //----------------------------------------------------------------------
 
-int Thread::Join(unsigned user_thread_id){
-	int jerror;
-	jerror = this->space->JoinThread(user_thread_id);
-	if (jerror <0){
-		return jerror;
+int Thread::Join(int user_thread_id){
+	int join_error;
+	join_error = this->space->JoinThread(user_thread_id);
+	if (join_error <0){
+		return join_error;
 	}
 	for (unsigned i=0; i<fils.size(); i++){
 		if (fils.at(i) == user_thread_id){
@@ -197,6 +204,7 @@ int Thread::Join(unsigned user_thread_id){
 // Thread::JoinFils
 //      Attends la fin de tous les threads "fils". Ne retourne que si
 //		tous les threads fils se sont terminés.
+//
 //		Retourne 0 en cas de succès, ou un code d'erreur (voir 
 //		erreur AddrSpace::JoinThread).
 //
@@ -204,6 +212,7 @@ int Thread::Join(unsigned user_thread_id){
 
 int Thread::JoinFils(){
 	int jerror;
+	
 	while (!this->fils.empty()){
 		jerror = this->space->JoinThread(fils.at(0));
 		if (jerror <0){

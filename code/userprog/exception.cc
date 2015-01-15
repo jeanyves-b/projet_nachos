@@ -134,31 +134,33 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-						if(machine->processCount==0){
-						  DEBUG('a', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+						currentThread->JoinFils();
+						if(machine->DecrProcess() < 0){
+						  DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 						  interrupt->Halt();
 						} else {
-							do_UserProcessExit();
+							DEBUG('r', "Exiting process with return value %d.\n",machine->ReadRegister(8));
+							currentThread->Finish();
 						}
 					    break;
 				      }
 			case SC_PutChar: {
-						 DEBUG('a', "Writing character on standard output, initiated by user program.\n");
+						 DEBUG('c', "Writing character on standard output, initiated by user program.\n");
 						 synchconsole->SynchPutChar(machine->ReadRegister(4));
 						 break;
 					 }
 			case SC_SynchPS:{ //SynchPutString
-						DEBUG('a', "Writing a string on standard output, initiated by user program.\n");
+						DEBUG('c', "Writing a string on standard output, initiated by user program.\n");
 						writeString(machine->ReadRegister(4));
 						break;
 					}	
 			case SC_SynchGC: { //SynchGetChar
-						 DEBUG('a', "reading character on standard intput, initiated by user program.\n");
+						 DEBUG('c', "reading character on standard intput, initiated by user program.\n");
 						 machine->WriteRegister(2,(int)synchconsole->SynchGetChar());
 						 break;
 					 }
 			case SC_SynchGS: { //SynchGetString
-						 DEBUG('a', "reading string on standard intput, initiated by user program.\n");
+						 DEBUG('c', "reading string on standard intput, initiated by user program.\n");
 						 char* buf = new char[MAX_STRING_SIZE];
 						 if (machine->ReadRegister(5) > 0) {
 							 unsigned chars_nb = (unsigned) machine->ReadRegister(5);
@@ -190,30 +192,30 @@ ExceptionHandler (ExceptionType which)
 						 break; 
 					 }
 			case SC_SynchPI: { //SynchPutInt
-						 DEBUG('a', "writing signed integer on standard output, initiated by user program.\n");
+						 DEBUG('c', "writing signed integer on standard output, initiated by user program.\n");
 						 synchconsole->SynchPutInt(machine->ReadRegister(4));
 						 break;
 					 }
 			case SC_SynchGI: { //SynchGetInt
-						 DEBUG('a', "reading signed integer from standard intput, initiated by user program.\n");
+						 DEBUG('c', "reading signed integer from standard intput, initiated by user program.\n");
 						 int n;
 						 synchconsole->SynchGetInt(&n);
 						 machine->WriteMem(machine->ReadRegister(4) ,4, n);
 						 break;
 					 }
 			case SC_UserThC: { //UserThreadCreate
-						 DEBUG('a', "Creating user thread, initiated by user program.\n");
+						 DEBUG('t', "Creating user thread, initiated by user program.\n");
 						 machine->WriteRegister(2, do_UserThreadCreate(machine->ReadRegister(4), machine->ReadRegister(5), machine->ReadRegister(8)));
 						 break;
 					 }
 			case SC_UserThE: { //UserThreadExit
-						 DEBUG('a', "Exiting current thread, initiated by user program.\n");
+						 DEBUG('t', "Exiting current thread, initiated by user program.\n");
 						 do_UserThreadExit();
 						 break;
 					 }
 			case SC_UserThJ: { //UserThreadJoin
-						 DEBUG('a', "Joining a thread, initiated by user program.\n");
-						 currentThread->Join(machine->ReadRegister(4));
+						 DEBUG('t', "Joining a thread, initiated by user program.\n");
+						 machine->WriteRegister(2, currentThread->Join(machine->ReadRegister(4)));
 						 break;
 					 }
 			case SC_ForkExec:{ //ForkExec

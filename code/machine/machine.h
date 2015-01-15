@@ -25,6 +25,7 @@
 #include "utility.h"
 #include "translate.h"
 #include "disk.h"
+#include "synch.h"
 #include "frameprovider.h"
 
 // Definitions related to the size, and format of user memory
@@ -33,7 +34,7 @@
 // the disk sector size, for
 // simplicity
 
-#define NumPhysPages    128
+#define NumPhysPages    512
 #define MemorySize 	(NumPhysPages * PageSize)
 #define TLBSize		4		// if there is a TLB, make it small
 
@@ -184,14 +185,17 @@ class Machine {
 		unsigned int pageTableSize;
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
-		unsigned processCount; //	compteur de processus lancés par la machine
+		 //	compteur de processus lancés par la machine
+		 int IncrProcess();
+		 int DecrProcess();
 
 	private:
 		bool singleStep;		// drop back into the debugger after each
 		// simulated instruction
 		int runUntilTime;		// drop back into the debugger when simulated
 		// time reaches this value
-		
+		unsigned processCount;
+		Lock *pCount;
 };
 
 extern void ExceptionHandler(ExceptionType which);
