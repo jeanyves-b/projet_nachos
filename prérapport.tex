@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[français]{babel}
+\usepackage[french]{babel}
 
 \begin{document}
 
@@ -27,7 +27,7 @@
 	\begin{description}
 		\item{NOM :} GetChar
 		\item{SIGNATURE : } char SynchGetChar()
-		\item{DESCRIPTION :} fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.\newline
+		\item{DESCRIPTION :}{fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.}
 		\item{VALEUR DE RETOUR : } retourne le caractère lu.
 	\end{description}
 	\begin{description}
@@ -112,8 +112,8 @@
 
 \section{Choix d'implémentation}
 	\subsection{Appels système}
-	    {Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulié.
-		sécurisation des lecture/écriture pour le multithreading
+	    {Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulier.
+	    sécurisation des lecture/écriture pour le multithreading
 		*à décrire*}
 	\subsection{Threads}
 		\subsubsection{La structure thread}
@@ -122,15 +122,17 @@
 				\item liste de tout ses fils : utilisé pour faire une join sur les fils au moment de UserThreadExit
 			\end{itemize}
 		\subsubsection{Gestion des identifiants de threads et de la pile}
-			deux identifiants:
+			{Deux identifiants:}
 			\begin{itemize}
-				\item un identifiant unique: unique parmi tous les threads du processus
-				\item un identifiant en pile : pour les processus actifs
-				La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Pour stocker ces identifiants, nous avons utilisé un tableau d'identifiants de pile où chaque case contien un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en pile + 2 (x) où si
+				\item{un identifiant unique: unique parmi tous les threads du processus.}
+				\item{un identifiant en pile : pour les processus actifs.}
+			\end{itemize}
+			{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Pour stocker ces identifiants, nous avons utilisé un tableau d'identifiants de pile où chaque case contient un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). }
+			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do\_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en $pile + 2 (x)$ où si.}
 				\begin{itemize}
-					\item x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé.
-					\item x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais s'est terminé.
-					\item x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'execution, et sa pile est dans le bloc (x - 2)
+					\item{x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé.}
+					\item{x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais s'est terminé.}
+					\item{x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'exécution, et sa pile est dans le bloc (x - 2)}
 				\end{itemize}
 		\subsubsection{Implementation du join}
 			structures : vecteur séquentiel contenant la liste des threads en attente et l'identifiant des threads qu'ils attend
