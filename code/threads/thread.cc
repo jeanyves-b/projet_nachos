@@ -65,7 +65,7 @@ Thread::Thread (const char *threadName)
 
 Thread::~Thread ()
 {
-	DEBUG ('t', "Deleting thread \"%s %d\"\n", name, id);
+	DEBUG ('t', "Deleting thread \"%s %d (pid: %d)\"\n", name, id, space->pid);
 
 	ASSERT (this != currentThread);
 	if (stack != NULL)
@@ -97,9 +97,6 @@ Thread::~Thread ()
 	void
 Thread::Fork (VoidFunctionPtr func, int arg)
 {
-	DEBUG ('t', "Forking thread \"%s %d\" with func = 0x%x, arg = %d\n",
-			name, id, (int) func, arg);
-
 	StackAllocate (func, arg);
 
 #ifdef USER_PROGRAM
@@ -111,6 +108,9 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 
 	// LB: Observe that currentThread->space may be NULL at that time.
 	this->space = currentThread->space;
+	
+	DEBUG ('t', "Forking thread \"%s %d (pid: %d)\", with func = 0x%x, arg = %d\n",
+			name, id, space->pid, (int) func, arg);
 
 #endif // USER_PROGRAM
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
@@ -143,8 +143,8 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 	void
 Thread::ForkExec (VoidFunctionPtr func, int arg)
 {
-	DEBUG ('t', "Forking thread \"%s %d\" with func = 0x%x, arg = %d\n",
-			name, id, (int) func, arg);
+	DEBUG ('t', "Forking process main thread \"%s %d (pid: %d)\", with func = 0x%x, arg = %d\n",
+			name, id, space->pid, (int) func, arg);
 
 	StackAllocate (func, arg);
 
@@ -165,6 +165,7 @@ Thread::ForkExec (VoidFunctionPtr func, int arg)
 //----------------------------------------------------------------------
 
 int Thread::AddThread(){
+	DEBUG ('t', "Adding a son to thread \"%s %d (pid: %d)\"\n", name, id, space->pid);
 	int created_id = this->space->AddThread();
 	
 	if (created_id < 0)
@@ -186,6 +187,7 @@ int Thread::AddThread(){
 //----------------------------------------------------------------------
 
 int Thread::Join(int user_thread_id){
+	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is waiting for thread #%d\n", name, id, space->pid, user_thread_id);
 	int join_error;
 	join_error = this->space->JoinThread(user_thread_id);
 	if (join_error <0){
@@ -211,8 +213,8 @@ int Thread::Join(int user_thread_id){
 //----------------------------------------------------------------------
 
 int Thread::JoinFils(){
+	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is waiting for all its children\n", name, id, space->pid);
 	int jerror;
-	
 	while (!this->fils.empty()){
 		jerror = this->space->JoinThread(fils.at(0));
 		if (jerror <0){
@@ -270,7 +272,7 @@ Thread::Finish ()
 	(void) interrupt->SetLevel (IntOff);
 	ASSERT (this == currentThread);
 
-	DEBUG ('t', "Finishing thread \"%s %d\"\n", getName (), id);
+	DEBUG ('t', "Finishing thread \"%s %d (pid: %d)\"\n", getName(), id, space->pid);
 
 	// LB: Be careful to guarantee that no thread to be destroyed 
 	// is ever lost 
@@ -308,7 +310,7 @@ Thread::Yield ()
 
 	ASSERT (this == currentThread);
 
-	DEBUG ('t', "Yielding thread \"%s %d\"\n", getName (), id);
+	DEBUG ('t', "Yielding thread \"%s %d (pid: %d)\"\n", getName(), id, space->pid);
 
 	nextThread = scheduler->FindNextToRun ();
 	if (nextThread != NULL)
@@ -346,7 +348,7 @@ Thread::Sleep ()
 	ASSERT (this == currentThread);
 	ASSERT (interrupt->getLevel () == IntOff);
 
-	DEBUG ('t', "Sleeping thread \"%s %d\"\n", getName (), id);
+	DEBUG ('t', "Sleeping thread \"%s %d (pid: %d)\"\n", getName(), id, space->pid);
 
 	status = BLOCKED;
 	while ((nextThread = scheduler->FindNextToRun ()) == NULL)

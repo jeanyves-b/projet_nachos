@@ -112,7 +112,7 @@ class Thread
 		}
 		void Print ()
 		{
-			printf ("%s id: %d space: %p, ", name, id, space);
+			printf ("%s id: %d (pid: %d), ", name, id, space->pid);
 		}
 
 	private:
