@@ -2,7 +2,7 @@
 
 // Programme de tester qui lance deux processus en fork
 /* void test(void *a) {
-	SynchPutString("thread");
+	PutString("thread");
 } */
 
 int main()

@@ -1,18 +1,26 @@
+%% Installer les paquets texlive-lang-french et texlive-fonts-recommended pour pouvoir compiler ce document
 \documentclass{article}
-
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ left=20mm,
+ right=20mm,
+ top=30mm,
+ bottom=40mm,
+ }
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
 
 \begin{document}
 
-\title {Pré-Rapport Projet NachOS\newline M1 Informatique}
+\title {(Pré-)Rapport Projet NachOS \\ M1 Informatique}
 \author{Amine Ait-Mouloud, Sébastien Avril,\\* Jean-Yves Bottraud, El Hadji Malick Diagne}
 \date{Janvier 2015}
 \maketitle
 
 \tableofcontents
-
+\newpage
 \section{Fonctionnalités du noyau}
 	Voici les partie que nous avons réussi à implémenter jusque là :
 	\begin{itemize}
@@ -23,49 +31,80 @@
 	Nous somme actuellement entrain de finr de débugger dette dernière partie.
 
 \section{Spécification des fonctions utilisateur}
-	\subsection{Appels système}
+	\subsection{Console}
 	\begin{description}
-		\item{NOM :} GetChar
-		\item{SIGNATURE : } char SynchGetChar()
-		\item{DESCRIPTION :}{fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.}
-		\item{VALEUR DE RETOUR : } retourne le caractère lu.
+		\item{SIGNATURE : } \texttt{char GetChar()}
+		\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans la cas de la fin de fichier.}
+		\item{VALEUR RENVOYÉE : } Renvoie un \texttt{char} qui représente le caractère lu, ou \texttt{EOF} en cas de fin de fichier ou d'erreur.
 	\end{description}
+	\vspace{2.5mm}
 	\begin{description}
-		\item{NOM : } GetString
-		\item{SIGNATURE : } void SynchGetString(char *s, int n)
-		\item{DESCRIPTION : } fonction utilisateur servant à récuperer une chaine de caractère. Elle est basé sur la fonction précédente qu'elle répéte au plus n fois, en stockant les caractères ainsi récupéré dans un char* passé en argument.
+		\item{SIGNATURE : } \texttt{void GetString(char *s, int n)}
+		\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaine récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
 	\end{description}
+	\vspace{2.5mm}
 	\begin{description}
-		\item{NOM : } PutChar
-		\item{SIGNATURE : } void SynchPutChar(const char ch)
-		\item{DECRITPION : } fonction utilisateur servant à afficher un caractère. Basé sur la fonction PutChar de la console sécurisé avec un sémaphore de façon à être sur que l'on attend bien que l'écriture soit finie avant de continuer le programme.
+	\item{SIGNATURE : } \texttt{int GetInt()}
+	\item{DESCRIPTION : } Lis une chaîne de caractères depuis l'entrée standard selon les mêmes règles que \texttt{GetString}, la convertit en entier naturel, et retourne ce dernier.
+	\item{VALEUR RENVOYÉE : } Entier naturel lu depuis l'entrée standard.
 	\end{description}
+	\vspace{2.5mm}
 	\begin{description}
-		\item{NOM : } PutString
-		\item{SIGNATURE : } void SynchPutString(const char *s)
-		\item{DESCRIPTION : } fonction utilisateur servant à afficher une chaîne de caractère à l'écran, cette fonction utilise la fonction précédente pour afficher une chaîne caractère par caractère.
+		\item{SIGNATURE : } \texttt{void PutChar(const char ch)}
+		\item{DECRITPION : } Écrit le caractère \texttt{ch} sur la sortie standard. 
 	\end{description}
-
-	\subsection{threads}
+	\vspace{3mm}
 	\begin{description}
-		\item{NOM : } UserThreadCreate
-		\item{SIGNATURE : } int UserThreadCreate(void *f(void*), void* arg)
-		\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument arg.
-		\item{VALEUR DE RETOUR : } identifiant du thread en cas de succès, code d'erreur négatif sinon.
+		\item{SIGNATURE : } \texttt{void PutString(const char *s)}
+		\item{DESCRIPTION : } Écrit la chaine présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaine sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
 	\end{description}
+	\vspace{2.5mm}
 	\begin{description}
-		\item{NOM : } UserThreadExit
-		\item{SIGNATURE : } void UserThreadExit();
-		\item{DESCRIPTION : } cette fonction est utilisée pour tuer le thread courant et nettoyer son espace de travail. Elle attend la fin de tous les threads fils de ce thread avant de terminer son exécution.
+	\item{SIGNATURE : } \texttt{void PutInt(int i)}
+	\item{DESCRIPTION : } Convertit l'entier naturel \texttt{i} en chaîne de caractères et l'affiche sur la sortie standard selon les mêmes régèles que \texttt{PutString}.
 	\end{description}
-	\begin{description}
-		\item{NOM : } UserThreadJoin
-		\item{SIGNATURE : } int UserThreadJoin(int id)
-		\item{DESCRIPTION : } Chaque thread contien un tableau d'id pour pouvoir retrouve facilement tous les threads qui ont été crée et leurs états. Si le thread à attendre est en cours d'exécution, on appelle Sleep et le thread attendu nous réveilleras. Pour faire ceci, nous avons dût rajouter une liste de thread en attente.(pas forcément au bon endroit)
-		\item{VALEUR DE RETOUR : } à completer
-	\end{description}
-
+	\subsection{Threads}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int UserThreadCreate(void *f(void*), void* arg)}
+			\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument arg. L'identifiant du thread est unique tout au long de l'exécution du processus. \\
+			Le thread créé est \emph{de facto} dans le même processus que le thread dans lequel il a été créé, et est considéré comme "fils" de celui-ci. \\
+			Lorsqu'un thread termine (même le thread \texttt{main}), il attend la terminaison de tous ses "fils".
+			\item{VALEUR RENVOYÉE : } Identifiant du thread en cas de succès, code d'erreur négatif sinon:
+				\subitem{\texttt{-1} : } Raison inconnue.
+				\subitem{\texttt{-2} : } Pas assez d'espace dans la pile du processus.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void UserThreadExit()}
+			\item{DESCRIPTION : } Termine le thread en cours d'éxecution et libère son emplacement dans la pile. Elle attend la fin de tous les threads fils de ce thread avant de terminer son exécution. Si c'est le dernier thread du processus, ce dernier se termine aussi et les ressources qu'il utilise sont libérées.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int UserThreadJoin(int id)}
+			\item{DESCRIPTION : } Attend que le thread ayant pour identifiant \texttt{id} se termine, et si le thread s'est déjà terminé la fonction revient de suite. Plusieurs threads peuvent attendre un même thread étant donné que l'identifiant des threads est unique dans le contexte du processus.
+			\item{VALEUR RENVOYÉE : } \texttt{0} en cas de succès, code d'erreur négatif sinon:
+				\subitem{\texttt{-1}, \texttt{-2} : } Identifiant fourni introuvable (jamais créé ou négatif).
+				\subitem{\texttt{-3} : } Tentative d'attendre le thread en cours d'exécution.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int GetTid()}
+			\item{DESCRIPTION : Renvoie le l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
+		\end{description}
 	\subsection{Mémoire virtuelle}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int ForkExec(char *path)}
+			\item{DESCRIPTION : } Crée un nouveau processus dans un environnement vide, et y exécute le fichier exécutable dont le nom est pointé par \texttt{path}.
+			\item{VALEUR RENVOYÉE : } Identifiant du processus créé en cas de succès, code d'erreur négatif sinon:
+				\subitem{\texttt{-1} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
+				\subitem{\texttt{-2}, \texttt{-4} : } Impossible de créer un environnement d'exécution.
+				\subitem{\texttt{-3} : } Pas assez de pages libres en mémoire pour créer l'espace d'adressage du processus.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int GetPid()}
+			\item{DESCRIPTION : Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours. } 
+		\end{description}
 
 \section{Test}
 	\subsection{Organisation}
@@ -77,7 +116,7 @@
 		{Pour lancer les tests, ils suffit d'exécuter le script testpart.sh situer dans le dossier code/test}
 
 	\subsection{Tests effectués et comportements}
-		\subsubsection{Appel système via synchconsole}
+		\subsubsection{Console}
 			\begin{itemize}
 				\item une chaine de 1 caractères 			validé : écrit le caractère	correctement à l'écran ou bien dans le fichier de destination
 				\item utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
@@ -105,13 +144,13 @@
 				\item lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
 			\end{itemize}
 
-		\subsubsection{Virtual memory}
+		\subsubsection{Mémoire virtuelle}
 			\begin{itemize}
 				\item 
 			\end{itemize}
 
 \section{Choix d'implémentation}
-	\subsection{Appels système}
+	\subsection{Console}
 	    {Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulier.
 	    sécurisation des lecture/écriture pour le multithreading
 		*à décrire*}
@@ -128,7 +167,7 @@
 				\item{un identifiant en pile : pour les processus actifs.}
 			\end{itemize}
 			{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Pour stocker ces identifiants, nous avons utilisé un tableau d'identifiants de pile où chaque case contient un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). }
-			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en $pile + 2 (x)$ où si.}
+			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do\_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en pile + 2 (x) où si.}
 				\begin{itemize}
 					\item{x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé.}
 					\item{x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais s'est terminé.}

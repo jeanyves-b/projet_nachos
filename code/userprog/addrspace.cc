@@ -444,7 +444,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 int
 AddrSpace::JoinThread (int user_thread_id) {
 
-	if(user_thread_id > threads_created){
+	if(user_thread_id < 0 || user_thread_id > threads_created){
 		return -1;
 	}
 	if (threads_stack_id[user_thread_id] == 0){

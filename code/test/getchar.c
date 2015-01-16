@@ -1,16 +1,16 @@
 #include "syscall.h"
 
 /*
- *  Programme de test de l'appel système SynchGetChar
+ *  Programme de test de l'appel système GetChar
  */
 
 int main()
 {
 	char c;
 	while (c!='q') {
-		c = SynchGetChar();
+		c = GetChar();
 		if (c!='\n') {
-			SynchPutString("Le caractère entré est: ");
+			PutString("Le caractère entré est: ");
 			PutChar(c);
 			PutChar('\n');
 		}

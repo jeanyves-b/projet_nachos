@@ -31,14 +31,14 @@ int main()
 	//~ if (id >= 0){
 		error = UserThreadJoin(id); 
 		if (error < 0){
-			SynchPutInt(id);
-			SynchPutInt(error);
+			PutInt(id);
+			PutInt(error);
 		}
 	//~ }
 	//~ if (id2 >= 0){
 		error = UserThreadJoin(id2);
 		if (error < 0){
-			SynchPutString("erreur Thread 2");
+			PutString("erreur Thread 2");
 		}
 	//~ } 
 	return 0;
