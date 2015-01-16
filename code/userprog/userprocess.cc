@@ -54,4 +54,14 @@ int do_UserProcessCreate(char *s){
 	
 	return addrSpace->pid;
 }
-
+void do_UserProcessExit(){
+	currentThread->JoinFils();
+	if(machine->DecrProcess() == 0){
+		DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+		interrupt->Halt();
+	} else {
+		DEBUG('r', "Exiting process with return value %d.\n",machine->ReadRegister(8));
+		currentThread->Finish();
+	}
+	ASSERT(FALSE);
+}

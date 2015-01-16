@@ -128,7 +128,7 @@
 				\item{un identifiant en pile : pour les processus actifs.}
 			\end{itemize}
 			{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Pour stocker ces identifiants, nous avons utilisé un tableau d'identifiants de pile où chaque case contient un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). }
-			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do\_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en $pile + 2 (x)$ où si.}
+			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en $pile + 2 (x)$ où si.}
 				\begin{itemize}
 					\item{x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé.}
 					\item{x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais s'est terminé.}

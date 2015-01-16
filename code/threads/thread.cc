@@ -108,7 +108,6 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 
 	// LB: Observe that currentThread->space may be NULL at that time.
 	this->space = currentThread->space;
-	
 	DEBUG ('t', "Forking thread \"%s %d (pid: %d)\", with func = 0x%x, arg = %d\n",
 			name, id, space!=NULL?space->pid:-1, (int) func, arg);
 
@@ -213,6 +212,7 @@ int Thread::Join(int user_thread_id){
 //----------------------------------------------------------------------
 
 int Thread::JoinFils(){
+
 	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is waiting for all its children\n", name, id, space!=NULL?space->pid:-1);
 	int jerror;
 	while (!this->fils.empty()){
@@ -271,7 +271,6 @@ Thread::Finish ()
 {
 	(void) interrupt->SetLevel (IntOff);
 	ASSERT (this == currentThread);
-
 	DEBUG ('t', "Finishing thread \"%s %d (pid: %d)\"\n", getName(), id, space!=NULL?space->pid:-1);
 
 	// LB: Be careful to guarantee that no thread to be destroyed 
@@ -309,7 +308,6 @@ Thread::Yield ()
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
 	ASSERT (this == currentThread);
-
 	DEBUG ('t', "Yielding thread \"%s %d (pid: %d)\"\n", getName(), id, space!=NULL?space->pid:-1);
 
 	nextThread = scheduler->FindNextToRun ();
@@ -347,7 +345,6 @@ Thread::Sleep ()
 
 	ASSERT (this == currentThread);
 	ASSERT (interrupt->getLevel () == IntOff);
-
 	DEBUG ('t', "Sleeping thread \"%s %d (pid: %d)\"\n", getName(), id, space!=NULL?space->pid:-1);
 
 	status = BLOCKED;

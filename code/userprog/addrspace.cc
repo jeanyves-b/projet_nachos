@@ -127,8 +127,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 		stack_blocs[j] = false;
 		
 	threads_created = 0; 
-	addT = new Lock("addT");
-	waitT = new Lock("waitT");
+
 	
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
@@ -172,7 +171,8 @@ AddrSpace::AddrSpace (OpenFile *executable)
             noffH.initData.inFileAddr, pageTable, numPages); 
 		}
 
-	
+	addT = new Lock("add");
+	waitT = new Lock("waitT");
 
 	
 
@@ -307,7 +307,7 @@ AddrSpace::AddThread ()
 
 	int created_thread_id = threads_created++;
 	threads_stack_id[created_thread_id] = id_in_stack;
-	addT->ReleaseByCurrentThread(); // fin section critique
+	addT->ReleaseByCurrentThread();  // fin section critique
 	
 	stack_blocs[id_in_stack-2] = true;
 
@@ -338,10 +338,10 @@ AddrSpace::RemoveThread (int unique_thread_id)
 	//	Thread pas en cours d'exécution ou identifiant en pile invalide
 	if (threads_stack_id[unique_thread_id] < 2 || threads_stack_id[unique_thread_id] >= MaxRunningThreads)
 		return -2;
-		
+	threads_stack_id[unique_thread_id] = 1;	
+	RunWaitingThread(unique_thread_id);
 	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
-	threads_stack_id[unique_thread_id] = 1;
-
+	
 	return 0;
 
 }
@@ -356,6 +356,8 @@ AddrSpace::RemoveThread (int unique_thread_id)
 
 void AddrSpace::RunWaitingThread(int unique_thread_id){
 	unsigned cpt = 0;
+	
+
 	waitT->AcquireByCurrentThread();
 	while (cpt < waiting_threads.size())
 		if (waiting_threads.at(cpt)->forId == unique_thread_id) {

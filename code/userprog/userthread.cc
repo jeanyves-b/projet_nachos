@@ -88,7 +88,7 @@ int do_UserThreadCreate(int f, int arg, int exit){
 //---------------------------------------------------------------------
 void do_UserThreadExit(){
 	currentThread->JoinFils();
-	currentThread->space->RunWaitingThread(currentThread->id);
+	ASSERT(currentThread->space->RemoveThread(currentThread->id) >= 0);
 	currentThread->Finish();
 }
 

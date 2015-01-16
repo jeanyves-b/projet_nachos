@@ -135,14 +135,8 @@ ExceptionHandler (ExceptionType which)
 				      }
 			case SC_Exit: {
 						DEBUG ('r', "Thread \"%s %d (pid: %d)\" called Exit\n",currentThread->getName(), currentThread->id, currentThread->space->pid);
-						currentThread->JoinFils();
-						if(machine->DecrProcess() < 0){
-						  DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
-						  interrupt->Halt();
-						} else {
-							DEBUG('r', "Exiting process with return value %d.\n",machine->ReadRegister(8));
-							currentThread->Finish();
-						}
+						do_UserProcessExit();
+						
 					    break;
 				      }
 			case SC_PutChar: {

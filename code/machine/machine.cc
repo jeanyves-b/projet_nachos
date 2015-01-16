@@ -74,7 +74,7 @@ Machine::Machine(bool debug)
 	
 	singleStep = debug;
 	CheckEndian();
-	processCount = 0;
+	processCount = 1;
 	pCount = new Lock("pCount");
 }
 
