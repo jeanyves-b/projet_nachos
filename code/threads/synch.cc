@@ -35,6 +35,7 @@
 
 Semaphore::Semaphore (const char *debugName, int initialValue)
 {
+	DEBUG('s', "Creating Semaphore \"%s\" with value %d\n", debugName, initialValue);
 	name = debugName;
 	value = initialValue;
 	queue = new List;
@@ -48,6 +49,7 @@ Semaphore::Semaphore (const char *debugName, int initialValue)
 
 Semaphore::~Semaphore ()
 {
+	DEBUG('s', "Destroying Semaphore \"%s\"\n", name);
 	delete queue;
 }
 
@@ -64,6 +66,7 @@ Semaphore::~Semaphore ()
 	void
 Semaphore::P ()
 {
+	DEBUG('s', "Wait request on Semaphore \"%s\" who has value %d\n", name, value);
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);	// disable interrupts
 
 	while (value == 0)
@@ -75,6 +78,7 @@ Semaphore::P ()
 	// consume its value
 
 	(void) interrupt->SetLevel (oldLevel);	// re-enable interrupts
+	DEBUG('s', "Successful wait request on Semaphore \"%s\" who has now value %d\n", name, value);
 }
 
 //----------------------------------------------------------------------
@@ -88,6 +92,7 @@ Semaphore::P ()
 	void
 Semaphore::V ()
 {
+	DEBUG('s', "Post request on Semaphore \"%s\" who has value %d\n", name, value);
 	Thread *thread;
 	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
@@ -96,6 +101,7 @@ Semaphore::V ()
 		scheduler->ReadyToRun (thread);
 	value++;
 	(void) interrupt->SetLevel (oldLevel);
+	DEBUG('s', "Post request successful on Semaphore \"%s\" who has now value %d\n", name, value);
 }
 
 // Dummy functions -- so we can compile our later assignments 
@@ -103,37 +109,47 @@ Semaphore::V ()
 // the test case in the network assignment won't work!
 Lock::Lock (const char *debugName)
 {
+	DEBUG('l', "Creating lock %s\n", debugName);
 	name = debugName;
 	lock = new Semaphore("mutex",1);
 }
 
 Lock::~Lock ()
 {
+	DEBUG('l', "Destroying lock %s\n", name);
 	delete lock;
 }
 	void
 Lock::Acquire ()
-{		
+{	
+	DEBUG('l', "Trying to acquire lock %s\n", name);
 	lock->P();
+	DEBUG('l', "Lock \"%s\" successfully acquired\n", name);
 }
 	void
 Lock::Release ()
 {
 	lock->V();
+	DEBUG('l', "Lock \"%s\" successfully released\n", name);
 }
 	void
 Lock::AcquireByCurrentThread ()
 {		
+	DEBUG('l', "Trying to acquire lock \"%s\" by thread %d pid %d \n", name, tid, pid);
 	lock->P();
 	tid = currentThread->id;
 	pid = currentThread->space->pid;
+	DEBUG('l', "Lock \"%s\" successfully acquired by thread %d pid %d \n", name, tid, pid);
 }
 	void
 Lock::ReleaseByCurrentThread ()
 {
+	DEBUG('l', "Trying to release lock \"%s\" by thread %d pid %d \n", name, tid, pid);
 	if (isHeldByCurrentThread()){
 		lock->V();
+		DEBUG('l', "Lock \"%s\" successfully released by thread %d pid %d \n", name, tid, pid);
 	}
+	DEBUG('l', "Lock \"%s\" is not held by thread %d pid %d to be released\n", name, tid, pid);
 }
 
 bool Lock::isHeldByCurrentThread(){
