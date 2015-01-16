@@ -54,7 +54,7 @@ Scheduler::~Scheduler ()
 Scheduler::ReadyToRun (Thread * thread)
 {
 
-	DEBUG ('t', "Putting thread %s %d (pid: %d) on ready list.\n", thread->getName (), thread->id, thread->space!=NULL?thread->space->pid:-1);
+	DEBUG ('t', "Putting thread %s %d (pid: %d) on ready list.\n", thread->getName (), thread->id, thread->space!=NULL?thread->space->pid:0);
 
 	thread->setStatus (READY);
 	readyList->Append ((void *) thread);
@@ -111,7 +111,7 @@ Scheduler::Run (Thread * nextThread)
 	currentThread = nextThread;	// switch to the next thread
 	currentThread->setStatus (RUNNING);	// nextThread is now running
 	DEBUG ('t', "Switching from thread  \"%s %d (pid: %d)\" to thread \"%s %d (pid: %d)\"\n",
-			oldThread->getName (), oldThread->id, oldThread->space!=NULL?oldThread->space->pid:-1, nextThread->getName (), nextThread->id, nextThread->space!=NULL?nextThread->space->pid:-1);
+			oldThread->getName (), oldThread->id, oldThread->space!=NULL?oldThread->space->pid:0, nextThread->getName (), nextThread->id, nextThread->space!=NULL?nextThread->space->pid:0);
 
 	// This is a machine-dependent assembly language routine defined 
 	// in switch.s.  You may have to think
@@ -119,7 +119,7 @@ Scheduler::Run (Thread * nextThread)
 	// of view of the thread and from the perspective of the "outside world".
 
 	SWITCH (oldThread, nextThread);
-	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->space!=NULL?currentThread->space->pid:-1);
+	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->space!=NULL?currentThread->space->pid:0);
 
 	// If the old thread gave up the processor because it was finishing,
 	// we need to delete its carcass.  Note we cannot delete the thread
@@ -127,7 +127,7 @@ Scheduler::Run (Thread * nextThread)
 	// point, we were still running on the old thread's stack!
 	if (threadToBeDestroyed != NULL)
 	{	
-		
+
 		if (threadToBeDestroyed->space->StackIsEmpty()) {
 			delete threadToBeDestroyed->space;
 		}

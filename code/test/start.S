@@ -114,50 +114,50 @@ PutChar:
 	j	$31
 	.end PutChar
 	
-	.globl SynchPutString
-	.ent	SynchPutString
-SynchPutString:
-	addiu $2,$0,SC_SynchPS
+	.globl PutString
+	.ent	PutString
+PutString:
+	addiu $2,$0,SC_PutString
 	syscall
 	j	$31
-	.end SynchPutString
+	.end PutString
 	
-	.globl SynchGetChar
-	.ent	SynchGetChar
-SynchGetChar:
-	addiu $2,$0,SC_SynchGC
+	.globl GetChar
+	.ent	GetChar
+GetChar:
+	addiu $2,$0,SC_GetChar
 	syscall
 	j	$31
-	.end SynchGetChar
+	.end GetChar
 	
-	.globl SynchGetString
-	.ent	SynchGetString
-SynchGetString:
-	addiu $2,$0,SC_SynchGS
+	.globl GetString
+	.ent	GetString
+GetString:
+	addiu $2,$0,SC_GetString
 	syscall
 	j	$31
-	.end SynchGetString
+	.end GetString
 	
-	.globl SynchPutInt
-	.ent	SynchPutInt
-SynchPutInt:
-	addiu $2,$0,SC_SynchPI
+	.globl PutInt
+	.ent	PutInt
+PutInt:
+	addiu $2,$0,SC_PutInt
 	syscall
 	j	$31
-	.end SynchPutInt
+	.end PutInt
 	
-	.globl SynchGetInt
-	.ent	SynchGetInt
-SynchGetInt:
-	addiu $2,$0,SC_SynchGI
+	.globl GetInt
+	.ent	GetInt
+GetInt:
+	addiu $2,$0,SC_GetInt
 	syscall
 	j	$31
-	.end SynchGetInt
+	.end GetInt
 	
 	.globl UserThreadCreate
 	.ent	UserThreadCreate
 UserThreadCreate:
-	addiu $2,$0,SC_UserThC
+	addiu $2,$0,SC_UserThreadC
 	addiu $8,$0,UserThreadExit
 	syscall
 	j	$31
@@ -166,7 +166,7 @@ UserThreadCreate:
 	.globl UserThreadExit
 	.ent	UserThreadExit
 UserThreadExit:
-	addiu $2,$0,SC_UserThE
+	addiu $2,$0,SC_UserThreadE
 	syscall
 	j	$31
 	.end UserThreadExit
@@ -174,10 +174,18 @@ UserThreadExit:
 	.globl UserThreadJoin
 	.ent	UserThreadJoin
 UserThreadJoin:
-	addiu $2,$0,SC_UserThJ
+	addiu $2,$0,SC_UserThreadJ
 	syscall
 	j	$31
 	.end UserThreadJoin
+	
+	.globl GetTid
+	.ent	GetTid
+GetTid:
+	addiu $2,$0,SC_GetTid
+	syscall
+	j	$31
+	.end GetTid
 	
 	.globl ForkExec
 	.ent	ForkExec
@@ -186,6 +194,14 @@ ForkExec:
 	syscall
 	j	$31
 	.end ForkExec
+	
+	.globl GetPid
+	.ent	GetPid
+GetPid:
+	addiu $2,$0,SC_GetPid
+	syscall
+	j	$31
+	.end GetPid
 
 	.globl Close
 	.ent	Close

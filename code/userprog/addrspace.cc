@@ -29,27 +29,27 @@ typedef struct WaitingThread {
 
 static void
 ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
-    int position, TranslationEntry *pageTableA, unsigned numPagesA){
-    
-    TranslationEntry *oldPT = machine->pageTable;
-    unsigned oldPTS = machine->pageTableSize;
+		int position, TranslationEntry *pageTableA, unsigned numPagesA){
 
-    machine->pageTable = pageTableA;
-    machine->pageTableSize = numPagesA;
+	TranslationEntry *oldPT = machine->pageTable;
+	unsigned oldPTS = machine->pageTableSize;
 
-    char buffer[numBytes];
+	machine->pageTable = pageTableA;
+	machine->pageTableSize = numPagesA;
 
-
-    int written = executable->ReadAt(buffer, numBytes, position);
-    int i = 0;
-
-    for (i = 0; i < written; i++){
-        machine->WriteMem(virtualaddr+i, 1, buffer[i]);
-    }
+	char buffer[numBytes];
 
 
-    machine->pageTable = oldPT;
-    machine->pageTableSize = oldPTS;
+	int written = executable->ReadAt(buffer, numBytes, position);
+	int i = 0;
+
+	for (i = 0; i < written; i++){
+		machine->WriteMem(virtualaddr+i, 1, buffer[i]);
+	}
+
+
+	machine->pageTable = oldPT;
+	machine->pageTableSize = oldPTS;
 } 
 
 //----------------------------------------------------------------------
@@ -75,7 +75,7 @@ SwapHeader (NoffHeader * noffH)
 	noffH->uninitData.inFileAddr = WordToHost (noffH->uninitData.inFileAddr);
 }
 
-  
+
 
 //----------------------------------------------------------------------
 // AddrSpace::AddrSpace
@@ -115,7 +115,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
-	
+
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
 	threads_stack_id = new unsigned[MaxThreads];
@@ -125,16 +125,16 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	for(unsigned int j=0; j<MaxRunningThreads; j++)
 		stack_blocs[j] = false;
-		
+
 	threads_created = 0; 
 
-	
+
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
 			numPages, size);
 	// first, set up the translation 
-	
+
 	pageTable = new TranslationEntry[numPages];
-		
+
 	for (assigned_vpn = 0; assigned_vpn < numPages; assigned_vpn++)
 	{
 		pageTable[assigned_vpn].virtualPage = assigned_vpn;	
@@ -154,27 +154,27 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// zero out the entire address space, to zero the unitialized data segment 
 	// and the stack segment
 	//bzero (machine->mainMemory, size);
-	
+
 	// then, copy in the code and data segments into memory
 	if (noffH.code.size > 0)
 	{
 		DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
 				noffH.code.virtualAddr, noffH.code.size);
 		ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size, 
-            noffH.code.inFileAddr, pageTable, numPages);
+				noffH.code.inFileAddr, pageTable, numPages);
 	}
 	if (noffH.initData.size > 0)
 	{
 		DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
 				noffH.initData.virtualAddr, noffH.initData.size);
 		ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size, 
-            noffH.initData.inFileAddr, pageTable, numPages); 
-		}
+				noffH.initData.inFileAddr, pageTable, numPages); 
+	}
 
 	addT = new Lock("add");
 	waitT = new Lock("waitT");
 
-	
+
 
 }
 
@@ -192,7 +192,7 @@ AddrSpace::~AddrSpace ()
 	//liberation de toutes les pages physiques utilisées par le processus
 	for(i = 0; i < assigned_vpn; i++)
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
-		// delete pageTable;
+	// delete pageTable;
 	delete [] pageTable;
 	delete stack_blocs;
 	delete threads_stack_id;
@@ -233,13 +233,13 @@ AddrSpace::InitRegisters ()
 
 	//	Ne pas oublier le thread main
 	unsigned tmpu;
-	
+
 	int tmpi = this->GetFirstFreeThreadStackBlockId(&tmpu);
 	ASSERT(tmpi >= 0 && tmpu == 2); 
-	
+
 	tmpi = this->AddThread();
 	ASSERT(tmpi >= 0 && tmpi < MaxThreads); 
-	
+
 	DEBUG ('a', "Initializing stack register to %d\n",
 			numPages * PageSize - 16);
 
@@ -295,9 +295,9 @@ AddrSpace::AddThread ()
 		return -1;
 
 	unsigned id_in_stack;
-	
+
 	addT->AcquireByCurrentThread(); //	début section critique
-	
+
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack) < 0){
@@ -308,7 +308,7 @@ AddrSpace::AddThread ()
 	int created_thread_id = threads_created++;
 	threads_stack_id[created_thread_id] = id_in_stack;
 	addT->ReleaseByCurrentThread();  // fin section critique
-	
+
 	stack_blocs[id_in_stack-2] = true;
 
 	return created_thread_id;
@@ -333,7 +333,7 @@ AddrSpace::RemoveThread (int unique_thread_id)
 	//	Identifiant unique trop grand
 	if (unique_thread_id >= MaxThreads)
 		return -1;
-		
+
 	//~ printf("\nXLe thread #%d (%d) est en pile à #%d\t",unique_thread_id,pid,threads_stack_id[unique_thread_id]-2);
 	//	Thread pas en cours d'exécution ou identifiant en pile invalide
 	if (threads_stack_id[unique_thread_id] < 2 || threads_stack_id[unique_thread_id] >= MaxRunningThreads)
@@ -341,7 +341,7 @@ AddrSpace::RemoveThread (int unique_thread_id)
 	threads_stack_id[unique_thread_id] = 1;	
 	RunWaitingThread(unique_thread_id);
 	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
-	
+
 	return 0;
 
 }
@@ -356,7 +356,7 @@ AddrSpace::RemoveThread (int unique_thread_id)
 
 void AddrSpace::RunWaitingThread(int unique_thread_id){
 	unsigned cpt = 0;
-	
+
 
 	waitT->AcquireByCurrentThread();
 	while (cpt < waiting_threads.size())
@@ -366,7 +366,7 @@ void AddrSpace::RunWaitingThread(int unique_thread_id){
 			waiting_threads.erase(waiting_threads.begin() + cpt);
 			delete tmp;
 		}else{
-		  cpt++;
+			cpt++;
 		}
 	waitT->ReleaseByCurrentThread();
 }
@@ -420,7 +420,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 	unsigned offset = 0;
 	while (offset<UserStackSize/(PageSize+16/ThreadPages)/ThreadPages) {
 		if (!stack_blocs[offset]) {
-		 
+
 			*stack_thread_id = offset + 2;
 			return 0;
 		}
@@ -444,7 +444,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 int
 AddrSpace::JoinThread (int user_thread_id) {
 
-	if(user_thread_id > threads_created){
+	if(user_thread_id < 0 || user_thread_id > threads_created){
 		return -1;
 	}
 	if (threads_stack_id[user_thread_id] == 0){
@@ -494,5 +494,5 @@ AddrSpace::StackIsEmpty () {
 	unsigned i = 0;
 	while(i<MaxRunningThreads && !stack_blocs[i]) 
 		i++;
-    return i==MaxRunningThreads;
+	return i==MaxRunningThreads;
 }

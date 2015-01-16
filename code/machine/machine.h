@@ -185,9 +185,9 @@ class Machine {
 		unsigned int pageTableSize;
 		FrameProvider *frameprovider; // variable permettant la gestion
 		//	des pages physiques (libres ou utilisées).
-		 //	compteur de processus lancés par la machine
-		 int IncrProcess();
-		 int DecrProcess();
+		//	compteur de processus lancés par la machine
+		int IncrProcess();
+		int DecrProcess();
 
 	private:
 		bool singleStep;		// drop back into the debugger after each

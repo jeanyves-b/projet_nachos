@@ -18,27 +18,29 @@
 /* system call codes -- used by the stubs to tell the kernel which system call
  * is being asked for
  */
-#define SC_Halt		0
-#define SC_Exit		1
-#define SC_Exec		2
-#define SC_Join		3
-#define SC_Create	4
-#define SC_Open		5
-#define SC_Read		6
-#define SC_Write	7
-#define SC_Close	8
-#define SC_Fork		9
-#define SC_Yield	10
-#define SC_PutChar	11
-#define SC_SynchPS	12
-#define SC_SynchGC	13 //SynchPutString
-#define SC_SynchGS	14 //SynchGetString
-#define SC_SynchPI	15 //SynchPutInt
-#define SC_SynchGI	16 //SynchGetInt
-#define SC_UserThC	17 //UserThreadCreate
-#define SC_UserThE	18 //UserThreadExit
-#define SC_UserThJ	19 //UserThreadJoin
-#define SC_ForkExec	20 //ForkExec
+#define SC_Halt			0
+#define SC_Exit			1
+#define SC_Exec			2
+#define SC_Join			3
+#define SC_Create		4
+#define SC_Open			5
+#define SC_Read			6
+#define SC_Write		7
+#define SC_Close		8
+#define SC_Fork			9
+#define SC_Yield		10
+#define SC_PutChar		11
+#define SC_PutString	12
+#define SC_GetChar		13 //PutString
+#define SC_GetString	14 //GetString
+#define SC_PutInt		15 //PutInt
+#define SC_GetInt		16 //GetInt
+#define SC_UserThreadC	17 //UserThreadCreate
+#define SC_UserThreadE	18 //UserThreadExit
+#define SC_UserThreadJ	19 //UserThreadJoin
+#define SC_GetTid		20
+#define SC_ForkExec		21 
+#define SC_GetPid		22
 
 #ifdef IN_USER_MODE
 
@@ -126,18 +128,18 @@ void Close (OpenFileId id);
 void PutChar(char c);
 
 /* Wtrites String "s" to the standard output*/
-void SynchPutString(char *s);
+void PutString(char *s);
 
 /* Gets character from the standard output returns char */
-char SynchGetChar();
+char GetChar();
 /* Gets string of length n from the standard input and put it in s */
-void SynchGetString(char *s, int n);
+void GetString(char *s, int n);
 
 /* Puts int n into standard output */
-void SynchPutInt(int n);
+void PutInt(int n);
 
 /* Gets int from standard input and puts it in *n */
-void SynchGetInt(int *n);
+int GetInt();
 
 /*Create user thread*/
 int UserThreadCreate(void f(void *arg), void *arg);
@@ -148,8 +150,14 @@ void UserThreadExit();
 /*join an existing thread*/
 int UserThreadJoin(int id);
 
+/*Get current thread id*/
+int GetTid();
+
 /*Start a new process which start the executable 's'*/
 int ForkExec( char *s);
+
+/*Get current process id*/
+int GetPid();
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

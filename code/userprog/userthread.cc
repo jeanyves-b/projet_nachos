@@ -68,11 +68,12 @@ int do_UserThreadCreate(int f, int arg, int exit){
 	data->arg = arg;
 	data->exit = exit;
 	data->id = currentThread->AddThread();
-	
+
+	//Impossible d'ajouter le thread à la pile d'éxcution
 	if (data->id < 0){
 		return -2;
 	}
-	
+
 	newThread->id = data->id;
 	newThread->Fork(StartUserThread, (int)data);
 

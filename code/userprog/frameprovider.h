@@ -14,11 +14,11 @@ class FrameProvider {
 	public:
 		FrameProvider(int n);	
 		~FrameProvider();			// De-allocate the data structures
-		
+
 		int GetEmptyFrame();	// récupère un cadre vide et le 
 		// considère comme utilisé
-        void ReleaseFrame(int n); // libère un cadre
-        int NumAvailFrame(); // retourne le nombre de cadres libres
+		void ReleaseFrame(int n); // libère un cadre
+		int NumAvailFrame(); // retourne le nombre de cadres libres
 
 
 	private:
