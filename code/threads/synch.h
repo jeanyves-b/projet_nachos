@@ -78,6 +78,8 @@ class Lock
 
 		void Acquire ();		// these are the only operations on a lock
 		void Release ();		// they are both *atomic*
+		void AcquireByCurrentThread ();		// these are the only operations on a lock
+		void ReleaseByCurrentThread ();		// they are both *atomic*
 
 		bool isHeldByCurrentThread ();	// true if the current thread
 		// holds this lock.  Useful for

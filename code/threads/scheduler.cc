@@ -53,7 +53,7 @@ Scheduler::~Scheduler ()
 	void
 Scheduler::ReadyToRun (Thread * thread)
 {
-	DEBUG ('t', "Putting thread %s %d (pid: %d) on ready list.\n", thread->getName (), thread->id, thread->space->pid);
+	DEBUG ('t', "Putting thread %s %d (pid: %d) on ready list.\n", thread->getName (), thread->id, thread->space!=NULL?thread->space->pid:-1);
 
 	thread->setStatus (READY);
 	readyList->Append ((void *) thread);
@@ -111,8 +111,8 @@ Scheduler::Run (Thread * nextThread)
 	currentThread->setStatus (RUNNING);	// nextThread is now running
 
 	DEBUG ('t', "Switching from thread  \"%s %d (pid: %d)\" to thread \"%s %d (pid: %d)\"\n",
-			oldThread->getName (), oldThread->id, currentThread->space->pid, nextThread->getName (), nextThread->id, nextThread->space->pid);
-	Print();
+			oldThread->getName (), oldThread->id, currentThread->space!=NULL?currentThread->space->pid:-1, nextThread->getName (), nextThread->id, nextThread->space!=NULL?nextThread->space->pid:-1);
+
 	// This is a machine-dependent assembly language routine defined 
 	// in switch.s.  You may have to think
 	// a bit to figure out what happens after this, both from the point
@@ -120,7 +120,7 @@ Scheduler::Run (Thread * nextThread)
 
 	SWITCH (oldThread, nextThread);
 
-	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->space->pid);
+	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->space!=NULL?currentThread->space->pid:-1);
 
 	// If the old thread gave up the processor because it was finishing,
 	// we need to delete its carcass.  Note we cannot delete the thread

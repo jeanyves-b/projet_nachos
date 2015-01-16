@@ -115,13 +115,21 @@ Lock::~Lock ()
 Lock::Acquire ()
 {		
 	lock->P();
-	
-	tid = currentThread->id;
-	
-	pid = currentThread->space->pid;
 }
 	void
 Lock::Release ()
+{
+	lock->V();
+}
+	void
+Lock::AcquireByCurrentThread ()
+{		
+	lock->P();
+	tid = currentThread->id;
+	pid = currentThread->space->pid;
+}
+	void
+Lock::ReleaseByCurrentThread ()
 {
 	if (isHeldByCurrentThread()){
 		lock->V();

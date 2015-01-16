@@ -296,18 +296,18 @@ AddrSpace::AddThread ()
 
 	unsigned id_in_stack;
 	
-	addT->Acquire(); //	début section critique
+	addT->AcquireByCurrentThread(); //	début section critique
 	
 	//	Récupération de l'identifiant dans la pile du premier bloc libre
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack) < 0){
-		addT->Release(); // fin section critique
+		addT->ReleaseByCurrentThread(); // fin section critique
 		return -2;
 	}
 
 	int created_thread_id = threads_created++;
 	threads_stack_id[created_thread_id] = id_in_stack;
-	addT->Release(); // fin section critique
+	addT->ReleaseByCurrentThread(); // fin section critique
 	
 	stack_blocs[id_in_stack-2] = true;
 
@@ -356,7 +356,7 @@ AddrSpace::RemoveThread (int unique_thread_id)
 
 void AddrSpace::RunWaitingThread(int unique_thread_id){
 	unsigned cpt = 0;
-	waitT->Acquire();
+	waitT->AcquireByCurrentThread();
 	while (cpt < waiting_threads.size())
 		if (waiting_threads.at(cpt)->forId == unique_thread_id) {
 			WaitingThread *tmp = waiting_threads.at(cpt);
@@ -366,7 +366,7 @@ void AddrSpace::RunWaitingThread(int unique_thread_id){
 		}else{
 		  cpt++;
 		}
-	waitT->Release();
+	waitT->ReleaseByCurrentThread();
 }
 
 //----------------------------------------------------------------------
