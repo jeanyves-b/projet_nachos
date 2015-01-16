@@ -133,9 +133,9 @@ ExceptionHandler (ExceptionType which)
 					      break;
 				      }
 			case SC_Exit: {
-					      DEBUG ('r', "Thread \"%s %d (pid: %d)\" called Exit\n",currentThread->getName(), currentThread->id, currentThread->space->pid);
-					      do_UserProcessExit();
-					      break;
+						DEBUG ('r', "Thread \"%s %d (pid: %d)\" called Exit\n",currentThread->getName(), currentThread->id, currentThread->space->pid);
+						do_UserProcessExit();
+					    break;
 				      }
 			case SC_PutChar: {
 						 DEBUG('c', "Writing character on standard output, initiated by user program.\n");
@@ -143,85 +143,85 @@ ExceptionHandler (ExceptionType which)
 						 break;
 					 }
 			case SC_PutString:{ 
-						  DEBUG('c', "Writing a string on standard output, initiated by user program.\n");
-						  writeString(machine->ReadRegister(4));
-						  break;
-					  }	
+						DEBUG('c', "Writing a string on standard output, initiated by user program.\n");
+						writeString(machine->ReadRegister(4));
+						break;
+					}	
 			case SC_GetChar: { 
 						 DEBUG('c', "reading character on standard intput, initiated by user program.\n");
 						 machine->WriteRegister(2,(int)synchconsole->SynchGetChar());
 						 break;
 					 }
 			case SC_GetString: { 
-						   DEBUG('c', "reading string from standard intput, initiated by user program.\n");
+						DEBUG('c', "reading string from standard intput, initiated by user program.\n");
+						 
+						if (machine->ReadRegister(5) > 0) {
+							 
+							unsigned chars_nb;
+							
+							//récupération du nombre de caractères à récupérer dans les limites de la taille maximum d'une chaine
+							if ((unsigned) machine->ReadRegister(5) < MaxStringSize) {
+								chars_nb = (unsigned) machine->ReadRegister(5);
+							} else {
+								chars_nb = MaxStringSize;
+							}
+							
+							char* buf = new char[chars_nb];
+							synchconsole->SynchGetString(buf, chars_nb); //	récupération de la chaine depuis la console
 
-						   if (machine->ReadRegister(5) > 0) {
-
-							   unsigned chars_nb;
-
-							   //récupération du nombre de caractères à récupérer dans les limites de la taille maximum d'une chaine
-							   if ((unsigned) machine->ReadRegister(5) < MaxStringSize) {
-								   chars_nb = (unsigned) machine->ReadRegister(5);
-							   } else {
-								   chars_nb = MaxStringSize;
-							   }
-
-							   char* buf = new char[chars_nb];
-							   synchconsole->SynchGetString(buf, chars_nb); //	récupération de la chaine depuis la console
-
-							   //récupération du nombre de caractères à copier dans les limites des caractères d'arrêt
-							   unsigned chars_to_copy = 0;	
-							   for(; chars_to_copy < chars_nb 
-									   && buf[chars_to_copy] != '\n'
-									   && buf[chars_to_copy] != '\r'
-									   && buf[chars_to_copy] != '\0'
-									   && buf[chars_to_copy] != EOF;
-									   chars_to_copy++);
-
-							   unsigned copied_chars = 0; //	caractères déjà copiés
-							   //	copie des caractères par blocs de MaxStringSize vers la machine
-							   for (;	chars_to_copy >= MaxStringSize;
-									   chars_to_copy -= MaxStringSize,
-									   copied_chars += MaxStringSize) {
-								   copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, MaxStringSize);
-							   }
-							   //	copie du reste des caractères vers la machine
-							   if (chars_to_copy>0) {
-								   copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, chars_to_copy);
-							   }
-							   delete buf;
-						   }
-
-						   break; 
-					   }
+							 //récupération du nombre de caractères à copier dans les limites des caractères d'arrêt
+							 unsigned chars_to_copy = 0;	
+							 for(; chars_to_copy < chars_nb 
+									 && buf[chars_to_copy] != '\n'
+									 && buf[chars_to_copy] != '\r'
+									 && buf[chars_to_copy] != '\0'
+									 && buf[chars_to_copy] != EOF;
+									 chars_to_copy++);
+									 
+							 unsigned copied_chars = 0; //	caractères déjà copiés
+							 //	copie des caractères par blocs de MaxStringSize vers la machine
+							 for (;	chars_to_copy >= MaxStringSize;
+									 chars_to_copy -= MaxStringSize,
+									 copied_chars += MaxStringSize) {
+								 copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, MaxStringSize);
+							 }
+							 //	copie du reste des caractères vers la machine
+							 if (chars_to_copy>0) {
+								 copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, chars_to_copy);
+							 }
+							 delete buf;
+						 }
+						 
+						 break; 
+					 }
 			case SC_PutInt: { 
-						DEBUG('c', "writing signed integer on standard output, initiated by user program.\n");
-						synchconsole->SynchPutInt(machine->ReadRegister(4));
-						break;
-					}
+						 DEBUG('c', "writing signed integer on standard output, initiated by user program.\n");
+						 synchconsole->SynchPutInt(machine->ReadRegister(4));
+						 break;
+					 }
 			case SC_GetInt: { 
-						DEBUG('c', "reading signed integer from standard intput, initiated by user program.\n");
-						machine->WriteRegister(2, synchconsole->SynchGetInt());
-						break;
-					}
+						 DEBUG('c', "reading signed integer from standard intput, initiated by user program.\n");
+						 machine->WriteRegister(2, synchconsole->SynchGetInt());
+						 break;
+					 }
 			case SC_UserThreadC: { //UserThreadCreate
-						     DEBUG('t', "Creating user thread, initiated by user program.\n");
-						     machine->WriteRegister(2, do_UserThreadCreate(machine->ReadRegister(4), machine->ReadRegister(5), machine->ReadRegister(8)));
-						     break;
-					     }
+						 DEBUG('t', "Creating user thread, initiated by user program.\n");
+						 machine->WriteRegister(2, do_UserThreadCreate(machine->ReadRegister(4), machine->ReadRegister(5), machine->ReadRegister(8)));
+						 break;
+					 }
 			case SC_UserThreadE: { //UserThreadExit
-						     DEBUG('t', "Exiting current thread, initiated by user program.\n");
-						     do_UserThreadExit();
-						     break;
-					     }
+						 DEBUG('t', "Exiting current thread, initiated by user program.\n");
+						 do_UserThreadExit();
+						 break;
+					 }
 			case SC_UserThreadJ: { //UserThreadJoin
-						     DEBUG('t', "Joining a thread, initiated by user program.\n");
-						     machine->WriteRegister(2, currentThread->Join(machine->ReadRegister(4)));
-						     break;
-					     }
+						 DEBUG('t', "Joining a thread, initiated by user program.\n");
+						 machine->WriteRegister(2, currentThread->Join(machine->ReadRegister(4)));
+						 break;
+					 }
 			case SC_GetTid: {
 						machine->WriteRegister(2, currentThread->id);
-					}
+				}
 			case SC_ForkExec:{ //ForkExec
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
 						 char buf[MaxStringSize];
@@ -231,7 +231,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_GetPid: {
 						machine->WriteRegister(2, currentThread->space!=NULL?currentThread->space->pid:0);
-					}
+				}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
 					 ASSERT(FALSE);

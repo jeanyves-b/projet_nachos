@@ -28,7 +28,6 @@ int main()
 	int id2 = UserThreadCreate(thread2, 0);
 	int error;
 
-	//~ if (id >= 0){
 	error = UserThreadJoin(id); 
 	if (error < 0){
 		PutInt(id);
@@ -40,7 +39,6 @@ int main()
 	if (error < 0){
 		PutString("erreur Thread 2");
 	}
-	//~ } 
 	return 0;
 
 }
