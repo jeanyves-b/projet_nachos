@@ -60,7 +60,7 @@ void do_UserProcessExit(){
 		DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 		interrupt->Halt();
 	} else {
-		DEBUG('r', "Exiting process with return value %d.\n",machine->ReadRegister(8));
+		DEBUG('r', "Exiting process %d with return value %d.\n",currentThread->space!=NULL?currentThread->space->pid:0,machine->ReadRegister(8));
 		currentThread->Finish();
 	}
 	ASSERT(FALSE);

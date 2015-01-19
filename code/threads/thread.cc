@@ -222,6 +222,7 @@ int Thread::JoinFils(){
 		}
 		this->fils.erase(fils.begin());
 	}
+	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is done waiting for its children\n", name, id, space!=NULL?space->pid:0);
 	return 0;
 }
 //----------------------------------------------------------------------

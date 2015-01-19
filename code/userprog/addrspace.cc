@@ -118,13 +118,10 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
-	threads_stack_id = new unsigned[MaxThreads];
-	stack_blocs = new bool[MaxRunningThreads];
-	for(unsigned int j=0; j<MaxThreads; j++)
-		threads_stack_id[j] = 0;
+	stack = new int[MaxRunningThreads];
 
 	for(unsigned int j=0; j<MaxRunningThreads; j++)
-		stack_blocs[j] = false;
+		stack[j] = -1;
 
 	threads_created = 0; 
 
@@ -192,10 +189,8 @@ AddrSpace::~AddrSpace ()
 	//liberation de toutes les pages physiques utilisées par le processus
 	for(i = 0; i < assigned_vpn; i++)
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
-	// delete pageTable;
 	delete [] pageTable;
-	delete stack_blocs;
-	delete threads_stack_id;
+	delete stack;
 	waiting_threads.clear();
 	delete addT;
 	delete waitT;
@@ -235,10 +230,10 @@ AddrSpace::InitRegisters ()
 	unsigned tmpu;
 
 	int tmpi = this->GetFirstFreeThreadStackBlockId(&tmpu);
-	ASSERT(tmpi >= 0 && tmpu == 2); 
+	ASSERT(tmpi >= 0 && tmpu == 0); 
 
 	tmpi = this->AddThread();
-	ASSERT(tmpi >= 0 && tmpi < MaxThreads); 
+	ASSERT(tmpi >= 0); 
 
 	DEBUG ('a', "Initializing stack register to %d\n",
 			numPages * PageSize - 16);
@@ -289,11 +284,6 @@ AddrSpace::RestoreState ()
 	int 
 AddrSpace::AddThread ()
 {
-
-	//Nombre de threads max par processus atteint
-	if (threads_created >= MaxThreads)
-		return -1;
-
 	unsigned id_in_stack;
 
 	addT->AcquireByCurrentThread(); //	début section critique
@@ -302,14 +292,12 @@ AddrSpace::AddThread ()
 	//	Test pas de place sur la pile
 	if (this->GetFirstFreeThreadStackBlockId(&id_in_stack) < 0){
 		addT->ReleaseByCurrentThread(); // fin section critique
-		return -2;
+		return -1;
 	}
 
 	int created_thread_id = threads_created++;
-	threads_stack_id[created_thread_id] = id_in_stack;
+	stack[id_in_stack] = created_thread_id;
 	addT->ReleaseByCurrentThread();  // fin section critique
-
-	stack_blocs[id_in_stack-2] = true;
 
 	return created_thread_id;
 }
@@ -330,19 +318,23 @@ AddrSpace::AddThread ()
 	int
 AddrSpace::RemoveThread (int unique_thread_id)
 {
-	//	Identifiant unique trop grand
-	if (unique_thread_id >= MaxThreads)
-		return -1;
+	//	Thread jamais créé
+	if (unique_thread_id >= threads_created)
+		return -1; 
 
-	//~ printf("\nXLe thread #%d (%d) est en pile à #%d\t",unique_thread_id,pid,threads_stack_id[unique_thread_id]-2);
-	//	Thread pas en cours d'exécution ou identifiant en pile invalide
-	if (threads_stack_id[unique_thread_id] < 2 || threads_stack_id[unique_thread_id] >= MaxRunningThreads)
-		return -2;
-	threads_stack_id[unique_thread_id] = 1;	
-	RunWaitingThread(unique_thread_id);
-	stack_blocs[threads_stack_id[unique_thread_id] - 2] = false;
+	unsigned offset;
+	for(offset = 0; offset < MaxRunningThreads; offset++) {
+		if (stack[offset] == unique_thread_id) {
+			stack[offset] = -1;
+			RunWaitingThread(unique_thread_id);
+			return 0;
+		}
+	}
+	//~ threads_stack_id[unique_thread_id] = 1;	
+	//~ 
 
-	return 0;
+	//	Thread pas trouvé dans la pile
+	return -2;
 
 }
 
@@ -377,38 +369,35 @@ void AddrSpace::RunWaitingThread(int unique_thread_id){
 //			unique unique_thread_id
 //		Retourne 0 en cas de succès, un code d'erreur sinon: 
 //		(-1 si unique_thread_id trop grand, -2 si thread pas en cours 
-//		d'execution, -3 si taille max de pile dépassée)
+//		d'execution)
 //
 //----------------------------------------------------------------------
 
 	int 
 AddrSpace::GetStackAddress (unsigned *stack_address, int unique_thread_id)
 {
-	//Identifiant unique trop grand
-	if (unique_thread_id >= MaxThreads)
-		return -1;
+	//Identifiant unique trop grand (jamais créé)
+	if (unique_thread_id < 0 || unique_thread_id >= threads_created)
+		return -1; 
 
 	//Récupération de l'identifiant dans le pile du thread ayant 
 	//	l'identifiant unique unique_thread_id
-	unsigned stack_thread_id = threads_stack_id[unique_thread_id];
+	unsigned stack_thread_id;
+	for(stack_thread_id = 0; stack_thread_id < MaxRunningThreads && stack[stack_thread_id] != unique_thread_id; stack_thread_id++);
+	
+	//	Thread pas trouvé dans le tableau (pas en cours d'éxecution)
+	if (stack_thread_id >= MaxRunningThreads)
+		return -2;
 
-	//Thread pas en cours d'exécution
-	if (stack_thread_id < 2)
-		return -2; 
-
-	//Identifiant de thread dépasse la taille maximale de pile
-	if (((PageSize*ThreadPages + 16)*(stack_thread_id - 2)) + 16 > UserStackSize)
-		return -3;
-
-	*stack_address = numPages * PageSize - ((PageSize*ThreadPages + 16)*(stack_thread_id - 2)) - 16;
-
+	*stack_address = numPages * PageSize - ((PageSize*ThreadPages + 16)*(stack_thread_id)) - 16;
 	return 0;
 }
 //----------------------------------------------------------------------
 // AddrSpace::GetFirstFreeStackId
-//     Retourne l'identifiant du premier emplacement de pile libre
+//     Mets l'identifiant du premier emplacement de pile libre
 //			disponible pour un thread en commençant de la fin de 
-//			l'espace d'adressage
+//			l'espace d'adressage dans l'emplacement pointé en 
+//			mémoire par "stack_thread_id"
 //		Retourne 0 en cas de succès, un code d'erreur sinon
 //		(-1 si pas de bloc libre trouvé)
 //
@@ -418,10 +407,9 @@ AddrSpace::GetStackAddress (unsigned *stack_address, int unique_thread_id)
 AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 {
 	unsigned offset = 0;
-	while (offset<UserStackSize/(PageSize+16/ThreadPages)/ThreadPages) {
-		if (!stack_blocs[offset]) {
-
-			*stack_thread_id = offset + 2;
+	while (offset<MaxRunningThreads) {
+		if (stack[offset] < 0) {
+			*stack_thread_id = offset;
 			return 0;
 		}
 		offset++;
@@ -435,7 +423,7 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 //		Cette fonctionne ne retourne que si le thread ayant comme
 //		identfiant "user_thread_id" se termine.
 //		Retourne 0 en cas de succès, code d'erreur sinon (-1 si
-//		identifiant jamais créé, -2 si identifiant ne correspond pas
+//		identifiant invalide, -2 si identifiant ne correspond pas
 //		à un emplacement actif dans la pile, -3 l'identifiant donné
 //		est celui du thread en cours).
 //
@@ -444,20 +432,27 @@ AddrSpace::GetFirstFreeThreadStackBlockId (unsigned *stack_thread_id)
 int
 AddrSpace::JoinThread (int user_thread_id) {
 
-	if(user_thread_id < 0 || user_thread_id > threads_created){
+	if(user_thread_id < 0){
 		return -1;
-	}
-	if (threads_stack_id[user_thread_id] == 0){
+	} else if (user_thread_id >= threads_created){
 		return -2;
 	}
 	if(user_thread_id == currentThread->id){
 		return -3;
 	}
 
-	if (threads_stack_id[user_thread_id]!=1) { //premier test pour le cas usuel
-		IntStatus oldLevel = interrupt->SetLevel (IntOff);
-		if (threads_stack_id[user_thread_id]!=1) { //deuxième test pour les cas particuliers
-
+	//Récupération de l'identifiant dans le pile du thread ayant 
+	//	l'identifiant unique unique_thread_id
+	unsigned stack_thread_id;
+	for(stack_thread_id = 0; stack_thread_id < MaxRunningThreads && stack[stack_thread_id] != user_thread_id; stack_thread_id++);
+	
+	if (stack_thread_id < MaxRunningThreads) { //premier test pour le cas usuel
+		IntStatus oldLevel = interrupt->SetLevel (IntOff);	
+		//Récupération de l'identifiant dans le pile du thread ayant 
+		//	l'identifiant unique unique_thread_id
+		for(stack_thread_id = 0; stack_thread_id < MaxRunningThreads && stack[stack_thread_id] != user_thread_id; stack_thread_id++);
+		
+		if (stack_thread_id < MaxRunningThreads) { //deuxième test pour les cas particuliers
 			WaitingThread *waiting_thread = new WaitingThread();
 			waiting_thread->who = currentThread;
 			waiting_thread->forId = user_thread_id;
@@ -492,7 +487,7 @@ AddrSpace::HasFailed () {
 bool
 AddrSpace::StackIsEmpty () {
 	unsigned i = 0;
-	while(i<MaxRunningThreads && !stack_blocs[i]) 
+	while(i<MaxRunningThreads && stack[i]==-1) 
 		i++;
 	return i==MaxRunningThreads;
 }
