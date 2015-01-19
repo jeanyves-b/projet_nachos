@@ -22,7 +22,7 @@
 
 #define UserStackSize		2048	// increase this as necessary!
 #define ThreadPages			2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
-#define MaxThreads			1024		// on alloue THREAD_PAGES pages par thread; u pour unsigned
+// #define MaxThreads			1024		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 #define MaxRunningThreads 	(UserStackSize-16)/(PageSize*ThreadPages + 16)	// nombre de threads maximum en cours d'execution dans un processus
 
 
@@ -59,11 +59,8 @@ class AddrSpace
 		// for now!
 		unsigned int numPages;	// Number of pages in the virtual 
 		// address space
-		unsigned *threads_stack_id;	// Tableau de: identifiant unique -> 
-		//	identifiant dans la pile (0 et 1 sont reservés pour resp.
-		//	jamais créé, et créé mais terminé)
-		bool *stack_blocs; //Tableau representant si oui ou non un bloc
-		//	de la pile est alloué ou non
+		int *stack; //Tableau representant si oui (identifiant unique 
+		// du thread dans le processus) ou non (-1) un bloc	de la pile est alloué ou non
 		int threads_created; //	Nombre de threads créés depuis
 		//	le début du processus
 		std::vector<WaitingThread*> waiting_threads; //	structure contnenant

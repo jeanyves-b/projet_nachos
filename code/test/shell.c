@@ -4,8 +4,6 @@
 main ()
 {
 	SpaceId newProc;
-	OpenFileId input = ConsoleInput;
-	OpenFileId output = ConsoleOutput;
 	char prompt[2], buffer[60];
 	int i;
 
@@ -14,19 +12,22 @@ main ()
 
 	while (1)
 	{
-		Write (prompt, 2, output);
+		for (i=0;i<2;i++)
+		  PutChar (prompt[i]);
 
 		i = 0;
 
 		do
 		{
 
-			Read (&buffer[i], 1, input);
+			GetChar (&buffer[i]);
 
 		}
 		while (buffer[i++] != '\n');
 
 		buffer[--i] = '\0';
+		
+		
 
 		if (i > 0)
 		{

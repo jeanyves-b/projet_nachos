@@ -1,7 +1,7 @@
 #include "syscall.h"
 
 /*
- *  Programme de test de l'appel système SynchPutChar
+ *  Programme de test de l'appel système PutChar
  */
 
 void print(char c, int n)

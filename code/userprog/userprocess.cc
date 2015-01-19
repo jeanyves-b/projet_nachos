@@ -29,29 +29,39 @@ int do_UserProcessCreate(char *s){
 	OpenFile *executable = fileSystem->Open(s);
 	if (executable == NULL)
 		return -1;
-	
+
 	AddrSpace *addrSpace = new AddrSpace(executable);
-	
+
 	delete executable;
 	if(addrSpace == NULL)
 		return -2;
-	
+
 	if (addrSpace->HasFailed()) {
 		delete addrSpace;
 		return -3;
 	}
 
-   	Thread *newThread = new Thread(s);
-   	if (newThread == NULL)
+	Thread *newThread = new Thread(s);
+	if (newThread == NULL)
 		return -4;
-	
-	
+
+
 	newThread->space = addrSpace;
 	newThread->id = 0;
 	addrSpace->pid = machine->IncrProcess();
-	
+
 	newThread->ForkExec(StartUserProcess, 0);
-	
+
 	return addrSpace->pid;
 }
-
+void do_UserProcessExit(){
+	currentThread->JoinFils();
+	if(machine->DecrProcess() == 0){
+		DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
+		interrupt->Halt();
+	} else {
+		DEBUG('r', "Exiting process %d with return value %d.\n",currentThread->space!=NULL?currentThread->space->pid:0,machine->ReadRegister(8));
+		currentThread->Finish();
+	}
+	ASSERT(FALSE);
+}

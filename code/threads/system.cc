@@ -80,7 +80,7 @@ TimerInterruptHandler (int dummy)
 Initialize (int argc, char **argv)
 {
 
-	
+
 	int argCount;
 	const char *debugArgs = "";
 	bool randomYield = FALSE;
@@ -209,6 +209,6 @@ Cleanup ()
 	delete scheduler;
 	delete interrupt;
 	delete stats;
-	
+
 	Exit (0);
 }
