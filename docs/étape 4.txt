@@ -67,12 +67,11 @@ partie 2 : executer plusieurs programmes en même temps
 	action 2
 		faire en sorte que le dernier processus arrete la machine
 			garder un compteur de processus forkés
-			si dernier processus alors halt la machine, sinon quitter le processus
+			si dernier processus alors halt la machine, sinon quitter le processus (et libérer ses ressources)
 	action 3
-		faire un gros test
-			enelver ASSERT pas assez de pages physiques
+		fait dans programme de test forkexec
 	action 4
-		vérifier que tout se fini correctement
+		il y a quelques fuites de mémoire liées au fait que c'est un thread en cours d'exécution qui tue la machine, et on ne peut donc pas le supprimer ou libérer ses ressources
 
 choix d'implémentation
 	dernier process arrete la machine
