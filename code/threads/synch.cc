@@ -121,31 +121,20 @@ Lock::~Lock ()
 }
 	void
 Lock::Acquire ()
-{	
-	DEBUG('l', "Trying to acquire lock %s\n", name);
-	lock->P();
-	DEBUG('l', "Lock \"%s\" successfully acquired\n", name);
-}
-	void
-Lock::Release ()
-{
-	lock->V();
-	DEBUG('l', "Lock \"%s\" successfully released\n", name);
-}
-	void
-Lock::AcquireByCurrentThread ()
 {		
 	DEBUG('l', "Trying to acquire lock \"%s\" by thread %d pid %d \n", name, tid, pid);
 	lock->P();
 	tid = currentThread->id;
-	pid = currentThread->space->pid;
+	pid = currentThread->getPid();
 	DEBUG('l', "Lock \"%s\" successfully acquired by thread %d pid %d \n", name, tid, pid);
 }
 	void
-Lock::ReleaseByCurrentThread ()
+Lock::Release ()
 {
 	DEBUG('l', "Trying to release lock \"%s\" by thread %d pid %d \n", name, tid, pid);
 	if (isHeldByCurrentThread()){
+		tid = -1;
+		pid = -1;
 		lock->V();
 		DEBUG('l', "Lock \"%s\" successfully released by thread %d pid %d \n", name, tid, pid);
 	}
@@ -153,27 +142,52 @@ Lock::ReleaseByCurrentThread ()
 }
 
 bool Lock::isHeldByCurrentThread(){
-	return (tid == currentThread->id && pid == currentThread->space->pid);
+	return (tid == currentThread->id && pid == (currentThread->getPid()));
 }
 
 Condition::Condition (const char *debugName)
 {
+	name = debugName;
+	waiting = new List;
 }
 
 Condition::~Condition ()
 {
+	delete waiting;
 }
 	void
 Condition::Wait (Lock * conditionLock)
 {
+	if(conditionLock->isHeldByCurrentThread()) {
+		IntStatus oldLevel = interrupt->SetLevel (IntOff); // disable interrupts
+		
+		waiting->Append((void*)currentThread); //	ajouter à la liste des threads qui attendent sur la condition
+		conditionLock->Release(); // libérer le lock
+		currentThread->Sleep();  //	attendre un signal/broadcast
+		
+		(void) interrupt->SetLevel (oldLevel);	// re-enable interrupts
+		
+		DEBUG('l', "Thread %d pid %d is waiting with condition \"%s\" on lock \"%s\"\n",
+			conditionLock->getTid(),  conditionLock->getPid(), name, conditionLock->getName());
+	}
 }
 
 	void
 Condition::Signal (Lock * conditionLock)
 {
+	IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
+
+	Thread* thread = (Thread*)waiting->Remove(); //	Récupérer un thread qui est en attente
+	if(thread != NULL)
+		scheduler->ReadyToRun(thread); //	ajouter le thread reveillé à la liste des threads à exécuter
+		
+    (void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
 }
 
 	void
 Condition::Broadcast (Lock * conditionLock)
 {
+	while (!waiting->IsEmpty()) {
+        this->Signal(conditionLock);
+    }
 }

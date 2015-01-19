@@ -110,6 +110,10 @@ class Thread
 		{
 			return (name);
 		}
+		const int getPid ()
+		{
+			return (space!=NULL?space->pid:0);
+		}
 		void Print ()
 		{
 			printf ("%s id: %d (pid: %d), ", name, id, space->pid);

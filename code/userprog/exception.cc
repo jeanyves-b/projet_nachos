@@ -230,7 +230,7 @@ ExceptionHandler (ExceptionType which)
 						 break;
 					 }
 			case SC_GetPid: {
-						machine->WriteRegister(2, currentThread->space!=NULL?currentThread->space->pid:0);
+						machine->WriteRegister(2, currentThread->getPid());
 				}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);

@@ -75,12 +75,17 @@ class Lock
 		{
 			return name;
 		}				// debugging assist
+		int getTid ()
+		{
+			return pid;
+		}				// debugging assist
+		int getPid ()
+		{
+			return tid;
+		}				// debugging assist
 
 		void Acquire ();		// these are the only operations on a lock
 		void Release ();		// they are both *atomic*
-		void AcquireByCurrentThread ();		// these are the only operations on a lock
-		void ReleaseByCurrentThread ();		// they are both *atomic*
-
 		bool isHeldByCurrentThread ();	// true if the current thread
 		// holds this lock.  Useful for
 		// checking in Release, and in
@@ -146,5 +151,6 @@ class Condition
 
 	private:
 		const char *name;
+		List*	waiting;
 };
 #endif // SYNCH_H

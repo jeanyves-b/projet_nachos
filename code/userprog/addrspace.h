@@ -22,7 +22,6 @@
 
 #define UserStackSize		2048	// increase this as necessary!
 #define ThreadPages			2u		// on alloue THREAD_PAGES pages par thread; u pour unsigned
-// #define MaxThreads			1024		// on alloue THREAD_PAGES pages par thread; u pour unsigned
 #define MaxRunningThreads 	(UserStackSize-16)/(PageSize*ThreadPages + 16)	// nombre de threads maximum en cours d'execution dans un processus
 
 
