@@ -91,7 +91,7 @@ void SynchConsole::SynchGetString(char *s, int n)
 		i++;
 	} while (i < n && current_char != '\n');
 
-	//vider le buffer noyau pour eviter les fuits noyau
+	//vider le buffer noyau pour eviter les fuites noyau
 	if (i == n) {
 		do {
 			current_char = this->SGetChar();

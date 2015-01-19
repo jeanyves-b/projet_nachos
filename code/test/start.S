@@ -202,6 +202,14 @@ GetPid:
 	syscall
 	j	$31
 	.end GetPid
+	
+	.globl mkdir
+	.ent	mkdir
+mkdir:
+	addiu $2,$0,SC_MkDir
+	syscall
+	j	$31
+	.end mkdir
 
 	.globl Close
 	.ent	Close

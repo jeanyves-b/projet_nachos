@@ -76,6 +76,8 @@ class FileSystem {
 
 		bool Create(const char *name, int initialSize);  	
 		// Create a file (UNIX creat)
+		
+		bool CreateDir(const char *name);  
 
 		OpenFile* Open(const char *name); 	// Open a file (UNIX open)
 
@@ -86,10 +88,13 @@ class FileSystem {
 		void Print();			// List all the files and their contents
 
 	private:
+		void InitializeDir(int);
+	  
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file
 		OpenFile* directoryFile;		// "Root" directory -- list of 
 		// file names, represented as a file
+		OpenFile* currentDir;
 };
 
 #endif // FILESYS

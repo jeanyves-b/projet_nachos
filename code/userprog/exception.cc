@@ -231,7 +231,14 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_GetPid: {
 						machine->WriteRegister(2, currentThread->space!=NULL?currentThread->space->pid:0);
+						break;
 				}
+			case SC_MkDir:{
+						char buf[MaxStringSize];
+						copyStringFromMachine(machine->ReadRegister(4),buf,MaxStringSize);
+						machine->WriteRegister(2,fileSystem->CreateDir(buf));
+						break;
+				    }
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
 					 ASSERT(FALSE);
