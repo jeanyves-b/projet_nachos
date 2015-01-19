@@ -1,7 +1,7 @@
 #include "syscall.h"
 
 /*
- *  Programme de test de l'appel système SynchPutInt
+ *  Programme de test de l'appel système PutInt
  */
 
 int main()
@@ -9,10 +9,10 @@ int main()
 	//Affichage des entiers de -2 à 11
 	int i;
 	for (i = -2; i <= 11; i++)
-		SynchPutInt(i);
+		PutInt(i);
 
 	//Affichage d'un entier très grand
-	SynchPutInt(1234567890);
+	PutInt(1234567890);
 
 	return 0;
 

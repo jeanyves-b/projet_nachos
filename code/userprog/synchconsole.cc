@@ -125,10 +125,12 @@ void SynchConsole::SynchPutInt(int n)
 	this->SynchPutString(buf);
 }
 
-void SynchConsole::SynchGetInt(int *n)
+int SynchConsole::SynchGetInt()
 {
+	int i;
 	//récupération d'un nombre dans buf
-	char* buf = new char[MAX_STRING_SIZE];
-	this->SynchGetString(buf, MAX_STRING_SIZE);
-	sscanf(buf, "%d", n);
+	char* buf = new char[MaxStringSize];
+	this->SynchGetString(buf, MaxStringSize);
+	sscanf(buf, "%d", &i);
+	return i;
 }

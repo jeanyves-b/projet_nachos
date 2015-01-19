@@ -1,15 +1,15 @@
 #include "syscall.h"
 
 /*
- *  Programme de test de l'appel système SynchGetString
+ *  Programme de test de l'appel système GetString
  */
 
 int main()
 {
 	char s[10];
-	SynchGetString(s, 10);
-	SynchPutString("La chaine entree est :");
-	SynchPutString(s);
+	GetString(s, 10);
+	PutString("La chaine entree est :");
+	PutString(s);
 	return 0;
 
 }

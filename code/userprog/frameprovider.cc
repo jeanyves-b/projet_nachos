@@ -24,7 +24,7 @@ FrameProvider::FrameProvider(int frames)
 //----------------------------------------------------------------------
 
 FrameProvider::~FrameProvider() {
- 	delete this->bitmap;
+	delete this->bitmap;
 }
 
 //----------------------------------------------------------------------
@@ -35,7 +35,7 @@ FrameProvider::~FrameProvider() {
 //
 //----------------------------------------------------------------------
 
-int
+	int
 FrameProvider::GetEmptyFrame ()
 {
 	int free_frame = this->bitmap->Find();
@@ -50,7 +50,7 @@ FrameProvider::GetEmptyFrame ()
 //
 //----------------------------------------------------------------------
 
-void
+	void
 FrameProvider::ReleaseFrame (int frame_id)
 {
 	this->bitmap->Clear(frame_id);
@@ -62,7 +62,7 @@ FrameProvider::ReleaseFrame (int frame_id)
 //
 //----------------------------------------------------------------------
 
-int
+	int
 FrameProvider::NumAvailFrame ()
 {
 	return this->bitmap->NumClear();

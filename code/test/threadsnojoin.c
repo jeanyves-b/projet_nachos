@@ -17,7 +17,7 @@ int main(){
 	UserThreadCreate(thread, (void*)(&n3));
 	UserThreadCreate(test, (void*)(&n3)); 
 
-	SynchPutString("On quitte main");
+	PutString("On quitte main");
 	return 0;
 }
 
@@ -38,11 +38,11 @@ void thread(void *n){
 	}
 
 	PutChar('\n');
-	SynchPutString("On quitte un thread \"fils\"");
+	PutString("On quitte un thread \"fils\"");
 	UserThreadExit();
 }
 
 void test(void *n){
-	SynchPutString("thread test");
+	PutString("thread test");
 	UserThreadExit();
 }

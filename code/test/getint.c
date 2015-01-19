@@ -1,15 +1,14 @@
 #include "syscall.h"
 
 /*
- *  Programme de test de l'appel système SynchGetInt
+ *  Programme de test de l'appel système GetInt
  */
 
 int main()
 {
-	int i;
-	SynchGetInt(&i);
-	SynchPutString("L'entier entre est :");
-	SynchPutInt(i);
+	int i = GetInt();
+	PutString("L'entier entre est :");
+	PutInt(i);
 	return 0;
 
 }
