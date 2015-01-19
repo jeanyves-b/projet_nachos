@@ -1,0 +1,152 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\begin{document}
+
+\title {Pré-Rapport Projet NachOS\newline M1 Informatique}
+\author{Amine Ait-Mouloud, Sébastien Avril,\\* Jean-Yves Bottraud, El Hadji Malick Diagne}
+\date{Janvier 2015}
+\maketitle
+
+\tableofcontents
+
+\section{Fonctionnalités du noyau}
+	Voici les partie que nous avons réussi à implémenter jusque là :
+	\begin{itemize}
+		\item appel system : toutes ces fonction on été porté au niveau utilisateur et sont 'thread safe'. Nous avons aussi utilisé des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran
+		\item threads : toutes les fonctions permettant de créer, détruire et gérer des threads on été porté au niveau utilisateur.
+		\item mémoire virtuel : work in progress (ce sera peut-etre fini d'ici la date de rendue, mais je ne sais pas si nous auront le temps d'en parler ici)
+	\end{itemize}
+	Nous somme actuellement entrain de finr de débugger dette dernière partie.
+
+\section{Spécification des fonctions utilisateur}
+	\subsection{Appels système}
+	\begin{description}
+		\item{NOM :} GetChar
+		\item{SIGNATURE : } char SynchGetChar()
+		\item{DESCRIPTION :}{fonction utilisateur servant à récupérer un caractère. Basé sur la fonction GetChar de la console que l'on sécurise avec un sémaphore pour nous assurer que le caractère a bien été posté avant de continuer le programme.}
+		\item{VALEUR DE RETOUR : } retourne le caractère lu.
+	\end{description}
+	\begin{description}
+		\item{NOM : } GetString
+		\item{SIGNATURE : } void SynchGetString(char *s, int n)
+		\item{DESCRIPTION : } fonction utilisateur servant à récuperer une chaine de caractère. Elle est basé sur la fonction précédente qu'elle répéte au plus n fois, en stockant les caractères ainsi récupéré dans un char* passé en argument.
+	\end{description}
+	\begin{description}
+		\item{NOM : } PutChar
+		\item{SIGNATURE : } void SynchPutChar(const char ch)
+		\item{DECRITPION : } fonction utilisateur servant à afficher un caractère. Basé sur la fonction PutChar de la console sécurisé avec un sémaphore de façon à être sur que l'on attend bien que l'écriture soit finie avant de continuer le programme.
+	\end{description}
+	\begin{description}
+		\item{NOM : } PutString
+		\item{SIGNATURE : } void SynchPutString(const char *s)
+		\item{DESCRIPTION : } fonction utilisateur servant à afficher une chaîne de caractère à l'écran, cette fonction utilise la fonction précédente pour afficher une chaîne caractère par caractère.
+	\end{description}
+
+	\subsection{threads}
+	\begin{description}
+		\item{NOM : } UserThreadCreate
+		\item{SIGNATURE : } int UserThreadCreate(void *f(void*), void* arg)
+		\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument arg.
+		\item{VALEUR DE RETOUR : } identifiant du thread en cas de succès, code d'erreur négatif sinon.
+	\end{description}
+	\begin{description}
+		\item{NOM : } UserThreadExit
+		\item{SIGNATURE : } void UserThreadExit();
+		\item{DESCRIPTION : } cette fonction est utilisée pour tuer le thread courant et nettoyer son espace de travail. Elle attend la fin de tous les threads fils de ce thread avant de terminer son exécution.
+	\end{description}
+	\begin{description}
+		\item{NOM : } UserThreadJoin
+		\item{SIGNATURE : } int UserThreadJoin(int id)
+		\item{DESCRIPTION : } Chaque thread contien un tableau d'id pour pouvoir retrouve facilement tous les threads qui ont été crée et leurs états. Si le thread à attendre est en cours d'exécution, on appelle Sleep et le thread attendu nous réveilleras. Pour faire ceci, nous avons dût rajouter une liste de thread en attente.(pas forcément au bon endroit)
+		\item{VALEUR DE RETOUR : } à completer
+	\end{description}
+
+	\subsection{Mémoire virtuelle}
+
+\section{Test}
+	\subsection{Organisation}
+		{Pour automatiser les tests, nous avons décidé de créer un script qui va lancer nos fichier de test à travers du projet.
+		Nous avons essayer de faire suffisamment de tests pour tester tous les défaut possible du programme, ils sont répartit en une série de fichiers séparé dans des dossiers.
+		Tous nos programme de test son situé dans le dossier code/test. Ils sont classé par étape avec un dossier par étape.}
+
+	\subsection{Utilisation}
+		{Pour lancer les tests, ils suffit d'exécuter le script testpart.sh situer dans le dossier code/test}
+
+	\subsection{Tests effectués et comportements}
+		\subsubsection{Appel système via synchconsole}
+			\begin{itemize}
+				\item une chaine de 1 caractères 			validé : écrit le caractère	correctement à l'écran ou bien dans le fichier de destination
+				\item utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
+				\item ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
+				\item trop de caractères					validé : sépare la chaine écrire en plusieurs chaines de taille équivalante à taillemax (situer dans le fichier .cc)
+				\item pas de caractère 						validé : si rien n'est entrée, rien ne se passe et si on entre juste le caractère retour chariot, il est traité comme n'importe quelle lettre
+				\item arrêt avec EOF 						validé : arrete la lecture de fichier.
+			\end{itemize}
+
+		\subsubsection{Thread}
+			\begin{itemize}
+				\item création d'un thread :
+					\begin{itemize}
+						\item test de création courante 				validé : le thread se crée
+						\item tester toutes les possibilités d'échecs	validé : retourne la bonne erreur
+						\item très grand nombre de threads 				validé : crée le threads normalement jusqu'au moment ou l'on dépasse le nombre maximum de threads. A partir ce cette limite, la fonction retourne une erreur.
+					\end{itemize}
+				\item arreter un thread avec Exit :
+					\begin{itemize}
+						\item vérifier les fuites mémoires		validé : toutes les structures allouées sont bien supprimées
+						\item plus dans l'ordonanceur			validé : l'ordonnanceur n'essaie plus de donner la main à la thread
+						\item état du parent					validé : le parent n'a plus le thread courant dans sa liste et continue de touner correctement
+						\item état des enfants					validé : on attend la fin des enfants avant de supprimer la thread courante. Ce choix est détaillé dans la partie "choix d'implémentation".
+					\end{itemize}
+				\item lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
+			\end{itemize}
+
+		\subsubsection{Virtual memory}
+			\begin{itemize}
+				\item 
+			\end{itemize}
+
+\section{Choix d'implémentation}
+	\subsection{Appels système}
+	    {Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulier.
+	    sécurisation des lecture/écriture pour le multithreading
+		*à décrire*}
+	\subsection{Threads}
+		\subsubsection{La structure thread}
+			\begin{itemize}
+				\item id : son id, permetant d'acceder à son adresse mémoire
+				\item liste de tout ses fils : utilisé pour faire une join sur les fils au moment de UserThreadExit
+			\end{itemize}
+		\subsubsection{Gestion des identifiants de threads et de la pile}
+			{Deux identifiants:}
+			\begin{itemize}
+				\item{un identifiant unique: unique parmi tous les threads du processus.}
+				\item{un identifiant en pile : pour les processus actifs.}
+			\end{itemize}
+			{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Pour stocker ces identifiants, nous avons utilisé un tableau d'identifiants de pile où chaque case contient un booléen représentant si l'espace mémoire associé dans la pile est utilisé par un thread (true) ou pas (false). }
+			{Un thread demande un espace dans la pile à sa création, et le libérera lors de l'appel à do\_UserThreadExit. L'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau. Il est possible de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile, et un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en $pile + 2 (x)$ où si.}
+				\begin{itemize}
+					\item{x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé.}
+					\item{x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais s'est terminé.}
+					\item{x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'exécution, et sa pile est dans le bloc (x - 2)}
+				\end{itemize}
+		\subsubsection{Implementation du join}
+			structures : vecteur séquentiel contenant la liste des threads en attente et l'identifiant des threads qu'ils attend
+				\begin{itemize}
+					\item élement who : Thread qui attend
+					\item élement forId : identifiant du thread que who doit attendre
+				\end{itemize}
+			dès l'appel à join du thread d'id x, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant appel la fonction Sleep. Elle l'enlevera de la liste d'attente du scheduler pour ne pas le réveiller inutilement, c'est le thread sur lequel le join a été effectué qui reveillera ce thread lors de son appel a UserThreadExit
+
+	\subsection{Mémoire virtuelle}
+		\paragraph{}
+
+\section{Organisation du travail}
+	\subsection{Fonctionement du groupe}
+	\subsection{Planning}
+
+\end{document}
