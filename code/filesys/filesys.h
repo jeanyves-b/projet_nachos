@@ -82,13 +82,15 @@ class FileSystem {
 		OpenFile* Open(const char *name); 	// Open a file (UNIX open)
 
 		bool Remove(const char *name); 	// Delete a file (UNIX unlink)
+		
+		void Cd(const char* name);
 
 		void List();			// List all the files in the file system
 
 		void Print();			// List all the files and their contents
 
 	private:
-		void InitializeDir(int);
+		void InitializeDir(int,int);
 	  
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file

@@ -61,7 +61,8 @@ class Directory {
 
 		int Find(const char *name);		// Find the sector number of the 
 		// FileHeader for file: "name"
-
+		int FindDir(const char* name);
+		
 		bool Add(const char *name, int newSector);  // Add a file name into the directory
 		bool AddDir(const char *name, int newSector);
 

@@ -239,6 +239,12 @@ ExceptionHandler (ExceptionType which)
 						machine->WriteRegister(2,fileSystem->CreateDir(buf));
 						break;
 				    }
+			case SC_Cd:{
+						char buf[MaxStringSize];
+						copyStringFromMachine(machine->ReadRegister(4),buf,MaxStringSize);
+						fileSystem->Cd(buf);
+						break;
+			}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
 					 ASSERT(FALSE);

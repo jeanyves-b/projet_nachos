@@ -42,6 +42,7 @@
 #define SC_ForkExec		21 
 #define SC_GetPid		22
 #define SC_MkDir		23
+#define SC_Cd			25
 
 #ifdef IN_USER_MODE
 
@@ -162,6 +163,9 @@ int GetPid();
 
 /*create a directory*/
 int mkdir(char* name);
+
+/*move to a directory*/
+void cd (char* name);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

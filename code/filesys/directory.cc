@@ -116,6 +116,16 @@ Directory::Find(const char *name)
 	return -1;
 }
 
+int
+Directory::FindDir(const char *name){
+  int i = FindIndex(name);
+
+	if (i != -1)
+	  if (table[i].isDir)
+		return table[i].sector;
+	return -1;
+}
+
 
 //----------------------------------------------------------------------
 // Directory::Add
@@ -191,8 +201,13 @@ Directory::Remove(const char *name)
 Directory::List()
 {
 	for (int i = 0; i < tableSize; i++)
-		if (table[i].inUse)
-			printf("%s\n", table[i].name);
+		if (table[i].inUse){
+			printf("%s", table[i].name);
+			if (table[i].isDir){
+			  printf("\tDir");
+			}
+			printf("\n");
+		}
 }
 
 //----------------------------------------------------------------------
