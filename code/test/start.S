@@ -219,6 +219,22 @@ rmdir:
 	j	$31
 	.end rmdir	
 
+	.globl mkfile
+	.ent	mkfile
+mkfile:
+	addiu $2,$0,SC_MkFile
+	syscall
+	j	$31
+	.end mkfile	
+
+	.globl rmfile
+	.ent	rmfile
+rmfile:
+	addiu $2,$0,SC_RmFile
+	syscall
+	j	$31
+	.end rmfile		
+
 	.globl cd
 	.ent	cd
 cd:
