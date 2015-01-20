@@ -219,6 +219,14 @@ rmdir:
 	j	$31
 	.end rmdir	
 
+	.globl cd
+	.ent	cd
+cd:
+	addiu $2,$0,SC_Cd
+	syscall
+	j	$31
+	.end cd
+
 	.globl Close
 	.ent	Close
 Close:

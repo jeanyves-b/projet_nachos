@@ -114,13 +114,16 @@ FileSystem::FileSystem(bool format)
 
 		freeMapFile = new OpenFile(FreeMapSector);
 		directoryFile = new OpenFile(DirectorySector);
+		
+		//Now we add the directory '.' to the root directory
+		directory->AddDir(".",DirectorySector);
 
 		// Once we have the files "open", we can write the initial version
 		// of each file back to disk.  The directory at this point is completely
 		// empty; but the bitmap has been changed to reflect the fact that
 		// sectors on the disk have been allocated for the file headers and
 		// to hold the file data for the directory and bitmap.
-
+		
 		DEBUG('f', "Writing bitmap and directory back to disk.\n");
 		freeMap->WriteBack(freeMapFile);	 // flush changes to disk
 		directory->WriteBack(directoryFile);
@@ -244,12 +247,13 @@ FileSystem::CreateDir(const char *name)
 			if (!hdr->Allocate(freeMap, DirectoryFileSize))
 				success = FALSE;	// no space on disk for data
 			else {	
+				int parentSector = dir->Find(".");
 				success = TRUE;
 				// everthing worked, flush all changes back to disk
 				hdr->WriteBack(sector); 		
 				dir->WriteBack(currentDir);
 				freeMap->WriteBack(freeMapFile);
-				InitializeDir(sector);
+				InitializeDir(sector,parentSector);
 			}
 			delete hdr;
 		}
@@ -260,9 +264,12 @@ FileSystem::CreateDir(const char *name)
 }
 
 void
-FileSystem::InitializeDir(int sector){
-  OpenFile* file = new OpenFile(sector);
+FileSystem::InitializeDir(int childSector,int parentSector){
+  OpenFile* file = new OpenFile(childSector);
   Directory* dir = new Directory(NumDirEntries);
+  ASSERT(NumDirEntries >= 2);
+  dir->AddDir(".", childSector);
+  dir->AddDir("..",parentSector);
   
   dir->WriteBack(file);
 }
@@ -338,7 +345,27 @@ FileSystem::Remove(const char *name)
 	delete directory;
 	delete freeMap;
 	return TRUE;
-} 
+}
+
+void
+FileSystem::Cd(const char* name){
+  int sector;
+  Directory* dir =new Directory(NumDirEntries);
+  dir->FetchFrom(currentDir);
+  sector= dir->FindDir(name);
+  if (sector == -1){
+    printf("error\n");
+  }else{
+    if (currentDir != directoryFile){
+      delete currentDir;
+    }
+    currentDir = new OpenFile(sector);
+    printf("Now in %s\n",name);
+    List();
+  }
+  delete dir;
+}
+  
 
 // remove directory
 

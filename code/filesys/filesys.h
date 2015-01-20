@@ -85,12 +85,14 @@ class FileSystem {
 		
 		bool RemoveDir(const char *name); // delete a directory
 
+		void Cd(const char* name);
+
 		void List();			// List all the files in the file system
 
 		void Print();			// List all the files and their contents
 
 	private:
-		void InitializeDir(int);
+		void InitializeDir(int,int);
 	  
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file
