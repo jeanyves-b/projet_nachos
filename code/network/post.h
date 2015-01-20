@@ -40,7 +40,7 @@ typedef int MailBoxAddress;
 typedef enum { MSG, ACK } MessageType;
 
 #define TEMPO 3.0
-#define MAXREEMISSIONS 5u
+#define MAXREEMISSIONS 50u
 
 // The following class defines part of the message header.  
 // This is prepended to the message by the PostOffice, before the message 
@@ -164,6 +164,7 @@ class PostOffice {
 		Semaphore *ackDone;
 		Lock *messagePendingLock;
 		bool hasMessagePending;
+		bool isResending;
 
 };
 

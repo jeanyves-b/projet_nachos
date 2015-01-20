@@ -122,7 +122,7 @@ Network::Send(PacketHeader hdr, char* data)
 	*(PacketHeader *)buffer = hdr;
 	bcopy(data, buffer + sizeof(PacketHeader), hdr.length);
 	SendToSocket(sock, buffer, MaxWireSize, toName);
-	delete []buffer;
+	delete [] buffer;
 }
 
 // read a packet, if one is buffered

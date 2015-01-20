@@ -196,6 +196,7 @@ PostOffice::PostOffice(NetworkAddress addr, double reliability, int nBoxes)
 	checkAck = new Semaphore("check if recieved an ack", 0);
 	ackDone = new Semaphore("check for ack done", 0);
 	hasMessagePending = false;
+	isResending = false;
 	messagePendingLock = new Lock("Checking lock");
 	
 	// Forth, initialize the network; tell it which interrupt handlers to call
@@ -238,6 +239,10 @@ PostOffice::PostalSender() {
 	unsigned tryCount ; 		// L
 	for(;;) {
 		startResendingMsg->P();
+		messagePendingLock->Acquire();
+		isResending = true;
+		messagePendingLock->Release();
+		
 		time(&lastTry);
 		tryCount = 1;
 		while(tryCount < MAXREEMISSIONS) {
@@ -250,6 +255,9 @@ PostOffice::PostalSender() {
 				startResendingMsg->P();
 				
 				if (waitingForAck == NULL) {
+					messagePendingLock->Acquire();
+					isResending = false;
+					messagePendingLock->Release();
 					ackDone->V();
 					break;
 				}
@@ -274,6 +282,9 @@ PostOffice::PostalSender() {
 			delete waitingForAck;
 			waitingForAck = NULL; 
 
+			messagePendingLock->Acquire();
+			isResending = false;
+			messagePendingLock->Release();
 			ackDone->V();
 		} else {
 			startResendingMsg->V();
@@ -311,12 +322,16 @@ PostOffice::PostalDelivery()
 			printf("Putting mail into mailbox: ");
 			PrintHeader(pktHdr, mailHdr);
 		}
-
-		// check that arriving message is legal!
-		ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
-		ASSERT(mailHdr.length <= MaxMailSize);
 		
-		checkAck->P();
+		messagePendingLock->Acquire();
+		if (isResending) {
+			messagePendingLock->Release();
+			checkAck->P();
+		} else {
+			messagePendingLock->Release();
+		}
+		
+		//	Renvoyer un acquittement si on reçoit un message normal		
 		if (mailHdr.type == ACK) {
 			if (waitingForAck != NULL) {
 				if (waitingForAck->mailHdr.id == mailHdr.id) {
@@ -327,27 +342,34 @@ PostOffice::PostalDelivery()
 					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
 			}	
-		}
-		startResendingMsg->V();
-		//	Renvoyer un acquittement si on reçoit un message normal
-		if(mailHdr.type == MSG) {
-			if (DebugIsEnabled('n')) {
-				printf("Sending ACK for message: ");
-				PrintHeader(pktHdr, mailHdr);
-			}
-			PacketHeader ackPHdr; 
-			MailHeader ackMHdr;
+		} else if(mailHdr.type == MSG) {
+				if (DebugIsEnabled('n')) {
+					printf("Sending ACK for message: ");
+					PrintHeader(pktHdr, mailHdr);
+				}
+				PacketHeader ackPHdr; 
+				MailHeader ackMHdr;
+				
+				ackPHdr.to = pktHdr.from;
+				ackPHdr.from = netAddr;
+				ackPHdr.length = 1;
+				
+				ackMHdr.to = mailHdr.from;
+				ackMHdr.from = mailHdr.to;
+				ackMHdr.type = ACK;
+				ackMHdr.id = mailHdr.id;
+				ackMHdr.length = 1;
+				this->Send(ackPHdr, ackMHdr, "");
 			
-			ackPHdr.to = pktHdr.from;
-			ackPHdr.from = netAddr;
-			ackPHdr.length = 1;
-			
-			ackMHdr.to = mailHdr.from;
-			ackMHdr.from = mailHdr.to;
-			ackMHdr.type = ACK;
-			ackMHdr.id = mailHdr.id;
-			ackMHdr.length = 1;
-			this->Send(ackPHdr, ackMHdr, "");
+		} 
+		
+		messagePendingLock->Acquire();
+		hasMessagePending = false;
+		if (isResending) {
+			messagePendingLock->Release();
+			startResendingMsg->V();
+		} else {
+			messagePendingLock->Release();
 		}
 		
 		
@@ -420,7 +442,6 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	}
 	ASSERT(mailHdr.length <= MaxMailSize);
 	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
-	
 	
 	mailHdr.type = MSG; // message normal
 	mailHdr.id = numMsgs++; // attribution d'un identfiant

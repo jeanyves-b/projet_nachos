@@ -47,13 +47,18 @@ MailTest(int farAddr)
 	outMailHdr.from = 1;
 	outMailHdr.length = strlen(data) + 1;
 
+	if (farAddr==1)
 	// Send the first message
-	postOffice->SendSafe(outPktHdr, outMailHdr, data); 
+		postOffice->SendSafe(outPktHdr, outMailHdr, data); 
 
 	// Wait for the first message from the other machine
 	postOffice->Receive(0, &inPktHdr, &inMailHdr, buffer);
 	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from);
 	fflush(stdout);
+	
+	if (farAddr!=1)
+	// Send the first message
+		postOffice->SendSafe(outPktHdr, outMailHdr, data);
 
 	/* // Send acknowledgement to the other machine (using "reply to" mailbox
 	// in the message that just arrived
@@ -62,7 +67,7 @@ MailTest(int farAddr)
 	outMailHdr.length = strlen(ack) + 1;
 	postOffice->Send(outPktHdr, outMailHdr, ack); 
 
-	// Wait for the ack from the other machine to the first message we sent.
+	//Wait for the ack from the other machine to the first message we sent.
 	postOffice->Receive(1, &inPktHdr, &inMailHdr, buffer);
 	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from); 
 	fflush(stdout); */
