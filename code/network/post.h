@@ -31,10 +31,16 @@
 #include "network.h"
 #include "synchlist.h"
 #include "thread.h"
+#include <time.h>
 
 // Mailbox address -- uniquely identifies a mailbox on a given machine.
 // A mailbox is just a place for temporary storage for messages.
 typedef int MailBoxAddress;
+
+typedef enum { MSG, ACK } MessageType;
+
+#define TEMPO 3.0
+#define MAXREEMISSIONS 5u
 
 // The following class defines part of the message header.  
 // This is prepended to the message by the PostOffice, before the message 
@@ -46,13 +52,16 @@ class MailHeader {
 		MailBoxAddress from;	// Mail box to reply to
 		unsigned length;		// Bytes of message data (excluding the 
 		// mail header)
+		MessageType type; 		// Type du message (acquittement ACK ou normal MSG)
+		unsigned id;			// Identifiant associé au message (ml'acquittement retournera cet identifiant)
+		time_t lastTry;			// Le temps de la dernière fois que l'on a tenté d'envoyer le message
+		unsigned tryCount; 		// Le nombre d'essais d'envoi du message effectués
 };
 
 // Maximum "payload" -- real data -- that can included in a single message
 // Excluding the MailHeader and the PacketHeader
 
 #define MaxMailSize 	(MaxPacketSize - sizeof(MailHeader))
-
 
 // The following class defines the format of an incoming/outgoing 
 // "Mail" message.  The message format is layered: 
@@ -62,13 +71,14 @@ class MailHeader {
 
 class Mail {
 	public:
-		Mail(PacketHeader pktH, MailHeader mailH, char *msgData);
+		Mail(PacketHeader pktH, MailHeader mailH, const char *msgData);
 		// Initialize a mail message by
 		// concatenating the headers to the data
 
 		PacketHeader pktHdr;	// Header appended by Network
 		MailHeader mailHdr;	// Header appended by PostOffice
 		char data[MaxMailSize];	// Payload -- message data
+		
 };
 
 // The following class defines a single mailbox, or temporary storage
@@ -112,6 +122,12 @@ class PostOffice {
 		// Send a message to a mailbox on a remote 
 		// machine.  The fromBox in the MailHeader is 
 		// the return box for ack's.
+		
+		void SendMail(Mail *mail) {
+			this->Send(mail->pktHdr, mail->mailHdr, mail->data);
+		}
+		
+		void SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
 
 		void Receive(int box, PacketHeader *pktHdr, 
 				MailHeader *mailHdr, char *data);
@@ -140,6 +156,9 @@ class PostOffice {
 		Semaphore *messageAvailable;// V'ed when message has arrived from network
 		Semaphore *messageSent;	// V'ed when next message can be sent to network
 		Lock *sendLock;		// Only one outgoing message at a time
+		unsigned numMsgs; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
+		Mail *waitingForAck; // Le message qui est entrain d'attendre son acquittement
+		List *waitingToSend;	// La liste des messages qui seront en attente de leur acquittement
 };
 
 #endif
