@@ -127,8 +127,7 @@ Scheduler::Run (Thread * nextThread)
 	// point, we were still running on the old thread's stack!
 	if (threadToBeDestroyed != NULL)
 	{	
-
-		if (threadToBeDestroyed->space->StackIsEmpty()) {
+		if (threadToBeDestroyed->space != NULL && threadToBeDestroyed->space->StackIsEmpty()) {
 			delete threadToBeDestroyed->space;
 		}
 		delete threadToBeDestroyed;

@@ -79,8 +79,8 @@ MailBox::~MailBox()
 	static void 
 PrintHeader(PacketHeader pktHdr, MailHeader mailHdr)
 {
-	printf("From (%d, %d) to (%d, %d) bytes %dn id %d\n",
-			pktHdr.from, mailHdr.from, pktHdr.to, mailHdr.to, mailHdr.length, mailHdr.id);
+	printf("From (%d, %d) to (%d, %d) bytes %d, id %d (%s)\n",
+			pktHdr.from, mailHdr.from, pktHdr.to, mailHdr.to, mailHdr.length, mailHdr.id, (mailHdr.type==ACK?"ACK":"MSG"));
 }
 
 //----------------------------------------------------------------------
@@ -141,7 +141,8 @@ MailBox::Get(PacketHeader *pktHdr, MailHeader *mailHdr, char *data)
 //----------------------------------------------------------------------
 // PostalHelper, ReadAvail, WriteDone
 // 	Dummy functions because C++ can't indirectly invoke member functions
-//	The first is forked as part of the "postal worker thread; the
+//	The first is forked as part of the "postal worker thread; the second
+//	as part of the "postal resender" thread; and the
 //	later two are called by the network interrupt handler.
 //
 //	"arg" -- pointer to the Post Office managing the Network
@@ -149,6 +150,8 @@ MailBox::Get(PacketHeader *pktHdr, MailHeader *mailHdr, char *data)
 
 static void PostalHelper(int arg)
 { PostOffice* po = (PostOffice *) arg; po->PostalDelivery(); }
+static void PostalResender(int arg)
+{ PostOffice* po = (PostOffice *) arg; po->PostalSender(); }
 static void ReadAvail(int arg)
 { PostOffice* po = (PostOffice *) arg; po->IncomingPacket(); }
 static void WriteDone(int arg)
@@ -188,7 +191,12 @@ PostOffice::PostOffice(NetworkAddress addr, double reliability, int nBoxes)
 	// Troisièmement, initialiser les différentes structures du protocole
 	numMsgs = 0;
 	waitingForAck = NULL;
-	waitingToSend = new List;
+	
+	startResendingMsg = new Semaphore("message pending to resend", 0);
+	checkAck = new Semaphore("check if recieved an ack", 0);
+	ackDone = new Semaphore("check for ack done", 0);
+	hasMessagePending = false;
+	messagePendingLock = new Lock("Checking lock");
 	
 	// Forth, initialize the network; tell it which interrupt handlers to call
 	network = new Network(addr, reliability, ReadAvail, WriteDone, (int) this);
@@ -196,9 +204,13 @@ PostOffice::PostOffice(NetworkAddress addr, double reliability, int nBoxes)
 
 	// Finally, create a thread whose sole job is to wait for incoming messages,
 	//   and put them in the right mailbox. 
-	Thread *t = new Thread("postal worker");
+	Thread *t_worker = new Thread("postal worker");
+	Thread *t_sender = new Thread("postal resender");
+	t_worker->id = -1;
+	t_sender->id = -2;
 
-	t->Fork(PostalHelper, (int) this);
+	t_worker->Fork(PostalHelper, (int) this);
+	t_sender->Fork(PostalResender, (int) this);
 }
 
 //----------------------------------------------------------------------
@@ -217,6 +229,60 @@ PostOffice::~PostOffice()
 
 //----------------------------------------------------------------------
 // PostOffice::PostalDelivery
+// 	Vérifie s'il y a un message qui doit être (re)transmis, et il le fait.
+//
+//---------------------------------------
+	void
+PostOffice::PostalSender() {
+	time_t lastTry;			// Le temps de la dernière fois que l'on a tenté d'envoyer le message
+	unsigned tryCount ; 		// L
+	for(;;) {
+		startResendingMsg->P();
+		time(&lastTry);
+		tryCount = 1;
+		while(tryCount < MAXREEMISSIONS) {
+			messagePendingLock->Acquire();
+			if (hasMessagePending) {
+				hasMessagePending = false;
+				messagePendingLock->Release();
+				
+				checkAck->V();
+				startResendingMsg->P();
+				
+				if (waitingForAck == NULL) {
+					ackDone->V();
+					break;
+				}
+			} else {
+				messagePendingLock->Release();
+			}
+			
+			if (waitingForAck != NULL && difftime(time(NULL), lastTry) >= TEMPO) {
+				DEBUG('n', "Le message #%d n'a pas été acquitté après %.2lf secondes, il est retransmis (essai n°%d).\n", 
+					waitingForAck->mailHdr.id, TEMPO, tryCount+1);
+				tryCount++;	
+				time(&lastTry);
+				
+				this->SendMail(waitingForAck);
+			}
+		} 
+		
+		if (tryCount == MAXREEMISSIONS) {
+			DEBUG('n', "Le message #%d n'a pas été acquitté après %.2lf secondes, il a été détruit.\n", 
+				waitingForAck->mailHdr.id, MAXREEMISSIONS*TEMPO);
+					
+			delete waitingForAck;
+			waitingForAck = NULL; 
+
+			ackDone->V();
+		} else {
+			startResendingMsg->V();
+		}
+	}
+}
+
+//----------------------------------------------------------------------
+// PostOffice::PostalDelivery
 // 	Wait for incoming messages, and put them in the right mailbox.
 //
 //      Incoming messages have had the PacketHeader stripped off,
@@ -230,36 +296,14 @@ PostOffice::PostalDelivery()
 	MailHeader mailHdr;
 	char *buffer = new char[MaxPacketSize];
 
-	for (;;) {
-		//	Retransmission ou destruction de messages en attente d'acquittement
-		if (difftime(time(NULL), waitingForAck->mailHdr.lastTry) >= TEMPO) {
-			if (waitingForAck->mailHdr.tryCount <= MAXREEMISSIONS) {
-				DEBUG('n', "Le message #%d n'a pas été acquitté après %.2lf secondes, il est retransmis (nombre essais: %d).\n", 
-					waitingForAck->mailHdr.id, TEMPO, waitingForAck->mailHdr.tryCount);
-				
-				time(&(waitingForAck->mailHdr.lastTry));
-				waitingForAck->mailHdr.tryCount++;
-				this->SendMail(waitingForAck);
-				
-			} else {
-				DEBUG('n', "Le message #%d n'a pas été acquitté après %d essais, il a été détruit.\n", 
-					waitingForAck->mailHdr.id, MAXREEMISSIONS);
-					
-				delete waitingForAck;
-				waitingForAck = NULL;
-				
-				//	S'il y a une message prêt à être envoyé, l'envoyer
-				if (!waitingToSend->IsEmpty()) {
-					waitingForAck = (Mail*)waitingToSend->Remove();
-					waitingForAck->mailHdr.tryCount++;
-					time(&(waitingForAck->mailHdr.lastTry));
-					this->SendMail(waitingForAck);
-				}
-			}
-		}
-		
+	for (;;) {		
 		// first, wait for a message
 		messageAvailable->P();	
+		
+		messagePendingLock->Acquire();
+		hasMessagePending = true;
+		messagePendingLock->Release();
+		
 		pktHdr = network->Receive(buffer);
 
 		mailHdr = *(MailHeader *)buffer;
@@ -272,32 +316,40 @@ PostOffice::PostalDelivery()
 		ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
 		ASSERT(mailHdr.length <= MaxMailSize);
 		
-		if (waitingForAck != NULL) {
-			if (mailHdr.type == ACK && waitingForAck->mailHdr.id == mailHdr.id) {
-				DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
-				delete waitingForAck;
-				waitingForAck = NULL;
-				
-				//	S'il y a une message prêt à être envoyé, l'envoyer
-				if (!waitingToSend->IsEmpty()) {
-					waitingForAck = (Mail*)waitingToSend->Remove();
-					waitingForAck->mailHdr.tryCount++;
-					time(&(waitingForAck->mailHdr.lastTry));
-					this->SendMail(waitingForAck);
+		checkAck->P();
+		if (mailHdr.type == ACK) {
+			if (waitingForAck != NULL) {
+				if (waitingForAck->mailHdr.id == mailHdr.id) {
+					DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
+					delete waitingForAck;
+					waitingForAck = NULL;
+				} else {
+					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
-			} else {
-				//	Renvoyer un acquittement si on reçoit un message normal
-				if(mailHdr.type == MSG) {
-					MailBoxAddress tmp = mailHdr.to;
-					pktHdr.to = pktHdr.from;
-					mailHdr.to = mailHdr.from;
-					pktHdr.from = netAddr;
-					mailHdr.from = tmp;
-					mailHdr.type = ACK;
-					this->Send(pktHdr, mailHdr, "");
-				}
-			}
+			}	
 		}
+		startResendingMsg->V();
+		//	Renvoyer un acquittement si on reçoit un message normal
+		if(mailHdr.type == MSG) {
+			if (DebugIsEnabled('n')) {
+				printf("Sending ACK for message: ");
+				PrintHeader(pktHdr, mailHdr);
+			}
+			PacketHeader ackPHdr; 
+			MailHeader ackMHdr;
+			
+			ackPHdr.to = pktHdr.from;
+			ackPHdr.from = netAddr;
+			ackPHdr.length = 1;
+			
+			ackMHdr.to = mailHdr.from;
+			ackMHdr.from = mailHdr.to;
+			ackMHdr.type = ACK;
+			ackMHdr.id = mailHdr.id;
+			ackMHdr.length = 1;
+			this->Send(ackPHdr, ackMHdr, "");
+		}
+		
 		
 		// put into mailbox
 		boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
@@ -358,11 +410,36 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	void
 PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 {
+	
+	char* buffer = new char[MaxPacketSize];	// space to hold concatenated
+	// mailHdr + data
+
 	if (DebugIsEnabled('n')) {
-		printf("Asking to send: ");
+		printf("Sending with ACK request: ");
 		PrintHeader(pktHdr, mailHdr);
 	}
 	ASSERT(mailHdr.length <= MaxMailSize);
+	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
+	
+	
+	mailHdr.type = MSG; // message normal
+	mailHdr.id = numMsgs++; // attribution d'un identfiant
+	
+	waitingForAck = new Mail(pktHdr, mailHdr, data);
+	
+	this->SendMail(waitingForAck);
+	
+	// réveillier le sender
+	startResendingMsg->V(); 
+	
+	ackDone->P();
+
+	sendLock->Release();
+
+	delete [] buffer;			// we've sent the message, so
+	// we can delete our buffer
+	
+	/* ASSERT(mailHdr.length <= MaxMailSize);
 	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes); 
 
 	// fill in pktHdr, for the Network layer
@@ -377,9 +454,14 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	}
 	else {
 		mailHdr.tryCount = 0;
+		if (DebugIsEnabled('n')) {
+			printf("Pending send: ");
+			PrintHeader(pktHdr, mailHdr);
+		}
+		
 		Mail *message = new Mail(pktHdr, mailHdr, data);
 		waitingToSend->Append((void*)message); 
-	}
+	} */
 }
 
 //----------------------------------------------------------------------

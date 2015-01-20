@@ -54,8 +54,6 @@ class MailHeader {
 		// mail header)
 		MessageType type; 		// Type du message (acquittement ACK ou normal MSG)
 		unsigned id;			// Identifiant associé au message (ml'acquittement retournera cet identifiant)
-		time_t lastTry;			// Le temps de la dernière fois que l'on a tenté d'envoyer le message
-		unsigned tryCount; 		// Le nombre d'essais d'envoi du message effectués
 };
 
 // Maximum "payload" -- real data -- that can included in a single message
@@ -133,6 +131,9 @@ class PostOffice {
 				MailHeader *mailHdr, char *data);
 		// Retrieve a message from "box".  Wait if
 		// there is no message in the box.
+		
+		void PostalSender();	// Vérifie s'il y a des messages
+		// à (re)transmettre, et le fait si c'est le cas.
 
 		void PostalDelivery();	// Wait for incoming messages, 
 		// and then put them in the correct mailbox
@@ -158,7 +159,12 @@ class PostOffice {
 		Lock *sendLock;		// Only one outgoing message at a time
 		unsigned numMsgs; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
 		Mail *waitingForAck; // Le message qui est entrain d'attendre son acquittement
-		List *waitingToSend;	// La liste des messages qui seront en attente de leur acquittement
+		Semaphore *checkAck;	
+		Semaphore *startResendingMsg;
+		Semaphore *ackDone;
+		Lock *messagePendingLock;
+		bool hasMessagePending;
+
 };
 
 #endif
