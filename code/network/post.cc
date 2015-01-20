@@ -433,9 +433,6 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 {
 	
-	char* buffer = new char[MaxPacketSize];	// space to hold concatenated
-	// mailHdr + data
-
 	if (DebugIsEnabled('n')) {
 		printf("Sending with ACK request: ");
 		PrintHeader(pktHdr, mailHdr);
@@ -446,6 +443,7 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	mailHdr.type = MSG; // message normal
 	mailHdr.id = numMsgs++; // attribution d'un identfiant
 	
+	sendLock->Acquire();
 	waitingForAck = new Mail(pktHdr, mailHdr, data);
 	
 	this->SendMail(waitingForAck);
@@ -457,32 +455,7 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 
 	sendLock->Release();
 
-	delete [] buffer;			// we've sent the message, so
-	// we can delete our buffer
-	
-	/* ASSERT(mailHdr.length <= MaxMailSize);
-	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes); 
 
-	// fill in pktHdr, for the Network layer
-	mailHdr.type = MSG;
-	mailHdr.id = numMsgs++;
-	
-	if (waitingForAck == NULL) {
-		time(&(mailHdr.lastTry));
-		mailHdr.tryCount = 1;
-		waitingForAck = new Mail(pktHdr, mailHdr, data);
-		this->Send(pktHdr, mailHdr,data);
-	}
-	else {
-		mailHdr.tryCount = 0;
-		if (DebugIsEnabled('n')) {
-			printf("Pending send: ");
-			PrintHeader(pktHdr, mailHdr);
-		}
-		
-		Mail *message = new Mail(pktHdr, mailHdr, data);
-		waitingToSend->Append((void*)message); 
-	} */
 }
 
 //----------------------------------------------------------------------

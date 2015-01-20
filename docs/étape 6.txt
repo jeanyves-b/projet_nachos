@@ -1,0 +1,22 @@
+Implémentation de solution de transfert fiable de paquets:
+	Envoi de message synchrone:
+		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois.
+		Un seul message peut attendre un acquittement en même temps.
+	Mettre type de message dans son header
+		MSG : Message normal
+		ACK : Message d'acquittement
+	Démons:
+		Existant: Démon de récéption:
+			Retransmets un ACK si c'est un MSG
+			Si c'est un ACK vérifie que c'est bien celui du message en cours d'attente d'acquittement.
+				Si c'est le cas, finir la tentative d'attente
+		Créé: Démon de retransmission
+			Bloqué au départ, et lancé dès qu'on tente d'envoyer un message et rebloqué lorsque la tentative se fini.
+			Retransmets le message en attente d'un ACK toutes les TEMPO secondes MAXREEMISSIONS fois jusqu'à ce que 
+	Utilisation de SendSafe au lieu de Send
+		Tente un premier envoi
+		Mets le message envoyé en attente d'un ACK
+		Un seul envoi possible en même temps.
+	Faiblesse:
+		Les ACK peuvent être perdus facilement, et si une machine s'éteint en ayant envoyé un ACK qui sera perdu, 
+			l'expéditeur retentera toujours d'envoyer le message
