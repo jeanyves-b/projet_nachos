@@ -210,6 +210,14 @@ mkdir:
 	syscall
 	j	$31
 	.end mkdir
+	
+	.globl rmdir
+	.ent	rmdir
+rmdir:
+	addiu $2,$0,SC_RmDir
+	syscall
+	j	$31
+	.end rmdir	
 
 	.globl Close
 	.ent	Close

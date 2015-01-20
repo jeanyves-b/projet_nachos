@@ -216,3 +216,19 @@ Directory::Print()
 	printf("\n");
 	delete hdr;
 }
+
+//----------------------------------------------------------------------
+// Directory::isEmpty
+// 	renvoie vrai si le repertoire est vide et false sinon 
+//----------------------------------------------------------------------
+
+	bool
+Directory::isEmpty()
+{
+	for (int i = 0; i < tableSize; i++)
+		if (table[i].inUse)
+			return false;
+	
+	return true;		
+}
+

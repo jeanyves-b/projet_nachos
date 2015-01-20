@@ -190,6 +190,7 @@ FileSystem::Create(const char *name, int initialSize)
 	else {	
 		freeMap = new BitMap(NumSectors);
 		freeMap->FetchFrom(freeMapFile);
+		freeMap->Print();
 		sector = freeMap->Find();	// find a sector to hold the file header
 		if (sector == -1) 		
 			success = FALSE;		// no free block for file header 
@@ -236,7 +237,7 @@ FileSystem::CreateDir(const char *name)
 		sector = freeMap->Find();	// find a sector to hold the file header
 		if (sector == -1) 		
 			success = FALSE;		// no free block for file header 
-		else if (!dir->Add(name, sector))
+		else if (!dir->AddDir(name, sector))
 			success = FALSE;	// no space in directory
 		else {
 			hdr = new FileHeader;
@@ -338,6 +339,62 @@ FileSystem::Remove(const char *name)
 	delete freeMap;
 	return TRUE;
 } 
+
+// remove directory
+
+	bool
+FileSystem::RemoveDir(const char *name)
+{ 
+	Directory *directory;
+	Directory *dirToDelete;
+	BitMap *freeMap;
+	FileHeader *fileHdr;
+	OpenFile* dir;
+	int sector;
+
+	directory = new Directory(NumDirEntries);
+	directory->FetchFrom(currentDir);
+	sector = directory->Find(name);
+	
+	if (sector == -1) {
+		delete directory;
+		return FALSE;			 // file not found 
+	}
+	
+	dir = new OpenFile(sector);
+	dirToDelete = new Directory(NumDirEntries);
+	dirToDelete->FetchFrom(dir);
+	
+	if ( !dirToDelete->isEmpty() ){ // teste si le repertoire est vide
+			delete directory;
+			delete dir;
+			delete dirToDelete;
+			return false;  
+		}
+		
+	
+	fileHdr = new FileHeader;
+	fileHdr->FetchFrom(sector);
+
+	freeMap = new BitMap(NumSectors);
+	freeMap->FetchFrom(freeMapFile);
+
+	fileHdr->Deallocate(freeMap);  		// remove data blocks
+	freeMap->Clear(sector);			// remove header block
+	directory->Remove(name);
+
+	freeMap->WriteBack(freeMapFile);		// flush to disk
+	directory->WriteBack(currentDir);        // flush to disk
+	delete fileHdr;
+	delete directory;
+	delete dir;
+	delete dirToDelete;
+	delete freeMap;
+	return TRUE;
+} 
+
+// end remove dir
+
 
 //----------------------------------------------------------------------
 // FileSystem::List
