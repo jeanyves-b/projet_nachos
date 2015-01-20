@@ -44,6 +44,8 @@
 #define SC_MkDir		23
 #define SC_RmDir		24
 #define SC_Cd			25
+#define SC_MkFile		26
+#define SC_RmFile		27
 
 #ifdef IN_USER_MODE
 
@@ -165,9 +167,14 @@ int GetPid();
 /*create a directory*/
 int mkdir(char* name);
 
-
-/*create a directory*/
+/*remove a directory*/
 int rmdir(char* name);
+
+/*create a file*/
+int mkfile(char* name, int initialSize);
+
+/*remove a file*/
+int rmfile(char* name);
 
 /*move to a directory*/
 void cd (char* name);
