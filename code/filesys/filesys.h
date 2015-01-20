@@ -85,7 +85,7 @@ class FileSystem {
 		
 		bool RemoveDir(const char *name); // delete a directory
 
-		void Cd(const char* name);
+		int Cd(const char* name);
 
 		void List();			// List all the files in the file system
 
@@ -93,12 +93,13 @@ class FileSystem {
 
 	private:
 		void InitializeDir(int,int);
-	  
+		 OpenFile* MoveTo(const char* name,char* s);
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file
 		OpenFile* directoryFile;		// "Root" directory -- list of 
 		// file names, represented as a file
-		OpenFile* currentDir;
+		OpenFile* currentDir; //the current directory
+		
 };
 
 #endif // FILESYS

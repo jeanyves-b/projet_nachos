@@ -3,7 +3,7 @@
 	int
 main ()
 {
-	SpaceId newProc;
+	int newProc;
 	char prompt[2], buffer[60];
 	int i;
 
@@ -31,8 +31,7 @@ main ()
 
 		if (i > 0)
 		{
-			newProc = Exec (buffer);
-			Join (newProc);
+			newProc = ForkExec(buffer);
 		}
 	}
 }

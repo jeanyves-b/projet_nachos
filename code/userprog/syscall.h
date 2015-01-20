@@ -165,14 +165,12 @@ int GetPid();
 /*create a directory*/
 int mkdir(char* name);
 
-<<<<<<< HEAD
 
 /*create a directory*/
 int rmdir(char* name);
-=======
+
 /*move to a directory*/
 void cd (char* name);
->>>>>>> fb3195ee9029cb14e13718ec4fd8703f3cc1e168
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
