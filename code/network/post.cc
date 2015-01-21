@@ -190,14 +190,15 @@ PostOffice::PostOffice(NetworkAddress addr, double reliability, int nBoxes)
 	
 	// Troisièmement, initialiser les différentes structures du protocole
 	numMsgs = 0;
+	ackCount = 0;
 	waitingForAck = NULL;
-	
-	startResendingMsg = new Semaphore("message pending to resend", 0);
-	checkAck = new Semaphore("check if recieved an ack", 0);
-	ackDone = new Semaphore("check for ack done", 0);
 	hasMessagePending = false;
 	isResending = false;
-	messagePendingLock = new Lock("Checking lock");
+	
+	startResendingMsg = new Semaphore("start/block sender", 0);
+	checkAck = new Semaphore("start/block worker", 0);
+	ackDone = new Semaphore("check for ack done", 0);
+	daemonsLock = new Lock("daemons");
 	
 	// Forth, initialize the network; tell it which interrupt handlers to call
 	network = new Network(addr, reliability, ReadAvail, WriteDone, (int) this);
@@ -239,30 +240,30 @@ PostOffice::PostalSender() {
 	unsigned tryCount ; 		// L
 	for(;;) {
 		startResendingMsg->P();
-		messagePendingLock->Acquire();
+		daemonsLock->Acquire();
 		isResending = true;
-		messagePendingLock->Release();
+		daemonsLock->Release();
 		
 		time(&lastTry);
 		tryCount = 1;
 		while(tryCount < MAXREEMISSIONS) {
-			messagePendingLock->Acquire();
+			daemonsLock->Acquire();
 			if (hasMessagePending) {
 				hasMessagePending = false;
-				messagePendingLock->Release();
+				daemonsLock->Release();
 				
 				checkAck->V();
 				startResendingMsg->P();
 				
 				if (waitingForAck == NULL) {
-					messagePendingLock->Acquire();
+					daemonsLock->Acquire();
 					isResending = false;
-					messagePendingLock->Release();
+					daemonsLock->Release();
 					ackDone->V();
 					break;
 				}
 			} else {
-				messagePendingLock->Release();
+				daemonsLock->Release();
 			}
 			
 			if (waitingForAck != NULL && difftime(time(NULL), lastTry) >= TEMPO) {
@@ -282,13 +283,11 @@ PostOffice::PostalSender() {
 			delete waitingForAck;
 			waitingForAck = NULL; 
 
-			messagePendingLock->Acquire();
+			daemonsLock->Acquire();
 			isResending = false;
-			messagePendingLock->Release();
+			daemonsLock->Release();
 			ackDone->V();
-		} else {
-			startResendingMsg->V();
-		}
+		} 
 	}
 }
 
@@ -311,9 +310,9 @@ PostOffice::PostalDelivery()
 		// first, wait for a message
 		messageAvailable->P();	
 		
-		messagePendingLock->Acquire();
+		daemonsLock->Acquire();
 		hasMessagePending = true;
-		messagePendingLock->Release();
+		daemonsLock->Release();
 		
 		pktHdr = network->Receive(buffer);
 
@@ -323,12 +322,12 @@ PostOffice::PostalDelivery()
 			PrintHeader(pktHdr, mailHdr);
 		}
 		
-		messagePendingLock->Acquire();
+		daemonsLock->Acquire();
 		if (isResending) {
-			messagePendingLock->Release();
+			daemonsLock->Release();
 			checkAck->P();
 		} else {
-			messagePendingLock->Release();
+			daemonsLock->Release();
 		}
 		
 		//	Renvoyer un acquittement si on reçoit un message normal		
@@ -338,6 +337,7 @@ PostOffice::PostalDelivery()
 					DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
 					delete waitingForAck;
 					waitingForAck = NULL;
+					ackCount++;
 				} else {
 					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
@@ -363,20 +363,20 @@ PostOffice::PostalDelivery()
 			
 		} 
 		
-		messagePendingLock->Acquire();
+		daemonsLock->Acquire();
 		hasMessagePending = false;
 		if (isResending) {
-			messagePendingLock->Release();
+			daemonsLock->Release();
 			startResendingMsg->V();
 		} else {
-			messagePendingLock->Release();
+			daemonsLock->Release();
 		}
 		
 		
 		// put into mailbox
 		boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
 		
-		//TODO: Check double recieved
+		//TODO: Check double Received
 	}
 }
 
@@ -424,6 +424,38 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	delete [] buffer;			// we've sent the message, so
 	// we can delete our buffer
 }
+
+//----------------------------------------------------------------------
+// PostOffice::SendMail
+//		Pareil que Send, mais prend un Mail en paramètre, et ne lock
+//			le sendLock car déjà locké par la fonction appelante.
+//----------------------------------------------------------------------
+void 
+PostOffice::SendMail(Mail *mail) {
+	char* buffer = new char[MaxPacketSize];	// space to hold concatenated
+	// mailHdr + data
+
+	if (DebugIsEnabled('n')) {
+		printf("Post send: ");
+		PrintHeader(mail->pktHdr, mail->mailHdr);
+	}
+	
+	// fill in pktHdr, for the Network layer
+	mail->pktHdr.from = netAddr;
+	mail->pktHdr.length = mail->mailHdr.length + sizeof(MailHeader);
+
+	// concatenate MailHeader and data
+	bcopy(&(mail->mailHdr), buffer, sizeof(MailHeader));
+	bcopy(mail->data, buffer + sizeof(MailHeader), mail->mailHdr.length);
+
+	network->Send(mail->pktHdr, buffer);
+	messageSent->P();			// wait for interrupt to tell us
+
+	delete [] buffer;			// we've sent the message, so
+	// we can delete our buffer
+} 
+
+
 //----------------------------------------------------------------------
 // PostOffice::SendSafe
 //
@@ -459,7 +491,70 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 }
 
 //----------------------------------------------------------------------
-// PostOffice::Recieve
+// PostOffice::SendUnfixedSize
+//
+//----------------------------------------------------------------------
+
+	void
+PostOffice::SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr,
+		char* data, unsigned size)
+{
+	
+	if (DebugIsEnabled('n')) {
+		printf("Sending message with size %d: ",size);
+		PrintHeader(pktHdr, mailHdr);
+	}
+	
+	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
+	
+	unsigned bytesRemaining = size;
+	unsigned bytesToSend;
+	do {
+		bytesToSend = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
+		char *fragment = new char[bytesToSend];
+		memcpy(fragment, data + size - bytesRemaining, bytesToSend);
+		mailHdr.length = bytesToSend;
+		this->SendSafe(pktHdr, mailHdr, static_cast<char const *>(fragment));
+		delete [] fragment;
+		bytesRemaining -= bytesToSend;
+	} while (bytesToSend > 0);
+}
+
+//----------------------------------------------------------------------
+// PostOffice::ReceiveUnfixedSize
+//
+//----------------------------------------------------------------------
+
+	void
+PostOffice::ReceiveUnfixedSize(int box, PacketHeader *pktHdr, 
+		MailHeader *mailHdr, char* data, unsigned size)
+{
+	
+	DEBUG('n', "Asking to Receive message of size %d on box %d\n", size, box);
+	
+	ASSERT((box >= 0) && (box < numBoxes));
+	
+	unsigned bytesRemaining = size;
+	unsigned bytesToReceive;
+	do {
+		bytesToReceive = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
+		char *fragment = new char[bytesToReceive];
+		
+		mailHdr->length = bytesToReceive;
+		this->Receive(box, pktHdr, mailHdr, fragment);
+		
+		memcpy(data + size - bytesRemaining, fragment, bytesToReceive);
+		
+		delete [] fragment;
+		bytesRemaining -= bytesToReceive;
+	} while (bytesToReceive > 0);
+	
+	mailHdr->length = size;
+	
+}
+
+//----------------------------------------------------------------------
+// PostOffice::Receive
 // 	Retrieve a message from a specific box if one is available, 
 //	otherwise wait for a message to arrive in the box.
 //

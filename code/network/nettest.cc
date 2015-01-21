@@ -35,9 +35,9 @@ MailTest(int farAddr)
 {
 	PacketHeader outPktHdr, inPktHdr;
 	MailHeader outMailHdr, inMailHdr;
-	const char *data = "Hello there!";
+	char *data = new char[900];
 	//const char *ack = "Got it!";
-	char buffer[MaxMailSize];
+	char *buffer = new char[900];
 
 	// construct packet, mail header for original message
 	// To: destination machine, mailbox 0
@@ -45,20 +45,30 @@ MailTest(int farAddr)
 	outPktHdr.to = farAddr;		
 	outMailHdr.to = 0;
 	outMailHdr.from = 1;
-	outMailHdr.length = strlen(data) + 1;
+	outMailHdr.length = 900;
+	
+	unsigned i;
+	for(i = 0; i < 895; i++) {
+		data[i] = farAddr == 1? 'a' + (i%26) : 'z' - (i%26);
+	}
+	data[i++] = '#';
+	data[i++] = 'E';
+	data[i++] = 'N';
+	data[i++] = 'D';
+	data[i] = '\0';
 
 	if (farAddr==1)
 	// Send the first message
-		postOffice->SendSafe(outPktHdr, outMailHdr, data); 
+		postOffice->SendUnfixedSize(outPktHdr, outMailHdr, data, 900); 
 
 	// Wait for the first message from the other machine
-	postOffice->Receive(0, &inPktHdr, &inMailHdr, buffer);
+	postOffice->ReceiveUnfixedSize(0, &inPktHdr, &inMailHdr, buffer, 900);
 	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from);
 	fflush(stdout);
 	
 	if (farAddr!=1)
 	// Send the first message
-		postOffice->SendSafe(outPktHdr, outMailHdr, data);
+		postOffice->SendUnfixedSize(outPktHdr, outMailHdr, data, 900); 
 
 	/* // Send acknowledgement to the other machine (using "reply to" mailbox
 	// in the message that just arrived

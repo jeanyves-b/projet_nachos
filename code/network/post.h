@@ -40,7 +40,7 @@ typedef int MailBoxAddress;
 typedef enum { MSG, ACK } MessageType;
 
 #define TEMPO 3.0
-#define MAXREEMISSIONS 50u
+#define MAXREEMISSIONS 20u
 
 // The following class defines part of the message header.  
 // This is prepended to the message by the PostOffice, before the message 
@@ -120,15 +120,21 @@ class PostOffice {
 		// Send a message to a mailbox on a remote 
 		// machine.  The fromBox in the MailHeader is 
 		// the return box for ack's.
-		
-		void SendMail(Mail *mail) {
-			this->Send(mail->pktHdr, mail->mailHdr, mail->data);
-		}
+	
 		
 		void SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
+		// Send a message and waits for its acknowledgment or MAXREEMISSIONS tries
+		//	to return. Uses Send.
+		
+		void SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr, char* data, unsigned size);
+		// Send a message of a given size, fragments into N messages of MaxMailSize bytes
+		//	and sends them one after the other
+		
+		void ReceiveUnfixedSize(int box, PacketHeader *pktHdr, 	MailHeader *mailHdr, char* data, unsigned size);
+		// Retrieve a message of a given size: retrieves N fragments of MaxMailSize bytes
+		//	from the box.
 
-		void Receive(int box, PacketHeader *pktHdr, 
-				MailHeader *mailHdr, char *data);
+		void Receive(int box, PacketHeader *pktHdr, MailHeader *mailHdr, char *data);
 		// Retrieve a message from "box".  Wait if
 		// there is no message in the box.
 		
@@ -150,6 +156,8 @@ class PostOffice {
 		}
 
 	private:
+		void SendMail(Mail *mail);
+	
 		Network *network;		// Physical network connection
 		NetworkAddress netAddr;	// Network address of this machine
 		MailBox *boxes;		// Table of mail boxes to hold incoming mail
@@ -158,11 +166,12 @@ class PostOffice {
 		Semaphore *messageSent;	// V'ed when next message can be sent to network
 		Lock *sendLock;		// Only one outgoing message at a time
 		unsigned numMsgs; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
+		unsigned ackCount; 	// Compteur des acquittement reçus
 		Mail *waitingForAck; // Le message qui est entrain d'attendre son acquittement
 		Semaphore *checkAck;	
 		Semaphore *startResendingMsg;
 		Semaphore *ackDone;
-		Lock *messagePendingLock;
+		Lock *daemonsLock;
 		bool hasMessagePending;
 		bool isResending;
 
