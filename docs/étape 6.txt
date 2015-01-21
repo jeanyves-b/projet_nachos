@@ -20,3 +20,13 @@ Implémentation de solution de transfert fiable de paquets:
 	Faiblesse:
 		Les ACK peuvent être perdus facilement, et si une machine s'éteint en ayant envoyé un ACK qui sera perdu, 
 			l'expéditeur retentera toujours d'envoyer le message
+			
+Transfert de paquets sans limite de taille
+	Envoi
+		Fragmentation du paquet original en N paquets de MaxMailSize octets maximum. ((N-1)*MaxMailSize < taille < N*MaxMailSize)
+		Envoyer les fragments à la suite avec le transfert fiable (attendre l'acquittement de chaque message)
+	Réception
+		Attendre la réception de N paquets ((N-1)*MaxMailSize < taille < N*MaxMailSize) sur le port
+		Mettre à chaque fois les données des messages reçus dans le grand buffer
+		
+SCHEMATISER TOUT ÇA!!

@@ -373,9 +373,12 @@ PostOffice::PostalDelivery()
 		}
 		
 		
-		// put into mailbox
-		boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
-		
+		if (mailHdr.id < ackCount) {
+			DEBUG('n', "Message #%d déjà acquitté.\n", mailHdr.id);
+		} else {
+			// put into mailbox
+			boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
+		}		
 		//TODO: Check double Received
 	}
 }
@@ -509,15 +512,17 @@ PostOffice::SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr,
 	
 	unsigned bytesRemaining = size;
 	unsigned bytesToSend;
+	char *fragment = new char[MaxMailSize];
 	do {
 		bytesToSend = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
-		char *fragment = new char[bytesToSend];
+		
 		memcpy(fragment, data + size - bytesRemaining, bytesToSend);
 		mailHdr.length = bytesToSend;
 		this->SendSafe(pktHdr, mailHdr, static_cast<char const *>(fragment));
-		delete [] fragment;
+		
 		bytesRemaining -= bytesToSend;
 	} while (bytesToSend > 0);
+	delete [] fragment;
 }
 
 //----------------------------------------------------------------------
@@ -536,19 +541,19 @@ PostOffice::ReceiveUnfixedSize(int box, PacketHeader *pktHdr,
 	
 	unsigned bytesRemaining = size;
 	unsigned bytesToReceive;
+	char *fragment = new char[MaxMailSize];
 	do {
 		bytesToReceive = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
-		char *fragment = new char[bytesToReceive];
 		
 		mailHdr->length = bytesToReceive;
 		this->Receive(box, pktHdr, mailHdr, fragment);
 		
 		memcpy(data + size - bytesRemaining, fragment, bytesToReceive);
 		
-		delete [] fragment;
+		
 		bytesRemaining -= bytesToReceive;
 	} while (bytesToReceive > 0);
-	
+	delete [] fragment;
 	mailHdr->length = size;
 	
 }
