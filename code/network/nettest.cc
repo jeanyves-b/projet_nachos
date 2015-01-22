@@ -33,19 +33,9 @@
 	void
 MailTest(int farAddr)
 {
-	PacketHeader outPktHdr, inPktHdr;
-	MailHeader outMailHdr, inMailHdr;
+/* 
 	char *data = new char[900];
-	//const char *ack = "Got it!";
 	char *buffer = new char[900];
-
-	// construct packet, mail header for original message
-	// To: destination machine, mailbox 0
-	// From: our machine, reply to: mailbox 1
-	outPktHdr.to = farAddr;		
-	outMailHdr.to = 0;
-	outMailHdr.from = 1;
-	outMailHdr.length = 900;
 	
 	unsigned i;
 	for(i = 0; i < 895; i++) {
@@ -57,31 +47,24 @@ MailTest(int farAddr)
 	data[i++] = 'D';
 	data[i] = '\0';
 
+	// To: destination machine, mailbox 0
+	// From: our machine, reply to: mailbox 1
 	if (farAddr==1)
 	// Send the first message
-		postOffice->SendUnfixedSize(outPktHdr, outMailHdr, data, 900); 
+		postOffice->SendUnfixedSize(data, 900, 1, farAddr, 0); 
 
 	// Wait for the first message from the other machine
-	postOffice->ReceiveUnfixedSize(0, &inPktHdr, &inMailHdr, buffer, 900);
-	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from);
+	postOffice->ReceiveUnfixedSize(0, buffer, 900);
+	printf("Got \"%s\"\n",buffer);
 	fflush(stdout);
 	
 	if (farAddr!=1)
 	// Send the first message
-		postOffice->SendUnfixedSize(outPktHdr, outMailHdr, data, 900); 
+		postOffice->SendUnfixedSize(data, 900, 1, farAddr, 0); 
 
-	/* // Send acknowledgement to the other machine (using "reply to" mailbox
-	// in the message that just arrived
-	outPktHdr.to = inPktHdr.from;
-	outMailHdr.to = inMailHdr.from;
-	outMailHdr.length = strlen(ack) + 1;
-	postOffice->Send(outPktHdr, outMailHdr, ack); 
+*/
 
-	//Wait for the ack from the other machine to the first message we sent.
-	postOffice->Receive(1, &inPktHdr, &inMailHdr, buffer);
-	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from); 
-	fflush(stdout); */
-
+	
 	// Then we're done!
 	interrupt->Halt();
 }

@@ -31,6 +31,7 @@
 #include "network.h"
 #include "synchlist.h"
 #include "thread.h"
+#include "stats.h"
 #include <time.h>
 
 // Mailbox address -- uniquely identifies a mailbox on a given machine.
@@ -39,7 +40,7 @@ typedef int MailBoxAddress;
 
 typedef enum { MSG, ACK } MessageType;
 
-#define TEMPO 3.0
+#define TEMPO NetworkTime*2.1/1000
 #define MAXREEMISSIONS 20u
 
 // The following class defines part of the message header.  
@@ -126,17 +127,21 @@ class PostOffice {
 		// Send a message and waits for its acknowledgment or MAXREEMISSIONS tries
 		//	to return. Uses Send.
 		
-		void SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr, char* data, unsigned size);
+		void SendUnfixedSize(char* data, unsigned size, int localPort, MailBoxAddress to, int remotePort);
 		// Send a message of a given size, fragments into N messages of MaxMailSize bytes
 		//	and sends them one after the other
 		
-		void ReceiveUnfixedSize(int box, PacketHeader *pktHdr, 	MailHeader *mailHdr, char* data, unsigned size);
+		void ReceiveUnfixedSize(int localPort, char* data, unsigned size);
 		// Retrieve a message of a given size: retrieves N fragments of MaxMailSize bytes
 		//	from the box.
 
 		void Receive(int box, PacketHeader *pktHdr, MailHeader *mailHdr, char *data);
 		// Retrieve a message from "box".  Wait if
 		// there is no message in the box.
+		
+		void SendFile(char *path, int localPort, MailBoxAddress to, int remotePort);
+		
+		void ReceiveFile(int localPort, char *path);
 		
 		void PostalSender();	// Vérifie s'il y a des messages
 		// à (re)transmettre, et le fait si c'est le cas.
@@ -156,7 +161,6 @@ class PostOffice {
 		}
 
 	private:
-		void SendMail(Mail *mail);
 	
 		Network *network;		// Physical network connection
 		NetworkAddress netAddr;	// Network address of this machine
@@ -166,14 +170,14 @@ class PostOffice {
 		Semaphore *messageSent;	// V'ed when next message can be sent to network
 		Lock *sendLock;		// Only one outgoing message at a time
 		unsigned numMsgs; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
-		unsigned ackCount; 	// Compteur des acquittement reçus
+		unsigned ackCount; 	// Compteur des messages reçus
 		Mail *waitingForAck; // Le message qui est entrain d'attendre son acquittement
-		Semaphore *checkAck;	
-		Semaphore *startResendingMsg;
-		Semaphore *ackDone;
-		Lock *daemonsLock;
-		bool hasMessagePending;
-		bool isResending;
+		Semaphore *checkAck;	// Bloquer ou faire la vérification de l'acquittement pour le message en attente d'acquittement
+		Semaphore *startResendingMsg;	// Bloquer ou faire la retransmission du message en attente d'acquittement
+		Semaphore *ackDone;	// Signifie que la vérification pour l'acquittement s'est terminée (acquittement reçu, ou bien message retransmis MAXREEMISSIONS fois)
+		Lock *daemonsLock;	//	Mutex qui fais "la circulation" entre le démon sender et le démon worker
+		bool hasMessagePending;	//	Est-ce qu'un message a été reçu et la vérification qu'il soit un acquittement du message en attente n'a pas encore été faite
+		bool isResending;	//	Est-ce qu'un message est en pleine retransmission périodique de lui-même (envoyé, mais pas encore acquitté)
 
 };
 

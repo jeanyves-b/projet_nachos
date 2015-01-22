@@ -272,7 +272,18 @@ PostOffice::PostalSender() {
 				tryCount++;	
 				time(&lastTry);
 				
-				this->SendMail(waitingForAck);
+				char* buffer = new char[MaxPacketSize];	// space to hold concatenated
+				// mailHdr + data
+
+				// concatenate MailHeader and data
+				bcopy(&(waitingForAck->mailHdr), buffer, sizeof(MailHeader));
+				bcopy(waitingForAck->data, buffer + sizeof(MailHeader), waitingForAck->mailHdr.length);
+
+				network->Send(waitingForAck->pktHdr, buffer);
+				messageSent->P();			// wait for interrupt to tell us
+
+				delete [] buffer;		
+				// this->Send(waitingForAck->pktHdr, waitingForAck->mailHdr, waitingForAck->data);
 			}
 		} 
 		
@@ -337,12 +348,12 @@ PostOffice::PostalDelivery()
 					DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
 					delete waitingForAck;
 					waitingForAck = NULL;
-					ackCount++;
+					
 				} else {
 					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
 			}	
-		} else if(mailHdr.type == MSG) {
+		} else {
 				if (DebugIsEnabled('n')) {
 					printf("Sending ACK for message: ");
 					PrintHeader(pktHdr, mailHdr);
@@ -359,8 +370,16 @@ PostOffice::PostalDelivery()
 				ackMHdr.type = ACK;
 				ackMHdr.id = mailHdr.id;
 				ackMHdr.length = 1;
+				
 				this->Send(ackPHdr, ackMHdr, "");
-			
+				
+				if (mailHdr.id < ackCount) {
+					DEBUG('n', "Message #%d déjà reçu.\n", mailHdr.id);
+				} else {
+					DEBUG('n', "__Message #%d jamais reçu. (%d)\n", mailHdr.id, ackCount);
+					ackCount++;
+					boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
+				}
 		} 
 		
 		daemonsLock->Acquire();
@@ -372,14 +391,6 @@ PostOffice::PostalDelivery()
 			daemonsLock->Release();
 		}
 		
-		
-		if (mailHdr.id < ackCount) {
-			DEBUG('n', "Message #%d déjà acquitté.\n", mailHdr.id);
-		} else {
-			// put into mailbox
-			boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
-		}		
-		//TODO: Check double Received
 	}
 }
 
@@ -428,35 +439,6 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	// we can delete our buffer
 }
 
-//----------------------------------------------------------------------
-// PostOffice::SendMail
-//		Pareil que Send, mais prend un Mail en paramètre, et ne lock
-//			le sendLock car déjà locké par la fonction appelante.
-//----------------------------------------------------------------------
-void 
-PostOffice::SendMail(Mail *mail) {
-	char* buffer = new char[MaxPacketSize];	// space to hold concatenated
-	// mailHdr + data
-
-	if (DebugIsEnabled('n')) {
-		printf("Post send: ");
-		PrintHeader(mail->pktHdr, mail->mailHdr);
-	}
-	
-	// fill in pktHdr, for the Network layer
-	mail->pktHdr.from = netAddr;
-	mail->pktHdr.length = mail->mailHdr.length + sizeof(MailHeader);
-
-	// concatenate MailHeader and data
-	bcopy(&(mail->mailHdr), buffer, sizeof(MailHeader));
-	bcopy(mail->data, buffer + sizeof(MailHeader), mail->mailHdr.length);
-
-	network->Send(mail->pktHdr, buffer);
-	messageSent->P();			// wait for interrupt to tell us
-
-	delete [] buffer;			// we've sent the message, so
-	// we can delete our buffer
-} 
 
 
 //----------------------------------------------------------------------
@@ -477,11 +459,31 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	
 	mailHdr.type = MSG; // message normal
 	mailHdr.id = numMsgs++; // attribution d'un identfiant
+
+	if (DebugIsEnabled('n')) {
+		printf("Post send: ");
+		PrintHeader(pktHdr, mailHdr);
+	}
 	
+	// fill in pktHdr, for the Network layer
+	pktHdr.from = netAddr;
+	pktHdr.length = mailHdr.length + sizeof(MailHeader);
+
+	char* buffer = new char[MaxPacketSize];	// space to hold concatenated
+	// mailHdr + data
+
+	// concatenate MailHeader and data
+	bcopy(&(mailHdr), buffer, sizeof(MailHeader));
+	bcopy(data, buffer + sizeof(MailHeader), mailHdr.length);
+
 	sendLock->Acquire();
 	waitingForAck = new Mail(pktHdr, mailHdr, data);
 	
-	this->SendMail(waitingForAck);
+	network->Send(waitingForAck->pktHdr, buffer);
+	messageSent->P();			// wait for interrupt to tell us
+
+	delete [] buffer;			// we've sent the message, so
+	// we can delete our buffer
 	
 	// réveillier le sender
 	startResendingMsg->V(); 
@@ -499,30 +501,40 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 //----------------------------------------------------------------------
 
 	void
-PostOffice::SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr,
-		char* data, unsigned size)
+PostOffice::SendUnfixedSize(char* data, unsigned size, int localPort, 
+		MailBoxAddress to, int remotePort)
 {
-	
-	if (DebugIsEnabled('n')) {
-		printf("Sending message with size %d: ",size);
-		PrintHeader(pktHdr, mailHdr);
-	}
-	
-	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
 	
 	unsigned bytesRemaining = size;
 	unsigned bytesToSend;
+	
+	PacketHeader *pktHdr = new PacketHeader();
+	MailHeader *mailHdr = new MailHeader();
+	pktHdr->to = to;		
+	mailHdr->to = remotePort;
+	mailHdr->from = localPort;
+	mailHdr->length = size;
+	
+	if (DebugIsEnabled('n')) {
+		printf("Sending message with size %d: ",size);
+		PrintHeader(*pktHdr, *mailHdr);
+	}
+	
+	ASSERT(0 <= mailHdr->to && mailHdr->to < numBoxes);
+	
 	char *fragment = new char[MaxMailSize];
 	do {
 		bytesToSend = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
 		
 		memcpy(fragment, data + size - bytesRemaining, bytesToSend);
-		mailHdr.length = bytesToSend;
-		this->SendSafe(pktHdr, mailHdr, static_cast<char const *>(fragment));
+		mailHdr->length = bytesToSend;
+		this->SendSafe(*pktHdr, *mailHdr, static_cast<char const *>(fragment));
 		
 		bytesRemaining -= bytesToSend;
 	} while (bytesToSend > 0);
 	delete [] fragment;
+	delete mailHdr;
+	delete pktHdr;
 }
 
 //----------------------------------------------------------------------
@@ -531,31 +543,34 @@ PostOffice::SendUnfixedSize(PacketHeader pktHdr, MailHeader mailHdr,
 //----------------------------------------------------------------------
 
 	void
-PostOffice::ReceiveUnfixedSize(int box, PacketHeader *pktHdr, 
-		MailHeader *mailHdr, char* data, unsigned size)
+PostOffice::ReceiveUnfixedSize(int localPort, char* data, unsigned size)
 {
 	
-	DEBUG('n', "Asking to Receive message of size %d on box %d\n", size, box);
+	DEBUG('n', "Asking to Receive message of size %d on box %d\n", size, localPort);
 	
-	ASSERT((box >= 0) && (box < numBoxes));
+	ASSERT((localPort >= 0) && (localPort < numBoxes));
 	
 	unsigned bytesRemaining = size;
 	unsigned bytesToReceive;
+	
+	PacketHeader *pktHdr = new PacketHeader();
+	MailHeader *mailHdr = new MailHeader();
 	char *fragment = new char[MaxMailSize];
+	
 	do {
 		bytesToReceive = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
 		
 		mailHdr->length = bytesToReceive;
-		this->Receive(box, pktHdr, mailHdr, fragment);
+		this->Receive(localPort, pktHdr, mailHdr, fragment);
 		
 		memcpy(data + size - bytesRemaining, fragment, bytesToReceive);
-		
 		
 		bytesRemaining -= bytesToReceive;
 	} while (bytesToReceive > 0);
 	delete [] fragment;
-	mailHdr->length = size;
-	
+	delete mailHdr;
+	delete pktHdr;
+
 }
 
 //----------------------------------------------------------------------
