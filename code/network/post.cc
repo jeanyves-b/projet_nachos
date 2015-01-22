@@ -189,8 +189,9 @@ PostOffice::PostOffice(NetworkAddress addr, double reliability, int nBoxes)
 	boxes = new MailBox[nBoxes];
 	
 	// Troisièmement, initialiser les différentes structures du protocole
-	numMsgs = 0;
-	ackCount = 0;
+	outMsgCount = 0;
+	inMsgCount = 0;
+	lastAck = -1;
 	waitingForAck = NULL;
 	hasMessagePending = false;
 	isResending = false;
@@ -348,7 +349,7 @@ PostOffice::PostalDelivery()
 					DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
 					delete waitingForAck;
 					waitingForAck = NULL;
-					
+					lastAck = mailHdr.id;
 				} else {
 					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
@@ -373,11 +374,11 @@ PostOffice::PostalDelivery()
 				
 				this->Send(ackPHdr, ackMHdr, "");
 				
-				if (mailHdr.id < ackCount) {
+				if (mailHdr.id < inMsgCount) {
 					DEBUG('n', "Message #%d déjà reçu.\n", mailHdr.id);
 				} else {
-					DEBUG('n', "__Message #%d jamais reçu. (%d)\n", mailHdr.id, ackCount);
-					ackCount++;
+					DEBUG('n', "__Message #%d jamais reçu. (%d)\n", mailHdr.id, inMsgCount);
+					inMsgCount++;
 					boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
 				}
 		} 
@@ -446,7 +447,7 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 //
 //----------------------------------------------------------------------
 
-	void
+	bool
 PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 {
 	
@@ -458,7 +459,7 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	ASSERT(0 <= mailHdr.to && mailHdr.to < numBoxes);
 	
 	mailHdr.type = MSG; // message normal
-	mailHdr.id = numMsgs++; // attribution d'un identfiant
+	mailHdr.id = outMsgCount++; // attribution d'un identfiant
 
 	if (DebugIsEnabled('n')) {
 		printf("Post send: ");
@@ -489,9 +490,10 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	startResendingMsg->V(); 
 	
 	ackDone->P();
-
+	bool retVal = mailHdr.id == lastAck;
 	sendLock->Release();
-
+	
+	return retVal;
 
 }
 
@@ -500,14 +502,10 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 //
 //----------------------------------------------------------------------
 
-	void
+	unsigned
 PostOffice::SendUnfixedSize(char* data, unsigned size, int localPort, 
 		MailBoxAddress to, int remotePort)
 {
-	
-	unsigned bytesRemaining = size;
-	unsigned bytesToSend;
-	
 	PacketHeader *pktHdr = new PacketHeader();
 	MailHeader *mailHdr = new MailHeader();
 	pktHdr->to = to;		
@@ -521,20 +519,28 @@ PostOffice::SendUnfixedSize(char* data, unsigned size, int localPort,
 	}
 	
 	ASSERT(0 <= mailHdr->to && mailHdr->to < numBoxes);
+
+	unsigned bytesSent = 0;
+	unsigned bytesTriedToSend = 0;
+	unsigned bytesToSend;
 	
 	char *fragment = new char[MaxMailSize];
-	do {
-		bytesToSend = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
+	while (bytesTriedToSend < size) {
+		bytesToSend = (size - bytesTriedToSend > MaxMailSize? MaxMailSize : size - bytesTriedToSend);
 		
-		memcpy(fragment, data + size - bytesRemaining, bytesToSend);
+		memcpy(fragment, data + bytesSent, bytesToSend);
 		mailHdr->length = bytesToSend;
-		this->SendSafe(*pktHdr, *mailHdr, static_cast<char const *>(fragment));
-		
-		bytesRemaining -= bytesToSend;
-	} while (bytesToSend > 0);
+		if (this->SendSafe(*pktHdr, *mailHdr, static_cast<char const *>(fragment))) {
+			bytesSent += bytesToSend;
+		}
+		bytesTriedToSend += bytesToSend;
+	}
+	
 	delete [] fragment;
 	delete mailHdr;
 	delete pktHdr;
+	
+	return bytesSent;
 }
 
 //----------------------------------------------------------------------
@@ -557,16 +563,17 @@ PostOffice::ReceiveUnfixedSize(int localPort, char* data, unsigned size)
 	MailHeader *mailHdr = new MailHeader();
 	char *fragment = new char[MaxMailSize];
 	
-	do {
+	while (bytesRemaining > 0) {
 		bytesToReceive = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
-		
+
 		mailHdr->length = bytesToReceive;
 		this->Receive(localPort, pktHdr, mailHdr, fragment);
 		
 		memcpy(data + size - bytesRemaining, fragment, bytesToReceive);
-		
 		bytesRemaining -= bytesToReceive;
-	} while (bytesToReceive > 0);
+		
+	}
+	
 	delete [] fragment;
 	delete mailHdr;
 	delete pktHdr;

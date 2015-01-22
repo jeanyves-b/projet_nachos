@@ -64,6 +64,13 @@ MailTest(int farAddr)
 
 */
 
+	const char* incoming = "00";
+	const char* towrite = "00r";
+	if (farAddr == 1) {
+		postOffice->SendFile(const_cast<char *>(incoming), 1, farAddr, 0);
+	}
+	else 
+		postOffice->ReceiveFile(0, const_cast<char *>(towrite), 99800);
 	
 	// Then we're done!
 	interrupt->Halt();

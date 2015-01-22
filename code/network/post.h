@@ -40,7 +40,7 @@ typedef int MailBoxAddress;
 
 typedef enum { MSG, ACK } MessageType;
 
-#define TEMPO NetworkTime*2.1/1000
+#define TEMPO NetworkTime*2.5/1000
 #define MAXREEMISSIONS 20u
 
 // The following class defines part of the message header.  
@@ -121,27 +121,26 @@ class PostOffice {
 		// Send a message to a mailbox on a remote 
 		// machine.  The fromBox in the MailHeader is 
 		// the return box for ack's.
-	
 		
-		void SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
+		bool SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
 		// Send a message and waits for its acknowledgment or MAXREEMISSIONS tries
 		//	to return. Uses Send.
 		
-		void SendUnfixedSize(char* data, unsigned size, int localPort, MailBoxAddress to, int remotePort);
+		void Receive(int box, PacketHeader *pktHdr, MailHeader *mailHdr, char *data);
+		// Retrieve a message from "box".  Wait if
+		// there is no message in the box.
+		
+		unsigned SendUnfixedSize(char* data, unsigned size, int localPort, MailBoxAddress to, int remotePort);
 		// Send a message of a given size, fragments into N messages of MaxMailSize bytes
 		//	and sends them one after the other
 		
 		void ReceiveUnfixedSize(int localPort, char* data, unsigned size);
 		// Retrieve a message of a given size: retrieves N fragments of MaxMailSize bytes
 		//	from the box.
-
-		void Receive(int box, PacketHeader *pktHdr, MailHeader *mailHdr, char *data);
-		// Retrieve a message from "box".  Wait if
-		// there is no message in the box.
 		
-		void SendFile(char *path, int localPort, MailBoxAddress to, int remotePort);
+		int SendFile(char *path, int localPort, MailBoxAddress to, int remotePort);
 		
-		void ReceiveFile(int localPort, char *path);
+		int ReceiveFile(int localPort, char *path, unsigned size);
 		
 		void PostalSender();	// Vérifie s'il y a des messages
 		// à (re)transmettre, et le fait si c'est le cas.
@@ -169,8 +168,9 @@ class PostOffice {
 		Semaphore *messageAvailable;// V'ed when message has arrived from network
 		Semaphore *messageSent;	// V'ed when next message can be sent to network
 		Lock *sendLock;		// Only one outgoing message at a time
-		unsigned numMsgs; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
-		unsigned ackCount; 	// Compteur des messages reçus
+		unsigned outMsgCount; 	// Nombre de messages (de type MSG) mis sur la liste d'envoi (permettra de gérer l'identifiant des messages)
+		unsigned inMsgCount; 	// Compteur des messages reçus
+		unsigned lastAck; 	//	Identifiant du dernier acquittement reçu.
 		Mail *waitingForAck; // Le message qui est entrain d'attendre son acquittement
 		Semaphore *checkAck;	// Bloquer ou faire la vérification de l'acquittement pour le message en attente d'acquittement
 		Semaphore *startResendingMsg;	// Bloquer ou faire la retransmission du message en attente d'acquittement
