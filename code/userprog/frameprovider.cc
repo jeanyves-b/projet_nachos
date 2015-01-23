@@ -15,6 +15,7 @@ FrameProvider::FrameProvider(int frames)
 {
 	numFrames = numFrames;
 	this->bitmap = new BitMap(frames);
+	s = new Semaphore("sem",1);
 }
 
 //----------------------------------------------------------------------
@@ -24,6 +25,7 @@ FrameProvider::FrameProvider(int frames)
 //----------------------------------------------------------------------
 
 FrameProvider::~FrameProvider() {
+	delete s;
 	delete this->bitmap;
 }
 

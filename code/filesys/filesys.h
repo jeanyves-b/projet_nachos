@@ -40,6 +40,7 @@
 #include "copyright.h"
 #include "openfile.h"
 #include "vector"
+#include "synch.h"
 
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
@@ -65,7 +66,10 @@ class FileSystem {
 		}
 
 		bool Remove(char *name) { return Unlink(name) == 0; }
+		bool CreateDir(const char *name){return TRUE;}
+		bool RemoveDir(const char *name){return TRUE;} // delete a directory
 
+		int Cd(const char* name){return 0;}
 };
 
 #else // FILESYS
@@ -78,6 +82,7 @@ class FileSystem {
 		// the disk, so initialize the directory
 		// and the bitmap of free blocks.
 
+		~FileSystem();
 		bool Create(const char *name, int initialSize);  	
 		// Create a file (UNIX creat)
 		

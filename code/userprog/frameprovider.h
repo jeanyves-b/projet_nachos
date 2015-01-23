@@ -19,7 +19,7 @@ class FrameProvider {
 		// considère comme utilisé
 		void ReleaseFrame(int n); // libère un cadre
 		int NumAvailFrame(); // retourne le nombre de cadres libres
-
+		Semaphore* s;
 
 	private:
 		BitMap *bitmap;

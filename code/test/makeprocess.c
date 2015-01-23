@@ -11,8 +11,13 @@ void thread2(void *n){
 
 int main()
 {
+<<<<<<< HEAD
 	UserThreadCreate(thread2, 0);
 	ForkExec("user");
 	//ForkExec("userpages1");
+=======
+	ForkExec("user0");
+	PutString("Hello");
+>>>>>>> 3e9c7db9efac9f81b2f7078d22c4d9325a0e8bb3
 	return 0;
 }

@@ -81,6 +81,7 @@
 FileSystem::FileSystem(bool format)
 { 
 	DEBUG('f', "Initializing the file system.\n");
+	sem = new Semaphore("sem",1);
 	if (format) {
 		BitMap *freeMap = new BitMap(NumSectors);
 		Directory *directory = new Directory(NumDirEntries);
@@ -118,7 +119,7 @@ FileSystem::FileSystem(bool format)
 		
 		//Now we add the directory '.' to the root directory
 		directory->AddDir(".",DirectorySector);
-
+		directory->AddDir("..",DirectorySector);
 		// Once we have the files "open", we can write the initial version
 		// of each file back to disk.  The directory at this point is completely
 		// empty; but the bitmap has been changed to reflect the fact that
@@ -132,12 +133,11 @@ FileSystem::FileSystem(bool format)
 		if (DebugIsEnabled('f')) {
 			freeMap->Print();
 			directory->Print();
-
+		}
 			delete freeMap; 
 			delete directory; 
 			delete mapHdr; 
 			delete dirHdr;
-		}
 		currentDir = directoryFile;
 		CreateDir("System");
 		
@@ -150,6 +150,16 @@ FileSystem::FileSystem(bool format)
 		//openedFiles = std::vector<openedFiles>(openFilesNum);
 	}
 	
+}
+
+FileSystem::~FileSystem(){
+  delete freeMapFile;
+   if (currentDir != directoryFile){
+     delete currentDir;
+   }
+  delete directoryFile;
+  delete sem;
+
 }
 
 OpenFile* 
@@ -245,7 +255,7 @@ FileSystem::Create(const char *name, int initialSize)
 	dir = new Directory(NumDirEntries);
 	dir->FetchFrom(f);
 	if (dir->Find(name) != -1)
-		success = FALSE;			// file is already in directory
+	success = FALSE;
 	else {	
 		freeMap = new BitMap(NumSectors);
 		freeMap->FetchFrom(freeMapFile);
@@ -257,9 +267,12 @@ FileSystem::Create(const char *name, int initialSize)
 			success = FALSE;	// no space in directory
 		else {
 			hdr = new FileHeader;
-			if (!hdr->Allocate(freeMap, initialSize))
+			sem->P();
+			if (!hdr->Allocate(freeMap, initialSize)){
+				sem->V();
 				success = FALSE;	// no space on disk for data
-			else {	
+			}else {	
+				sem->V();
 				success = TRUE;
 				// everthing worked, flush all changes back to disk
 				hdr->WriteBack(sector); 		
@@ -307,9 +320,12 @@ FileSystem::CreateDir(const char *name)
 			success = FALSE;	// no space in directory
 		else {
 			hdr = new FileHeader;
-			if (!hdr->Allocate(freeMap, DirectoryFileSize))
+			sem->P();
+			if (!hdr->Allocate(freeMap, DirectoryFileSize)){
+				sem->V();
 				success = FALSE;	// no space on disk for data
-			else {	
+			}else {
+				sem->V();	
 				int parentSector = dir->Find(".");
 				success = TRUE;
 				// everthing worked, flush all changes back to disk
@@ -420,6 +436,35 @@ FileSystem::findIndexFile(const char *name){
 	
 	return -1;			
 	
+{ 
+	Directory *directory = new Directory(NumDirEntries);
+	OpenFile *openFile = NULL;
+	OpenFile *f;
+	int sector;
+	char filename[FileNameMaxLen+1];
+	f = MoveTo(name,filename);
+	if (f == NULL)
+	  return NULL;
+	DEBUG('f', "Opening file %s\n", name);
+	directory->FetchFrom(f);
+	sector = directory->Find(filename); 
+	if (sector >= 0) {		
+		openFile = new OpenFile(sector);	// name was found in directory 
+	}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'System'
+	    f = MoveTo("/System/",NULL);
+	    if (f == NULL){
+		return NULL;
+	    }
+	    directory->FetchFrom(f);
+	    sector = directory->Find(filename);
+	    if (sector >= 0) 		
+		openFile = new OpenFile(sector);
+	}
+	delete directory;
+	if (f != currentDir && f != directoryFile)
+	  delete f;
+	return openFile;				// return NULL if not found
+
 }
 
 //----------------------------------------------------------------------
@@ -483,23 +528,28 @@ FileSystem::Cd(const char* name){
     error =  1;
   else{
     dir->FetchFrom(f);
-    printf("f:%p\ncurrentDir:%p\nfilename:%s\n",f,currentDir,filename);
-    if (f!=currentDir && f != directoryFile)
-	  delete f;
-    sector= dir->FindDir(filename);
-    if (sector == -1){
-      printf("error\n");
-      error = 1;
+    //printf("f:%p\ncurrentDir:%p\nfilename:%s\n",f,currentDir,filename);
+    if (filename[0] == '\0'){
+      currentDir = f;
     }else{
-      if (currentDir != directoryFile){//le fichier ouvert sur le repertoire root doit rester ouvert
-	delete currentDir;
+	if (f!=currentDir && f != directoryFile)
+	    delete f;
+      sector= dir->FindDir(filename);
+      if (sector == -1){
+	printf("Le repertoire est introuvable\n");
+	error = 1;
+      }else{
+	if (currentDir != directoryFile){//le fichier ouvert sur le repertoire root doit rester ouvert
+	  delete currentDir;
+	}
+	currentDir = new OpenFile(sector);
       }
-      currentDir = new OpenFile(sector);
-      printf("Now in %s\n",name);
-      List();
     }
   }
-
+  if (error == 0){
+    printf("Now in %s\n",name);
+    List();
+  }
   delete dir;
   return error;
 }
