@@ -20,7 +20,8 @@ main ()
 		do
 		{
 
-			GetChar (&buffer[i]);
+			buffer[i] = GetChar ();
+			PutChar(buffer[i]);
 
 		}
 		while (buffer[i++] != '\n');
@@ -28,9 +29,9 @@ main ()
 		buffer[--i] = '\0';
 		
 		
-
 		if (i > 0)
 		{
+			
 			newProc = ForkExec(buffer);
 		}
 	}

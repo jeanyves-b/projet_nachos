@@ -37,6 +37,7 @@
 
 #include "copyright.h"
 #include "openfile.h"
+#include "synch.h"
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 // calls to UNIX, until the real file system
@@ -61,7 +62,10 @@ class FileSystem {
 		}
 
 		bool Remove(char *name) { return Unlink(name) == 0; }
+		bool CreateDir(const char *name){return TRUE;}
+		bool RemoveDir(const char *name){return TRUE;} // delete a directory
 
+		int Cd(const char* name){return 0;}
 };
 
 #else // FILESYS
@@ -74,6 +78,7 @@ class FileSystem {
 		// the disk, so initialize the directory
 		// and the bitmap of free blocks.
 
+		~FileSystem();
 		bool Create(const char *name, int initialSize);  	
 		// Create a file (UNIX creat)
 		
@@ -99,7 +104,7 @@ class FileSystem {
 		OpenFile* directoryFile;		// "Root" directory -- list of 
 		// file names, represented as a file
 		OpenFile* currentDir; //the current directory
-		
+		Semaphore* sem; //semaphore pour gérer les allocations concurrentes
 };
 
 #endif // FILESYS

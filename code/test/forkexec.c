@@ -10,9 +10,13 @@ int main()
 	//UserThreadCreate(test, 0);
 
 	int i, pid;
-	for (i=0;i<8;i++)
-		if ( (pid = ForkExec("userpages0")) < 0)
-			PutChar('}');
+	for (i=0;i<8;i++){
+	  pid = ForkExec("user0");
+	  PutString("here");
+	  PutInt(pid);
+	  if (pid >= 0)
+	    PutChar('}');
+	}
 	//ForkExec("userpages1");
 
 	return 0;
