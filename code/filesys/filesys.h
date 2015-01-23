@@ -34,9 +34,13 @@
 
 #ifndef FS_H
 #define FS_H
+#define FileNameMaxLen 		9	// for simplicity, we assume 
+// file names are <= 9 characters long
 
 #include "copyright.h"
 #include "openfile.h"
+#include "vector"
+
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 // calls to UNIX, until the real file system
@@ -92,13 +96,15 @@ class FileSystem {
 		void Print();			// List all the files and their contents
 
 	private:
+		int findIndexFile(const char *name);
 		void InitializeDir(int,int);
-		 OpenFile* MoveTo(const char* name,char* s);
+		OpenFile* MoveTo(const char* name,char* s);
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file
 		OpenFile* directoryFile;		// "Root" directory -- list of 
 		// file names, represented as a file
 		OpenFile* currentDir; //the current directory
+		std::vector<const char *> openedFiles;
 		
 };
 

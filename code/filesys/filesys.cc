@@ -63,6 +63,7 @@
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
 #define NumDirEntries 		10
 #define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
+#define openFilesNum			10
 
 //----------------------------------------------------------------------
 // FileSystem::FileSystem
@@ -146,6 +147,7 @@ FileSystem::FileSystem(bool format)
 		freeMapFile = new OpenFile(FreeMapSector);
 		directoryFile = new OpenFile(DirectorySector);
 		currentDir = directoryFile;
+		//openedFiles = std::vector<openedFiles>(openFilesNum);
 	}
 	
 }
@@ -174,7 +176,7 @@ FileSystem::MoveTo(const char* name,char* s){
        delete f;
      if(sector == -1)
        return NULL;
-     f = new OpenFile(sector);
+     f = new OpenFile(sector); 
      dir->FetchFrom(f);
      nb = 0;
      cpt++;
@@ -349,34 +351,75 @@ FileSystem::InitializeDir(int childSector,int parentSector){
 
 	OpenFile *
 FileSystem::Open(const char *name)
-{ 
-	Directory *directory = new Directory(NumDirEntries);
-	OpenFile *openFile = NULL;
-	OpenFile *f;
-	int sector;
-	char filename[FileNameMaxLen+1];
-	f = MoveTo(name,filename);
-	if (f == NULL)
-	  return NULL;
-	DEBUG('f', "Opening file %s\n", name);
-	directory->FetchFrom(f);
-	sector = directory->Find(filename); 
-	if (sector >= 0) {		
-		openFile = new OpenFile(sector);	// name was found in directory 
-	}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
-	    f = MoveTo("/System/",NULL);
-	    if (f == NULL){
-		return NULL;
-	    }
-	    directory->FetchFrom(f);
-	    sector = directory->Find(filename);
-	    if (sector >= 0) 		
-		openFile = new OpenFile(sector);
-	}
-	delete directory;
-	if (f != currentDir && f != directoryFile)
-	  delete f;
-	return openFile;				// return NULL if not found
+{ 			
+		// verifie si le fichier est deja ouvert		
+		if(findIndexFile(name) != -1)
+			return NULL;
+			
+		
+		// fichier non ouvert. il faut l'ajouter à la table des fichiers ouverts		
+		if(openedFiles.size() == openFilesNum)  // nombre maximal de fichiers ouvert atteint
+			return NULL;
+			
+		Directory *directory = new Directory(NumDirEntries);
+		OpenFile *openFile = NULL;
+		OpenFile *f;
+		int sector;
+		char filename[FileNameMaxLen+1];
+		f = MoveTo(name,filename);
+		
+		if (f == NULL)
+		  return NULL;
+		DEBUG('f', "Opening file %s\n", name);
+		directory->FetchFrom(f);
+		sector = directory->Find(filename); 
+		if (sector >= 0) {		
+			openFile = new OpenFile(sector);	// name was found in directory 
+			openedFiles.push_back(name); // mettre le fichier dans la table de fichiers ouverts
+	
+		}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
+			f = MoveTo("/System/",NULL);
+			if (f == NULL){
+			return NULL;
+			}
+			directory->FetchFrom(f);
+			sector = directory->Find(filename);
+			if (sector >= 0){ 		
+			openFile = new OpenFile(sector);
+			openedFiles.push_back(name);  // mettre le fichier dans la table de fichiers ouverts
+			}
+		}
+		
+		delete directory;
+		if (f != currentDir && f != directoryFile)
+		  delete f;
+		
+		return openFile;				// return NULL if not found
+	
+	
+}
+
+
+
+//----------------------------------------------------------------------
+// FileSystem::findIndexFile
+//  renvoie la position du fichier dans la table des fichiers ouverts
+//
+//	Return -1 si le fichier ne se trouve pas dans la table
+//
+//	"name" -- nom du fichier 
+//-------------------------------------------------------------
+
+int 
+FileSystem::findIndexFile(const char *name){
+	
+	unsigned i;
+	for(i=0; i<openedFiles.size() ; i++)
+			if(strncmp(openedFiles[i], name, FileNameMaxLen))
+				return i;
+	
+	return -1;			
+	
 }
 
 //----------------------------------------------------------------------
@@ -400,7 +443,7 @@ FileSystem::Remove(const char *name)
 	BitMap *freeMap;
 	FileHeader *fileHdr;
 	int sector;
-
+	int i;
 	directory = new Directory(NumDirEntries);
 	directory->FetchFrom(currentDir);
 	sector = directory->Find(name);
@@ -423,6 +466,8 @@ FileSystem::Remove(const char *name)
 	delete fileHdr;
 	delete directory;
 	delete freeMap;
+	i = findIndexFile(name);
+	openedFiles.erase(openedFiles.begin()+i);
 	return TRUE;
 }
 
@@ -484,14 +529,12 @@ FileSystem::RemoveDir(const char *name)
 	dir = new OpenFile(sector);
 	dirToDelete = new Directory(NumDirEntries);
 	dirToDelete->FetchFrom(dir);
-	
 	if ( !dirToDelete->isEmpty() ){ // teste si le repertoire est vide
 			delete directory;
 			delete dir;
 			delete dirToDelete;
 			return false;  
 		}
-		
 	
 	fileHdr = new FileHeader;
 	fileHdr->FetchFrom(sector);

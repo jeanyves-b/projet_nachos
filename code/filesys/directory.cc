@@ -241,7 +241,7 @@ Directory::Print()
 Directory::isEmpty()
 {
 	for (int i = 0; i < tableSize; i++)
-		if (table[i].inUse)
+		if (table[i].inUse &&  !strncmp(table[i].name, "..\0", FileNameMaxLen) && !strncmp(table[i].name, ".\0", FileNameMaxLen))
 			return false;
 	
 	return true;		
