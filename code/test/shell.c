@@ -3,7 +3,7 @@
 	int
 main ()
 {
-	SpaceId newProc;
+	int newProc;
 	char prompt[2], buffer[60];
 	int i;
 
@@ -20,7 +20,8 @@ main ()
 		do
 		{
 
-			GetChar (&buffer[i]);
+			buffer[i] = GetChar ();
+			PutChar(buffer[i]);
 
 		}
 		while (buffer[i++] != '\n');
@@ -28,11 +29,10 @@ main ()
 		buffer[--i] = '\0';
 		
 		
-
 		if (i > 0)
 		{
-			newProc = Exec (buffer);
-			Join (newProc);
+			
+			newProc = ForkExec(buffer);
 		}
 	}
 }

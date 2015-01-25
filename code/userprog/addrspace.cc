@@ -30,17 +30,16 @@ typedef struct WaitingThread {
 static void
 ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
 		int position, TranslationEntry *pageTableA, unsigned numPagesA){
-
+	char buffer[numBytes];
+	
+	int written = executable->ReadAt(buffer, numBytes, position);
+	IntStatus oldLevel = interrupt->SetLevel (IntOff);
 	TranslationEntry *oldPT = machine->pageTable;
 	unsigned oldPTS = machine->pageTableSize;
 
 	machine->pageTable = pageTableA;
 	machine->pageTableSize = numPagesA;
 
-	char buffer[numBytes];
-
-
-	int written = executable->ReadAt(buffer, numBytes, position);
 	int i = 0;
 
 	for (i = 0; i < written; i++){
@@ -50,6 +49,7 @@ ReadAtVirtual(OpenFile *executable, int virtualaddr, int numBytes,
 
 	machine->pageTable = oldPT;
 	machine->pageTableSize = oldPTS;
+	(void) interrupt->SetLevel (oldLevel);
 } 
 
 //----------------------------------------------------------------------
@@ -110,20 +110,23 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	// to leave room for the stack
 	numPages = divRoundUp (size, PageSize);
 	size = numPages * PageSize;
+	
+		stack = new int[MaxRunningThreads];
 
-	ASSERT (numPages <= NumPhysPages);	// check we're not trying
+	for(unsigned int j=0; j<MaxRunningThreads; j++)
+		stack[j] = -1;
+
+	threads_created = 0; 
+	
+	machine->frameprovider->s->P();
+	ASSERT (numPages <= (unsigned)machine->frameprovider->NumAvailFrame());	// check we're not trying
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
-	stack = new int[MaxRunningThreads];
 
-	for(unsigned int j=0; j<MaxRunningThreads; j++)
-		stack[j] = -1;
-
-	threads_created = 0; 
 
 
 	DEBUG ('a', "Initializing address space, num pages %d, size %d\n",
@@ -134,12 +137,9 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	for (assigned_vpn = 0; assigned_vpn < numPages; assigned_vpn++)
 	{
-		pageTable[assigned_vpn].virtualPage = assigned_vpn;	
-		if (machine->frameprovider->NumAvailFrame() > 0) { //	on vérifie qu'il y a assez de pages pages 
-			pageTable[assigned_vpn].physicalPage = machine->frameprovider->GetEmptyFrame();
-		} else {
-			return;
-		}
+		
+		pageTable[assigned_vpn].virtualPage = assigned_vpn;
+		pageTable[assigned_vpn].physicalPage = machine->frameprovider->GetEmptyFrame();
 		pageTable[assigned_vpn].valid = TRUE;
 		pageTable[assigned_vpn].use = FALSE;
 		pageTable[assigned_vpn].dirty = FALSE;
@@ -147,27 +147,26 @@ AddrSpace::AddrSpace (OpenFile *executable)
 		// a separate page, we could set its 
 		// pages to be read-only
 	}
+	machine->frameprovider->s->V();
+		// zero out the entire address space, to zero the unitialized data segment 
+		// and the stack segment
+		//bzero (machine->mainMemory, size);
 
-	// zero out the entire address space, to zero the unitialized data segment 
-	// and the stack segment
-	//bzero (machine->mainMemory, size);
-
-	// then, copy in the code and data segments into memory
-	if (noffH.code.size > 0)
-	{
-		DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
-				noffH.code.virtualAddr, noffH.code.size);
-		ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size, 
-				noffH.code.inFileAddr, pageTable, numPages);
-	}
-	if (noffH.initData.size > 0)
-	{
-		DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
-				noffH.initData.virtualAddr, noffH.initData.size);
-		ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size, 
-				noffH.initData.inFileAddr, pageTable, numPages); 
-	}
-
+		// then, copy in the code and data segments into memory
+		if (noffH.code.size > 0)
+		{
+			DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
+					noffH.code.virtualAddr, noffH.code.size);
+			ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size, 
+					noffH.code.inFileAddr, pageTable, numPages);
+		}
+		if (noffH.initData.size > 0)
+		{
+			DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
+					noffH.initData.virtualAddr, noffH.initData.size);
+			ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size, 
+					noffH.initData.inFileAddr, pageTable, numPages); 
+		}
 	addT = new Lock("add");
 	waitT = new Lock("waitT");
 
@@ -187,8 +186,11 @@ AddrSpace::~AddrSpace ()
 	// End of modification
 	unsigned i;
 	//liberation de toutes les pages physiques utilisées par le processus
-	for(i = 0; i < assigned_vpn; i++)
+	for(i = 0; i < assigned_vpn; i++){
+		machine->frameprovider->s->P();
 		machine->frameprovider->ReleaseFrame(pageTable[i].physicalPage);
+		machine->frameprovider->s->V();
+	}
 	delete [] pageTable;
 	delete stack;
 	waiting_threads.clear();
