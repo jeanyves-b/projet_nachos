@@ -687,6 +687,7 @@ void
 FileSystem::Close(const char* name){
 	int i;
 		
+		lock->P();
 		i = FindIndex(name);
 		if(i != -1 ){ 
 		openFileTable[i].count--;
@@ -694,8 +695,8 @@ FileSystem::Close(const char* name){
 			delete openFileTable[i].file;
 			openFileTable[i].used = false;
 			openFileTable[i].file = NULL;
-			
 		}
+		lock->V();
 }
 
 //----------------------------------------------------------------------
