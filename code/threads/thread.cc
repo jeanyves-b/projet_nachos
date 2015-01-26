@@ -151,6 +151,7 @@ Thread::ForkExec (VoidFunctionPtr func, int arg)
 	scheduler->ReadyToRun (this);	// ReadyToRun assumes that interrupts 
 	// are disabled!
 	(void) interrupt->SetLevel (oldLevel);
+	
 }
 
 //----------------------------------------------------------------------
