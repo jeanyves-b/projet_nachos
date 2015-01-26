@@ -76,7 +76,7 @@ MailBox::~MailBox()
 //	"mailHdr" -- source, destination mailbox ID's
 //----------------------------------------------------------------------
 
-	static void 
+	void 
 PrintHeader(PacketHeader pktHdr, MailHeader mailHdr)
 {
 	printf("From (%d, %d) to (%d, %d) bytes %d, id %d (%s)\n",
@@ -232,46 +232,61 @@ PostOffice::~PostOffice()
 
 //----------------------------------------------------------------------
 // PostOffice::PostalDelivery
-// 	Vérifie s'il y a un message qui doit être (re)transmis, et il le fait.
+// 	Démon qui tourne en permanence sur le thread "sender" et qui 
+//	  renvoie un paquet si celui-ci a été envoyé, n'a toujours pas
+//	  reçu d'acquittement, n'a pas atteint son nombre maximal de 
+//	  rentransmission, et que sa dernière transmission date de plus de
+//	  "TEMPO" secondes.
 //
 //---------------------------------------
 	void
 PostOffice::PostalSender() {
 	time_t lastTry;			// Le temps de la dernière fois que l'on a tenté d'envoyer le message
-	unsigned tryCount ; 		// L
+	unsigned tryCount ; 		// Le
 	for(;;) {
+		// attendre une demande de retransmission
 		startResendingMsg->P();
+		
+		// signifier qu'un retransmission est en cours
 		daemonsLock->Acquire();
 		isResending = true;
 		daemonsLock->Release();
 		
+		// retransmettre tant que le nombre maximal de retransmissions
+		//	 n'a pas été atteint et qu'aucun acquittement reçu.
 		time(&lastTry);
 		tryCount = 1;
 		while(tryCount < MAXREEMISSIONS) {
+			// passer la main au démon "woker" s'il y a un message
+			//	 en attente, et attendre sa permission pour reprendre
+			//	 et si à la reprise l'acquittement a bien été reçu, 
+			//	 redonner la main au thread principal
 			daemonsLock->Acquire();
 			if (hasMessagePending) {
-				hasMessagePending = false;
+				hasMessagePending = false; // signifier que le message
+				// en attente a été pris en compte
 				daemonsLock->Release();
 				
-				checkAck->V();
-				startResendingMsg->P();
+				checkAck->V(); // donner la main au démon "worker"
+				startResendingMsg->P(); // attendre de reprendre la main
 				
 				if (waitingForAck == NULL) {
 					daemonsLock->Acquire();
-					isResending = false;
+					isResending = false; // signifier qu'il n'y a plus
+					// de retransmission en cours
 					daemonsLock->Release();
-					ackDone->V();
+					ackDone->V(); // signifier que la vérification 
+					// est terminée
 					break;
 				}
 			} else {
 				daemonsLock->Release();
 			}
 			
+			// renvoyer le message s'il est temps de le faire
 			if (waitingForAck != NULL && difftime(time(NULL), lastTry) >= TEMPO) {
 				DEBUG('n', "Le message #%d n'a pas été acquitté après %.2lf secondes, il est retransmis (essai n°%d).\n", 
 					waitingForAck->mailHdr.id, TEMPO, tryCount+1);
-				tryCount++;	
-				time(&lastTry);
 				
 				char* buffer = new char[MaxPacketSize];	// space to hold concatenated
 				// mailHdr + data
@@ -279,6 +294,10 @@ PostOffice::PostalSender() {
 				// concatenate MailHeader and data
 				bcopy(&(waitingForAck->mailHdr), buffer, sizeof(MailHeader));
 				bcopy(waitingForAck->data, buffer + sizeof(MailHeader), waitingForAck->mailHdr.length);
+				
+				// mettre à jour nombre d'essais et temps dernier essai
+				tryCount++;	
+				time(&lastTry);
 
 				network->Send(waitingForAck->pktHdr, buffer);
 				messageSent->P();			// wait for interrupt to tell us
@@ -288,17 +307,20 @@ PostOffice::PostalSender() {
 			}
 		} 
 		
+		// si aucun acquittement de reçu tout au long des retransmissions
 		if (tryCount == MAXREEMISSIONS) {
 			DEBUG('n', "Le message #%d n'a pas été acquitté après %.2lf secondes, il a été détruit.\n", 
 				waitingForAck->mailHdr.id, MAXREEMISSIONS*TEMPO);
 					
+			// detruire le message en attente d'acquittement
 			delete waitingForAck;
 			waitingForAck = NULL; 
 
 			daemonsLock->Acquire();
-			isResending = false;
+			isResending = false; // signifier qu'aucun retransmission
+			// en cours
 			daemonsLock->Release();
-			ackDone->V();
+			ackDone->V(); // redonner la main au thread principal
 		} 
 	}
 }
@@ -309,6 +331,9 @@ PostOffice::PostalSender() {
 //
 //      Incoming messages have had the PacketHeader stripped off,
 //	but the MailHeader is still tacked on the front of the data.
+//
+//	Renvoie un acquittement pour les messages normaux et signifie qu'un
+//	  message a été acquitté si le message reçu est un acquittement.
 //----------------------------------------------------------------------
 
 	void
@@ -322,6 +347,7 @@ PostOffice::PostalDelivery()
 		// first, wait for a message
 		messageAvailable->P();	
 		
+		// Signifier qu'un message est en attente
 		daemonsLock->Acquire();
 		hasMessagePending = true;
 		daemonsLock->Release();
@@ -334,6 +360,8 @@ PostOffice::PostalDelivery()
 			PrintHeader(pktHdr, mailHdr);
 		}
 		
+		// ne continuer que s'il n'y pas de retransmission en cours
+		//	ou que la retransmission nous permet de continuer ici.
 		daemonsLock->Acquire();
 		if (isResending) {
 			daemonsLock->Release();
@@ -342,47 +370,52 @@ PostOffice::PostalDelivery()
 			daemonsLock->Release();
 		}
 		
-		//	Renvoyer un acquittement si on reçoit un message normal		
+		
 		if (mailHdr.type == ACK) {
 			if (waitingForAck != NULL) {
 				if (waitingForAck->mailHdr.id == mailHdr.id) {
+					//	si on reçoit l'acquittement on le signifie
 					DEBUG('n', "Le message #%d a été acquitté\n", mailHdr.id);
 					delete waitingForAck;
 					waitingForAck = NULL;
 					lastAck = mailHdr.id;
 				} else {
+					// utilie pour le debug uniquement
 					DEBUG('n', "Reçu message acquittement #%d a été acquitté\n", mailHdr.id);
 				}
 			}	
 		} else {
-				if (DebugIsEnabled('n')) {
-					printf("Sending ACK for message: ");
-					PrintHeader(pktHdr, mailHdr);
-				}
-				PacketHeader ackPHdr; 
-				MailHeader ackMHdr;
+			//	Renvoyer un acquittement si on reçoit un message normal		
+			if (DebugIsEnabled('n')) {
+				printf("Sending ACK for message: ");
+				PrintHeader(pktHdr, mailHdr);
+			}
+			PacketHeader ackPHdr; 
+			MailHeader ackMHdr;
+			
+			ackPHdr.to = pktHdr.from;
+			ackPHdr.from = netAddr;
+			ackPHdr.length = 1;
+			
+			ackMHdr.to = mailHdr.from;
+			ackMHdr.from = mailHdr.to;
+			ackMHdr.type = ACK;
+			ackMHdr.id = mailHdr.id;
+			ackMHdr.length = 1;
+			
+			this->Send(ackPHdr, ackMHdr, "");
 				
-				ackPHdr.to = pktHdr.from;
-				ackPHdr.from = netAddr;
-				ackPHdr.length = 1;
-				
-				ackMHdr.to = mailHdr.from;
-				ackMHdr.from = mailHdr.to;
-				ackMHdr.type = ACK;
-				ackMHdr.id = mailHdr.id;
-				ackMHdr.length = 1;
-				
-				this->Send(ackPHdr, ackMHdr, "");
-				
-				if (mailHdr.id < inMsgCount) {
-					DEBUG('n', "Message #%d déjà reçu.\n", mailHdr.id);
-				} else {
-					DEBUG('n', "__Message #%d jamais reçu. (%d)\n", mailHdr.id, inMsgCount);
-					inMsgCount++;
-					boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
-				}
+			if (mailHdr.id < inMsgCount) {
+				DEBUG('n', "Message #%d déjà reçu.\n", mailHdr.id);
+			} else {
+				DEBUG('n', "__Message #%d jamais reçu. (%d)\n", mailHdr.id, inMsgCount);
+				inMsgCount++;
+				boxes[mailHdr.to].Put(pktHdr, mailHdr, buffer + sizeof(MailHeader));
+			}
 		} 
 		
+		// signifier qu'aucun message n'est attente et redonner la main
+		//	 au demon "sender" s'il était entrain de retransmettre
 		daemonsLock->Acquire();
 		hasMessagePending = false;
 		if (isResending) {
@@ -444,7 +477,24 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 
 //----------------------------------------------------------------------
 // PostOffice::SendSafe
+// 	Mets l'entête du mail devant les données, et transmets la demande
+//	  d'envoi au réseau, et attends l'acquittement du message en
+//	  question avant de retourner. 
+//	Un seul paquet peut être transmis à la fois, l'envoi de paquets 
+//	  via le réseau est donc synchrone
+//	Le paquet est retransmis tout les "TEMPO" secondes tant que 
+//	  son acquittement n'a pas été reçu ou qu'il ait été renvoyé
+//	  "MAXREEMISSIONS" fois. Au retour de cette fonction, le paquet
+//	  pourrait donc ne pas avoir bien été reçu par le destinataire.
 //
+//	Note that the MailHeader + data looks just like normal payload
+//	data to the Network.
+//
+//	Renvoie si oui ou non le paquet a été bien acquitté.
+//
+//	"pktHdr" -- source, destination machine ID's
+//	"mailHdr" -- source, destination mailbox ID's
+//	"data" -- payload message data
 //----------------------------------------------------------------------
 
 	bool
@@ -489,94 +539,12 @@ PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 	// réveillier le sender
 	startResendingMsg->V(); 
 	
-	ackDone->P();
+	ackDone->P(); // attendre que la vérification d'acquittement se
+	//  termine
 	bool retVal = mailHdr.id == lastAck;
 	sendLock->Release();
 	
 	return retVal;
-
-}
-
-//----------------------------------------------------------------------
-// PostOffice::SendUnfixedSize
-//
-//----------------------------------------------------------------------
-
-	unsigned
-PostOffice::SendUnfixedSize(char* data, unsigned size, int localPort, 
-		MailBoxAddress to, int remotePort)
-{
-	PacketHeader *pktHdr = new PacketHeader();
-	MailHeader *mailHdr = new MailHeader();
-	pktHdr->to = to;		
-	mailHdr->to = remotePort;
-	mailHdr->from = localPort;
-	mailHdr->length = size;
-	
-	if (DebugIsEnabled('n')) {
-		printf("Sending message with size %d: ",size);
-		PrintHeader(*pktHdr, *mailHdr);
-	}
-	
-	ASSERT(0 <= mailHdr->to && mailHdr->to < numBoxes);
-
-	unsigned bytesSent = 0;
-	unsigned bytesTriedToSend = 0;
-	unsigned bytesToSend;
-	
-	char *fragment = new char[MaxMailSize];
-	while (bytesTriedToSend < size) {
-		bytesToSend = (size - bytesTriedToSend > MaxMailSize? MaxMailSize : size - bytesTriedToSend);
-		
-		memcpy(fragment, data + bytesSent, bytesToSend);
-		mailHdr->length = bytesToSend;
-		if (this->SendSafe(*pktHdr, *mailHdr, static_cast<char const *>(fragment))) {
-			bytesSent += bytesToSend;
-		}
-		bytesTriedToSend += bytesToSend;
-	}
-	
-	delete [] fragment;
-	delete mailHdr;
-	delete pktHdr;
-	
-	return bytesSent;
-}
-
-//----------------------------------------------------------------------
-// PostOffice::ReceiveUnfixedSize
-//
-//----------------------------------------------------------------------
-
-	void
-PostOffice::ReceiveUnfixedSize(int localPort, char* data, unsigned size)
-{
-	
-	DEBUG('n', "Asking to Receive message of size %d on box %d\n", size, localPort);
-	
-	ASSERT((localPort >= 0) && (localPort < numBoxes));
-	
-	unsigned bytesRemaining = size;
-	unsigned bytesToReceive;
-	
-	PacketHeader *pktHdr = new PacketHeader();
-	MailHeader *mailHdr = new MailHeader();
-	char *fragment = new char[MaxMailSize];
-	
-	while (bytesRemaining > 0) {
-		bytesToReceive = (bytesRemaining > MaxMailSize? MaxMailSize : bytesRemaining);
-
-		mailHdr->length = bytesToReceive;
-		this->Receive(localPort, pktHdr, mailHdr, fragment);
-		
-		memcpy(data + size - bytesRemaining, fragment, bytesToReceive);
-		bytesRemaining -= bytesToReceive;
-		
-	}
-	
-	delete [] fragment;
-	delete mailHdr;
-	delete pktHdr;
 
 }
 

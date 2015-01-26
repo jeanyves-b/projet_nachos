@@ -100,6 +100,8 @@ class MailBox {
 		SynchList *messages;	// A mailbox is just a list of arrived messages
 };
 
+void PrintHeader(PacketHeader pktHdr, MailHeader mailHdr);
+
 // The following class defines a "Post Office", or a collection of 
 // mailboxes.  The Post Office is a synchronization object that provides
 // two main operations: Send -- send a message to a mailbox on a remote 
@@ -138,9 +140,9 @@ class PostOffice {
 		// Retrieve a message of a given size: retrieves N fragments of MaxMailSize bytes
 		//	from the box.
 		
-		int SendFile(char *path, int localPort, MailBoxAddress to, int remotePort);
+		int SendFile(const char *path, int localPort, MailBoxAddress to, int remotePort);
 		
-		int ReceiveFile(int localPort, char *path, unsigned size);
+		int ReceiveFile(int localPort, const char *path);
 		
 		void PostalSender();	// Vérifie s'il y a des messages
 		// à (re)transmettre, et le fait si c'est le cas.

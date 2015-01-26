@@ -8,28 +8,52 @@
 
 //----------------------------------------------------------------------
 // PostOffice::SendFile
+//	Envoie la taille d'un fichier puis le fichier sur le réseau en le 
+//	  fragmentant en plusieurs paquets si nécéssaire.
 //
+//	Renvoie 0 en cas de succès, un code d'erreur négatif sinon (-1 sur
+//	  fichier impossible à ouvrir, -2 si taille du fichier invalide,
+//	  -3 si tous les octets n'ont pas été acquittés. Pour ce dernier
+//	   cas, certains octets ont été bien acquittés).
+//
+// "path" -- nom du fichier à envoyer
+// "localPort" -- port local vers lequel les acquittement seront reçus
+// "to" -- adresse du destinataire dans le réseau
+// "remotePort" -- port distant (du destinataire) où envoyer le fichier
 //----------------------------------------------------------------------
 
 	int
-PostOffice::SendFile(char *path, int localPort, MailBoxAddress to, int remotePort)
+PostOffice::SendFile(const char *path, int localPort, MailBoxAddress to, int remotePort)
 {
 	ASSERT((localPort >= 0) && (localPort < numBoxes));
-	OpenFile *file = fileSystem->Open(path);
-	if (file == NULL && file->Length()>0)
-		return -1;
 	
-	char *buffer = new char[file->Length()];
+	// ouverture du fichier
+	OpenFile *file = fileSystem->Open(path);
+	if (file == NULL)
+		return -1;
+		
+	// récupération de la taille du fichier
+	int size = file->Length();
+	
+	if (size <= 0)
+		return -2;
+		
+	// on envoie la taille
+	this->SendUnfixedSize((char*)(&size), sizeof(int), localPort, to, remotePort);
 
-	int remaining = file->Length();
+	// on envoie le contenu du fichier tant qu'il reste des données à envoyer
+	char *buffer = new char[size];
+
+	int remaining = size;
 	while (remaining > 0) {
-		remaining -= file->Read(buffer + file->Length() - remaining, remaining);
+		remaining -= file->Read(buffer + size - remaining, remaining);
 	}
 	
-	int sent = this->SendUnfixedSize(buffer, (unsigned)(file->Length()), localPort, to, remotePort);
+	int sent = this->SendUnfixedSize(buffer, (unsigned)(size), localPort, to, remotePort);
 	
 	delete [] buffer;
 	
+	// on n'a pas envoyé tout le fichier (paquets perdus)
 	if (sent < file->Length()) 
 		return -3;
 		
@@ -38,35 +62,50 @@ PostOffice::SendFile(char *path, int localPort, MailBoxAddress to, int remotePor
 	
 //----------------------------------------------------------------------
 // PostOffice::ReceiveFile
+//	Reçoit un fichier sur le port local indiqué et l'entregistre sous 
+//	  le nom fourni.
 //
+//	Retourne 0 en cas de succès, un code négatif sinon (-1 si taille 
+//	  reçue invalide, -2 si impossible de créer ou d'écraser le fichier
+//	  au chemin souhaité, -3 si impossible d'ouvrir le fichier)
+//
+// "localPort" -- port local où la machine doit attendre un fichier
+// "path" -- chemin où le fichier reçu doit être placé.
 //----------------------------------------------------------------------
 
 	int
-PostOffice::ReceiveFile(int localPort, char *path, unsigned size) {
+PostOffice::ReceiveFile(int localPort, const char *path) {
 		
-	ASSERT(size > 0);
 	ASSERT((localPort >= 0) && (localPort < numBoxes));
 	
+	//	On reçoit la taille attendue
+	unsigned size = 0;
+	this->ReceiveUnfixedSize(localPort, (char*)(&size), sizeof(int));
 	
-	int retVal = 0;
+	// La taille du fichier est invalide
+	if (size<=0) 
+		return -1;
 	
-	if (!fileSystem->Create(path, size)) {
-		retVal = -1;
-	} else {
-		OpenFile *file = fileSystem->Open(path);
-		if (file == NULL) {
-			retVal = -2;
-		} else {
-			char *buffer = new char[size];
-			this->ReceiveUnfixedSize(localPort, buffer, size);
-			
-			int written = 0;
-			while ((unsigned)written < size) {
-				written += file->Write(buffer + written, size  - written);
-			}
-			delete [] buffer;				
-		}
+	// Impossible de créer une fichier (ou de l'écraser)
+	if (!fileSystem->Create(path, size))
+		return -2;
+	
+	OpenFile *file = fileSystem->Open(path);
+	
+	//	Impossible d'ouvrir le fichier
+	if (file == NULL) 
+		return -3;
+	
+	// On reçoit les données du fichier en fragments sur un buffer.
+	char *buffer = new char[size];
+	this->ReceiveUnfixedSize(localPort, buffer, size);
+		
+	// Ecriture du contenu du buffer sur le fichier.
+	int written = 0;
+	while ((unsigned)written < size) {
+		written += file->Write(buffer + written, size  - written);
 	}
-	
-	return retVal;
+	delete [] buffer;				
+
+	return 0;
 }

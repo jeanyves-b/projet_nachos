@@ -87,7 +87,7 @@ $(eval $(call define-flavor,step4,userprog filesys-stub,synchconsole.cc userthre
 $(eval $(call define-flavor,step5,userprog filesys, \
 	frameprovider.cc userprocess.cc synchconsole.cc userthread.cc))
 $(eval $(call define-flavor,step6,userprog filesys-stub network, \
-	frameprovider.cc userprocess.cc synchconsole.cc userthread.cc filepost.cc))
+	frameprovider.cc userprocess.cc synchconsole.cc userthread.cc unfixedpost.cc filepost.cc))
 # $(eval $(call define-flavor,mynetwork,userprog filesys-stub network, \
 #     synchconsole.cc userthread.cc))
 # $(eval $(call define-flavor,final,userprog filesys network,\
