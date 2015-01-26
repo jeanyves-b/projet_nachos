@@ -126,8 +126,6 @@ class FileSystem {
 		Semaphore* lock;
 		FileSysEntry* openFileTable;
 		
-		Semaphore *sem;
-		
 };
 
 #endif // FILESYS
