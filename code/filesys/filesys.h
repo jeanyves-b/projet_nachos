@@ -111,6 +111,8 @@ class FileSystem {
 		OpenFile* currentDir; //the current directory
 		std::vector<const char *> openedFiles;
 		
+		Semaphore *sem;
+		
 };
 
 #endif // FILESYS

@@ -211,20 +211,21 @@ int Thread::Join(int user_thread_id){
 //
 //----------------------------------------------------------------------
 
-int Thread::JoinFils(){
+//int Thread::JoinFils(){
 
-	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is waiting for all its children\n", name, id, space!=NULL?space->pid:0);
-	int jerror;
-	while (!this->fils.empty()){
-		jerror = this->space->JoinThread(fils.at(0));
-		if (jerror <0){
-			return jerror;
-		}
-		this->fils.erase(fils.begin());
-	}
-	DEBUG ('t', "Thread \"%s %d (pid: %d)\" is done waiting for its children\n", name, id, space!=NULL?space->pid:0);
-	return 0;
-}
+	//DEBUG ('t', "Thread \"%s %d (pid: %d)\" is waiting for all its children\n", name, id, space!=NULL?space->pid:0);
+	//int jerror;
+	//while (!this->fils.empty()){
+		//jerror = this->space->JoinThread(fils.at(0));
+		//if (jerror <0){
+			//return jerror;
+		//}
+		//this->fils.erase(fils.begin());
+	//}
+	//DEBUG ('t', "Thread \"%s %d (pid: %d)\" is done waiting for its children\n", name, id, space!=NULL?space->pid:0);
+	//return 0;
+//}
+
 //----------------------------------------------------------------------
 // Thread::CheckOverflow
 //      Check a thread's stack to see if it has overrun the space

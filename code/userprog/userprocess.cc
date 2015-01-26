@@ -51,7 +51,7 @@ int do_UserProcessCreate(char *s){
 	return addrSpace->pid;
 }
 void do_UserProcessExit(){
-	currentThread->JoinFils();
+	currentThread->space->JoinThreads();
 	if(machine->DecrProcess() == 0){
 		DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 		interrupt->Halt();

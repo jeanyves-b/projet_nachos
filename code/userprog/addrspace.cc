@@ -340,6 +340,16 @@ AddrSpace::RemoveThread (int unique_thread_id)
 
 }
 
+void
+AddrSpace::JoinThreads(){
+	unsigned offset;
+	for(offset = 0; offset < MaxRunningThreads ; offset++){
+		if (stack[offset] != -1){
+			JoinThread(stack[offset]);
+		}
+	}
+} 
+	
 //----------------------------------------------------------------------
 // AddrSpace::RunWaitingThread
 //		Cherche le thread ayant l'id "unique_thread_id" dans la liste
