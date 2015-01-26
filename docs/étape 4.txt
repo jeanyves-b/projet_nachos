@@ -30,11 +30,17 @@ partie 1 : adressage virtuel par une table de pages
 			libérer toutes les pages physiques de la pageTable de l'espace d'adressage à sa destruction
 
 choix d'implémentation
+	ReadAtVirtual():
 	façon d'écrire dans la mémoire
 		Ecriture dans buffer avec ReadAt
 		Ecriture du buffer vers page virtuelle avec WriteMem
+	On enlève les interruptions pour éviter qu'un autre thread prenne la main alors que
+	la pageTable de la machine a changé.
+	
+	frameprovider:
 	allocation et sytem de cadre/pagination
-
+	le systeme renvoit la première page valide et libre.
+	
 	modification de machine page table size :
 
 
@@ -76,6 +82,8 @@ partie 2 : executer plusieurs programmes en même temps
 
 choix d'implémentation
 	dernier process arrete la machine
+		la machine garde un compteur de processus que l'on peut appeler
+		pour s'ajouter au processus en cours ou dire que l'on quitte.
 
 test
 
