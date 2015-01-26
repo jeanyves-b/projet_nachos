@@ -82,6 +82,7 @@ FileSystem::FileSystem(bool format)
 { 
 	DEBUG('f', "Initializing the file system.\n");
 	sem = new Semaphore("sem",1);
+	lock = new Semaphore("lock",1);
 	if (format) {
 		BitMap *freeMap = new BitMap(NumSectors);
 		Directory *directory = new Directory(NumDirEntries);
@@ -147,7 +148,14 @@ FileSystem::FileSystem(bool format)
 		freeMapFile = new OpenFile(FreeMapSector);
 		directoryFile = new OpenFile(DirectorySector);
 		currentDir = directoryFile;
-		//openedFiles = std::vector<openedFiles>(openFilesNum);
+				
+	}
+	int i;
+	openFileTable = new FileSysEntry[maxOpenFiles];
+	for(i=0;i<maxOpenFiles;i++){
+		openFileTable[i].used = false;
+		openFileTable[i].file = NULL;
+		openFileTable[i].count=0;
 	}
 	
 }
@@ -159,6 +167,8 @@ FileSystem::~FileSystem(){
    }
   delete directoryFile;
   delete sem;
+  delete lock;
+  delete openFileTable;
 
 }
 
@@ -368,20 +378,23 @@ FileSystem::InitializeDir(int childSector,int parentSector){
 	OpenFile *
 FileSystem::Open(const char *name)
 { 			
-		// verifie si le fichier est deja ouvert		
-		if(findIndexFile(name) != -1)
-			return NULL;
-			
+		OpenFile *openFile = NULL;	
 		
-		// fichier non ouvert. il faut l'ajouter à la table des fichiers ouverts		
-		if(openedFiles.size() == openFilesNum)  // nombre maximal de fichiers ouvert atteint
-			return NULL;
+		lock->P();
+		openFile = Find(name);
+		
+		if (openFile != NULL){ // le fichier est dans la table 
+			return openFile;
+		}else{
+			if(GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+				return NULL;
+		}	
 			
 		Directory *directory = new Directory(NumDirEntries);
-		OpenFile *openFile = NULL;
 		OpenFile *f;
 		int sector;
-		char filename[FileNameMaxLen+1];
+		char filename[FileNameMaxLen+1];		
+			
 		f = MoveTo(name,filename);
 		
 		if (f == NULL)
@@ -391,8 +404,7 @@ FileSystem::Open(const char *name)
 		sector = directory->Find(filename); 
 		if (sector >= 0) {		
 			openFile = new OpenFile(sector);	// name was found in directory 
-			openedFiles.push_back(name); // mettre le fichier dans la table de fichiers ouverts
-	
+			
 		}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
 			f = MoveTo("/System/",NULL);
 			if (f == NULL){
@@ -402,69 +414,19 @@ FileSystem::Open(const char *name)
 			sector = directory->Find(filename);
 			if (sector >= 0){ 		
 			openFile = new OpenFile(sector);
-			openedFiles.push_back(name);  // mettre le fichier dans la table de fichiers ouverts
 			}
 		}
+		if(openFile != NULL)		
+			AddFile(name,openFile); // on ajoute le fichier dans la table
+			
 		
 		delete directory;
 		if (f != currentDir && f != directoryFile)
 		  delete f;
-		
+		lock->V();
 		return openFile;				// return NULL if not found
 	
 	
-}
-
-
-
-//----------------------------------------------------------------------
-// FileSystem::findIndexFile
-//  renvoie la position du fichier dans la table des fichiers ouverts
-//
-//	Return -1 si le fichier ne se trouve pas dans la table
-//
-//	"name" -- nom du fichier 
-//-------------------------------------------------------------
-
-int 
-FileSystem::findIndexFile(const char *name){
-	
-	unsigned i;
-	for(i=0; i<openedFiles.size() ; i++)
-			if(strncmp(openedFiles[i], name, FileNameMaxLen))
-				return i;
-	
-	return -1;			
-	
-{ 
-	Directory *directory = new Directory(NumDirEntries);
-	OpenFile *openFile = NULL;
-	OpenFile *f;
-	int sector;
-	char filename[FileNameMaxLen+1];
-	f = MoveTo(name,filename);
-	if (f == NULL)
-	  return NULL;
-	DEBUG('f', "Opening file %s\n", name);
-	directory->FetchFrom(f);
-	sector = directory->Find(filename); 
-	if (sector >= 0) {		
-		openFile = new OpenFile(sector);	// name was found in directory 
-	}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'System'
-	    f = MoveTo("/System/",NULL);
-	    if (f == NULL){
-		return NULL;
-	    }
-	    directory->FetchFrom(f);
-	    sector = directory->Find(filename);
-	    if (sector >= 0) 		
-		openFile = new OpenFile(sector);
-	}
-	delete directory;
-	if (f != currentDir && f != directoryFile)
-	  delete f;
-	return openFile;				// return NULL if not found
-
 }
 
 //----------------------------------------------------------------------
@@ -488,7 +450,7 @@ FileSystem::Remove(const char *name)
 	BitMap *freeMap;
 	FileHeader *fileHdr;
 	int sector;
-	int i;
+	
 	directory = new Directory(NumDirEntries);
 	directory->FetchFrom(currentDir);
 	sector = directory->Find(name);
@@ -511,8 +473,7 @@ FileSystem::Remove(const char *name)
 	delete fileHdr;
 	delete directory;
 	delete freeMap;
-	i = findIndexFile(name);
-	openedFiles.erase(openedFiles.begin()+i);
+	
 	return TRUE;
 }
 
@@ -660,4 +621,96 @@ FileSystem::Print()
 	delete dirHdr;
 	delete freeMap;
 	delete directory;
+}
+
+
+//----------------------------------------------------------------------
+// 	ajoute un fichier dans la liste des fichiers ouverts 
+//  return index du fichier ajouté dans la table -1 en cas d'erreur
+//----------------------------------------------------------------------
+ 
+int
+FileSystem::AddFile(const char* name,OpenFile* open){
+	int i = 0;
+		
+	i = GetNextEntry(); // cherche une entrée libre
+	if(i == -1) //table de fichiers ouverts pleine 
+		return -1;
+	
+	openFileTable[i].used = true;
+	openFileTable[i].file = open;
+	openFileTable[i].count++;
+	strncpy(openFileTable[i].name, name, FileNameMaxLen); 
+
+
+	return i;
+}
+
+//----------------------------------------------------------------------
+// FileSysTable::find
+// renvoie l'openfile du fichier 
+//	return NULL si fichier absent
+//----------------------------------------------------------------------
+
+OpenFile * 
+FileSystem::Find(const char* name){
+	int i=0;
+	
+	for(i=0;i<maxOpenFiles;i++){
+		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
+			return openFileTable[i].file;
+	}
+	
+	return NULL;
+	
+}	
+// retourne l'index du fichier dans la table
+int 
+FileSystem::FindIndex(const char *name){
+	int i=0;
+	
+	for(i=0;i<maxOpenFiles;i++){
+		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
+			return i;
+	}
+	
+	return -1;
+	
+}
+
+//----------------------------------------------------------------------
+// FileSysTable::close 
+// Décremente le nombre de thread qui ouvre le fichier. 
+// Férme le fichier si aucun thread ne l'utilise
+//----------------------------------------------------------------------
+void 
+FileSystem::Close(const char* name){
+	int i;
+		
+		i = FindIndex(name);
+		if(i != -1 ){ 
+		openFileTable[i].count--;
+		if(openFileTable[i].count == 0 )
+			delete openFileTable[i].file;
+			openFileTable[i].used = false;
+			openFileTable[i].file = NULL;
+			
+		}
+}
+
+//----------------------------------------------------------------------
+// return la prochaine entrée valide de la table des fichiers ouverts
+// -1 si la table est pleine
+//----------------------------------------------------------------------
+int 
+FileSystem::GetNextEntry(){
+	int i;
+	
+    for(i=0;i<maxOpenFiles;i++){
+		if( !openFileTable[i].used )
+			return i;
+	}
+	
+	return -1;
+	
 }
