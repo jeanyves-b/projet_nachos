@@ -1,7 +1,6 @@
 #include "syscall.h"
 
-	int
-main ()
+int main ()
 {
 	int newProc;
 	char prompt[2], buffer[60];
@@ -16,22 +15,15 @@ main ()
 		  PutChar (prompt[i]);
 
 		i = 0;
-
 		do
 		{
-
 			buffer[i] = GetChar ();
 			PutChar(buffer[i]);
-
 		}
 		while (buffer[i++] != '\n');
-
 		buffer[--i] = '\0';
-		
-		
 		if (i > 0)
 		{
-			
 			newProc = ForkExec(buffer);
 		}
 	}

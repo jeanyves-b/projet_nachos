@@ -1,0 +1,30 @@
+descriptif des fichiers
+	makethread
+		crée 3 threads
+			UserThreadJoin
+			PutChar
+			PutString
+
+	threadautoexit
+		create
+		putchar
+		putstring
+		pas de UserThreadExit
+
+	threadsnojoin
+		même que makethread mais sans les joins
+
+	userpages0
+		create
+		join
+		putchar
+
+	userpages1
+		create
+		putchar
+
+	threaderror
+		teste les erreurs de userthreadjoin
+		teste les erreurs de userthreadcreate
+		crée énormément de thread
+		

@@ -12,7 +12,7 @@ gros choix
 
 partie 1 : implantation d'une hiérarchie de répertoires
 aller lire partie 6
-	->répertoire peu contenir un répertoire
+	->répertoire peut contenir un répertoire
 
 	création de fonction :
 		créer un repertoire
@@ -20,10 +20,9 @@ aller lire partie 6
 		supprimer un répertoire
 
 	2 des entrée des répertoire sont réservé pour .(actuel) et ..(précédent)
-
+	sauf la racine pour qui .. représente aussi l'actuel
+	
 	problème :
-		choix d'une architecture pour les fichiers
-			tableaux chainé?
 		enregistrement de la structure à la fermeture de la machine
 		restoration de la structure au moment de l'initialisation de la machine
 			écriture/lecture sur le disque
@@ -33,7 +32,27 @@ aller lire partie 6
 	  on peut se déplacer dans les repertoires mais lorsque la machine s'arrête
 	    on revient au repertoire racine (il faudrait arriver à faire le shell pour
 	    avoir un fonctionement 'normal')
-	  
+	    
+	Après l'implémentation du filesystem, l'appel systeme ForkExec ne marchait plus:
+	on a donc fait plusieurs test pour comprendre d'ou venait le problème:
+		- Lancer un programme simple qui crée un processus qui affiche une chaine de caractère
+		  et quitte
+		- Lancer un programme qui crée un nouvel espace d'adressage mais ne crée pas le processus
+		(cela nous a permit de comprendre que le problème venait des PageTable chargé en mémoire)
+		- un pas à pas avec gdb pour voir les changements d'état de la variable
+	Ces tests ont mis en évidence une section critique dans ReadAtVirtua que l'on a corrigé.
+	
+Choix d'implementation:
+	Déplacement dans les répertoires
+		on a rajoute une fonction pour tester l'existence du repertoire demandé
+		cela consiste à ouvrir un fichier(OpenFile) vers le secteur contenant le repertoire
+		il n'est pas sauvegarder dans le disque dur donc on repart de la racine à chaque redémarrage de la machine
+	
+	Supprimer un repertoire
+		on ne peut pas supprimer un repertoire non vide (. et .. ne sont pas considére comme des repertoires "normaux")
+	
+	Créer un repertoire
+		
 
 partie 2 : implantation de la table système des fichiers ouverts
 aller lire partie 7
@@ -65,7 +84,7 @@ partie 4 + 5 : augmentation de la taille max des fichiers + implantation de fich
 	modification de l'entête à chaque modification du contenu d'un fichier
 		les action d'écriture et de suppression dans un fichier doivent avoir accès à l'entête du fichier
 
-partie 6 : implantation des noms de chemin (path name)
+partie 6 : implentation des noms de chemin (path name)
 	faire un interpreteur de commande qui va analyser les nom passer en argument
 		faire un parseur qui va appeler les fonction de déplacement
 		doit se souvenir du dossier courant pour y revenir facilement
@@ -77,7 +96,7 @@ partie 6 : implantation des noms de chemin (path name)
 			possibilité d'appel récursif pour tout supprimer
 		déplacement dans le systeme de fichier
 			une seule fonction
-				pointe sur un répertoire, le répertoire précédant est considérer comme un sous répertoire
+				pointe sur un répertoire, le répertoire précédent est considéré comme un sous répertoire
 
 				
 	Explication de l'utilisation des path name
@@ -85,7 +104,7 @@ partie 6 : implantation des noms de chemin (path name)
 	    - un repertoire qui n'existe pas dans le fichier produira une erreur
 	  si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
 	  dans le cas contraire, on part du répertoire courant.
-	  il faut ajouter manuellement leur utlisation dans toutes les fonctions
+	  il faut ajouter manuellement leur utilisation dans toutes les fonctions
 	  donc il faut tester si les path name marche dans chaques fonctions
 	  (mkdir,cd,rm,...)
 	

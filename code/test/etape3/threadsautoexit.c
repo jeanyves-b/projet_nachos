@@ -14,11 +14,11 @@ int main(){
 	if (id >= 0){
 		error = UserThreadJoin(id); 
 		if (error < 0){
-			PutString("erreur Thread 1");
+			PutString("erreur Thread 1\n");
 		}
 	}
 
-	PutString("On quitte main");
+	PutString("On quitte main\n");
 	return 0;
 }
 
@@ -34,7 +34,6 @@ void thread(void *n){
 	}
 
 	PutChar('\n');
-	//PutString("On quitte un thread \"fils\"");
-	//UserThreadExit();
+	PutString("On quitte un thread \"fils\"\n");
 }
 
