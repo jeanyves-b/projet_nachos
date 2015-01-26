@@ -1,0 +1,15 @@
+tester les fonctions :
+	UserThreadCreate
+		possibilité d'échec
+		position dans l'ordonnanceur
+		création de la structure
+		vérifié l'id
+	UserThreadExit
+		clean correctement
+		attend bien que toutes les thread fils soient finis.
+	UserThreadJoin
+		pair ajouter dans la listes des attentes
+		on attend bien que la thread attendue se termine
+
+lancement de plusieur thread
+string entrelacée
