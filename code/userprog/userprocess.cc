@@ -50,6 +50,7 @@ int do_UserProcessCreate(char *s){
 
 	return addrSpace->pid;
 }
+
 void do_UserProcessExit(){
 	currentThread->JoinFils();
 	if(machine->DecrProcess() == 0){

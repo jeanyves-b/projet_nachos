@@ -1,7 +1,3 @@
-tester les fonctions :
-	UserThreadCreate
-		possibilité d'échec
-
 descriptif des fichiers
 	makethread
 		crée 3 threads
