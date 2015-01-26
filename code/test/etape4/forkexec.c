@@ -8,7 +8,7 @@
 int main()
 {
 	//UserThreadCreate(test, 0);
-
+	int i,pid;
 	for (i=0;i<8;i++)
 		if ( (pid = ForkExec("userpages")) < 0)
 			PutChar('}');

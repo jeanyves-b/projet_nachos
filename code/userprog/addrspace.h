@@ -45,10 +45,12 @@ class AddrSpace
 
 		int AddThread();	// ajouter un thread
 		int RemoveThread(int);	// enlever un thread
+		
 		void RunWaitingThread(int);// lancer les threads en attente
 		int GetStackAddress(unsigned*,int);	//récupérer l'adresse d'un thread
 		//	dans la pile à partir de son identifiant
 		int JoinThread (int); //	attendre la fin d'un thread
+		void JoinThreads();
 		bool HasFailed(); //	si le mapping vpn->ppn a échoué
 		bool StackIsEmpty ();
 
