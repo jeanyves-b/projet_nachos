@@ -1,15 +1,34 @@
 tester les fonctions :
 	UserThreadCreate
 		possibilité d'échec
-		position dans l'ordonnanceur
-		création de la structure
-		vérifié l'id
-	UserThreadExit
-		clean correctement
-		attend bien que toutes les thread fils soient finis.
-	UserThreadJoin
-		pair ajouter dans la listes des attentes
-		on attend bien que la thread attendue se termine
 
-lancement de plusieur thread
-string entrelacée
+descriptif des fichiers
+	makethread
+		crée 3 threads
+			UserThreadJoin
+			PutChar
+			PutString
+
+	threadautoexit
+		create
+		putchar
+		putstring
+		pas de UserThreadExit
+
+	threadsnojoin
+		même que makethread mais sans les joins
+
+	userpages0
+		create
+		join
+		putchar
+
+	userpages1
+		create
+		putchar
+
+	threaderror
+		teste les erreurs de userthreadjoin
+		teste les erreurs de userthreadcreate
+		crée énormément de thread
+		
