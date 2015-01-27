@@ -1,13 +1,13 @@
 %% Installer les paquets texlive-lang-french et texlive-fonts-recommended pour pouvoir compiler ce document
 \documentclass{article}
 \usepackage{geometry}
- \geometry{
- a4paper,
- left=20mm,
- right=20mm,
- top=30mm,
- bottom=40mm,
- }
+\geometry{
+	a4paper,
+	left=20mm,
+	right=20mm,
+	top=30mm,
+	bottom=40mm,
+}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
@@ -15,60 +15,62 @@
 \begin{document}
 
 \title {Rapport Projet NachOS \\ M1 Informatique}
-\author{Amine Ait-Mouloud, Sébastien Avril,\\* Jean-Yves Bottraud, El Hadji Malick Diagne}
+\author{Amine Ait-Mouloud, Sébastien Avril,\\ Jean-Yves Bottraud, El Hadji Malick Diagne}
 \date{Janvier 2015}
 \maketitle
 
 \section{questionnement sur le contenu/la forme du rapport}
 	-> utilité de dire que nous aons dût modifier les fonctions de lecture/écriture en mémoire.
-	-> possibilité d'un process qui se crée, mais le dernier process se termine avant que le compteur est été incrémenté? -> le process en cour de lancement ne se créera jamais.
+	-> possibilité d'un process qui se crée, mais le dernier process se termine avant que le compteur est été incrémenté? -> le process en cour de lancement ne se lancera jamais?
+	-> faire des schema, notament pour la mémoire virtuelle et les id des threads
+	-> test de la partie process
 
 \tableofcontents{}
 \newpage
 \section{Fonctionnalités du noyau}
 	Voici les partie que nous avons réussi à implémenter jusque là :
 	\begin{itemize}
-		\item (aprtie 2) appel system : toutes ces fonction on été porté au niveau utilisateur et sont 'thread safe'. Nous avons aussi utilisé des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran
+		\item (aprtie 2) appel system : toutes les fonction d'écriture et de lecture ont été portées au niveau utilisateur et sont 'thread safe'. Nous avons aussi utilisé des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran. Il n'y a pas de blocage entre la lecture et l'écriture.
 		\item (partie 3) threads : toutes les fonctions permettant de créer, détruire et gérer des threads on été porté au niveau utilisateur.
 		\item (partie 4) mémoire virtuel : le système de mémoire virtuel à été implémenté. La fonction ForkExec a été portée au niveau utilisateur.
-		\item (partie 5) système de fichier :
-		\item (partie 6) réseaux :
+		\item (partie 5) système de fichier : Il est maintenant possible de créer/supprimer des fichiers et des dossiers et de se déplacer dans l'architecture de dossier au niveau utilisateur. L'architecture est sauvegarder d'une éxécution à la suivante.
+		\item (partie 6) réseaux : 
 	\end{itemize}
 	pour toutes ces parties, nos tests n'ont révélé aucun problème. Les tests effectué sont détaillé dans la section qui leur dédiés.
 
 \section{Spécification des fonctions utilisateur}
 	\subsection{Console}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{char GetChar()}
-		\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans la cas de la fin de fichier.}
-		\item{VALEUR DE RETOUR : } Renvoie un \texttt{char} qui représente le caractère lu, ou \texttt{EOF} en cas de fin de fichier ou d'erreur.
-	\end{description}
-	\vspace{2.5mm}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{void GetString(char *s, int n)}
-		\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaine récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
-	\end{description}
-	\vspace{2.5mm}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{int GetInt()}
-		\item{DESCRIPTION : } Lis une chaîne de caractères depuis l'entrée standard selon les mêmes règles que \texttt{GetString}, la convertit en entier naturel, et retourne ce dernier.
-		\item{VALEUR DE RETOUR : } Entier naturel lu depuis l'entrée standard.
-	\end{description}
-	\vspace{2.5mm}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{void PutChar(const char ch)}
-		\item{DECRITPION : } Écrit le caractère \texttt{ch} sur la sortie standard. 
-	\end{description}
-	\vspace{3mm}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{void PutString(const char *s)}
-		\item{DESCRIPTION : } Écrit la chaine présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaine sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
-	\end{description}
-	\vspace{2.5mm}
-	\begin{description}
-		\item{SIGNATURE : } \texttt{void PutInt(int i)}
-		\item{DESCRIPTION : } Convertit l'entier naturel \texttt{i} en chaîne de caractères et l'affiche sur la sortie standard selon les mêmes régèles que \texttt{PutString}.
-	\end{description}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{char GetChar()}
+			\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans la cas de la fin de fichier.}
+			\item{VALEUR DE RETOUR : } Renvoie un \texttt{char} qui représente le caractère lu, ou \texttt{EOF} en cas de fin de fichier ou d'erreur.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void GetString(char *s, int n)}
+			\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaine récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int GetInt()}
+			\item{DESCRIPTION : } Lis une chaîne de caractères depuis l'entrée standard selon les mêmes règles que \texttt{GetString}, la convertit en entier naturel, et retourne ce dernier.
+			\item{VALEUR DE RETOUR : } Entier naturel lu depuis l'entrée standard.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void PutChar(const char ch)}
+			\item{DECRITPION : } Écrit le caractère \texttt{ch} sur la sortie standard. 
+		\end{description}
+		\vspace{3mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void PutString(const char *s)}
+			\item{DESCRIPTION : } Écrit la chaine présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaine sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void PutInt(int i)}
+			\item{DESCRIPTION : } Convertit l'entier naturel \texttt{i} en chaîne de caractères et l'affiche sur la sortie standard selon les mêmes régèles que \texttt{PutString}.
+		\end{description}
 	\subsection{Threads}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int UserThreadCreate(void *f(void*), void* arg)}
@@ -143,11 +145,24 @@
 					\subitem état du parent					validé : le parent n'a plus le thread courant dans sa liste et continue de touner correctement
 					\subitem état des enfants					validé : on attend la fin des enfants avant de supprimer la thread courante. Ce choix est détaillé dans la partie "choix d'implémentation".
 				\item lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
+				\item retours d'erreurs				validé : quand les mauvais argument sont passé à la fonction ou bien qu'il n'y a plus assez de place pour créer un thread, la fonction renvoie bien le bon code d'erreur.
 			\end{itemize}
 
 		\subsubsection{Mémoire virtuelle}
 			\begin{itemize}
-				\item 
+				\item créer un processus :					validé : le processus est créé correctement et la fonction passée en paramètre démarre normalement.
+				\item stress de la mémoire :				validé : les fichiers matmult et sort s'éxécutent sans problèmes.
+				\item allocation et libération de pages : 	validé : les pages sont alloué et libérée correctement. les pages ne sont pas donnée alors qu'elles sont utilisé et ne sont libérée qu'à la fin des processus.
+				\item caractères entrelacé avec processus : ???
+				\item retours d'erreurs : 					validé : les bonnes valeur sont retourné en cas de mauvais arguments ou de manque de place.
+			\end{itemize}
+
+		\subsubsection{système de fichier}
+			\begin{itemize}
+				\item créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
+				\item déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
+				\item suppression dossier/fichier :				validé : Le dossier/fichier est supprimé correctement. Les pages sont libéré et il ne réapparait pas lors de la prochaine lecture du disque.
+				\item enregistrement de la structure :			validé : La structure s'enregistre correctement et est rechargée sans erreur notable au début de l'éxécution de la machine.
 			\end{itemize}
 
 \section{Choix d'implémentation}
@@ -198,14 +213,15 @@
 			avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a 0 en se terminant.}
 
 	\subsection{système de fichier}
+la position dans les dossier n'est pas sauvegarder entre deux éxécutions
 
 	\subsection{réseaux}
 
 \section{Organisation du travail}
 	\subsection{Fonctionement du groupe}
+		Malik : code/debug/docs\\
 		Amine : code/docs\\
 		Sebastien : code/docs\\
-		malik : code/debug/docs\\
 		Jean-Yves : organisation/docs/tests\\
 
 	\subsection{Planning}
@@ -222,7 +238,7 @@
 			\subitem Malik : partie 5
 			\subitem Amine : partie 6
 			\subitem Sebastien : débug partie 4 et 5
-			\subitem JY : HS (petit travail de mise en page)
+			\subitem Jean-Yves : HS (petit travail de mise en page)
 
 		\item semaine 4 :
 			\subitem lundi/mardi : fin des partie 5 et 6 et debug du reste
