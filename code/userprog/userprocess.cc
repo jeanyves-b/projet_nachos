@@ -52,7 +52,9 @@ int do_UserProcessCreate(char *s){
 }
 
 void do_UserProcessExit(){
-	currentThread->space->JoinThreads();
+	if (currentThread->space != NULL){
+		currentThread->space->JoinThreads();
+	}
 	if(machine->DecrProcess() == 0){
 		DEBUG('r', "Exiting program with return value %d.\n",machine->ReadRegister(8));
 		interrupt->Halt();
