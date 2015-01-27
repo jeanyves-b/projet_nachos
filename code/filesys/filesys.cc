@@ -540,11 +540,11 @@ FileSystem::RemoveDir(const char *name)
 	dir = new OpenFile(sector);
 	dirToDelete = new Directory(NumDirEntries);
 	dirToDelete->FetchFrom(dir);
-	if ( !dirToDelete->isEmpty() ){ // teste si le repertoire est vide
+	if ( !dirToDelete->isEmpty() ){ // repertoire pas vide
 			delete directory;
 			delete dir;
 			delete dirToDelete;
-			return false;  
+			return false;    // on empeche la suppression
 		}
 	
 	fileHdr = new FileHeader;
