@@ -33,8 +33,10 @@ Transfert de fichier
 	Envoi
 		Envoi d'un paquet contenant la taille du fichier à envoyer
 		Envoi du contenu du fichier via le transfert de paquets sans limite de taille
+			Fragmenter l'envoi en plusieurs paquets de MaxStringSize si taille du fichier supérieure à cette limite utilisateur
 	Réception
-		Attendre la réception de la taille du fichier à recevoir
+		Attendre la réception de la taille du fichier à 
+		Fragmenter la réception en plusieurs paquets de MaxStringSize si taille du fichier supérieure à cette limite utilisateur
 		Réception du contenu du fichier à recevoir sur un buffer
 		Ecriture du contenu du buffer sur le fichier
 		

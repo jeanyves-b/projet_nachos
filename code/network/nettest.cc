@@ -82,11 +82,11 @@ MailTest(int farAddr)
 	void
 RingMailTest(int size)
 {
-	char *data = new char[900];
-	char *buffer = new char[900];
+	char *data = new char[200];
+	char *buffer = new char[200];
 	
 	unsigned i;
-	for(i = 0; i < 895; i++) {
+	for(i = 0; i < 195; i++) {
 		data[i] = postOffice->getNetAddr() == 0? 'a' + (i%26) : 'z' - (i%26);
 	}
 	data[i++] = '#';
@@ -98,15 +98,15 @@ RingMailTest(int size)
 	// To: destination machine, mailbox 0
 	// From: our machine, reply to: mailbox 1
 	if (postOffice->getNetAddr()==0)
-		postOffice->SendUnfixedSize(data, 900, 1, 1, 0); 
+		postOffice->SendUnfixedSize(data, 200, 1, 1, 0); 
 
 	// Wait for the message from the other machine
-	postOffice->ReceiveUnfixedSize(0, buffer, 900);
+	postOffice->ReceiveUnfixedSize(0, buffer, 200);
 	printf("Got \"%s\"\n",buffer);
 	fflush(stdout);
 	
 	if (postOffice->getNetAddr()!=0)
-		postOffice->SendUnfixedSize(data, 900, 1, postOffice->getNetAddr()+1==size?0:postOffice->getNetAddr() + 1, 0); 
+		postOffice->SendUnfixedSize(data, 200, 1, postOffice->getNetAddr()+1==size?0:postOffice->getNetAddr() + 1, 0); 
 
 	// Then we're done!
 	interrupt->Halt();

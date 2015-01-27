@@ -202,6 +202,46 @@ GetPid:
 	syscall
 	j	$31
 	.end GetPid
+	
+	.globl Send
+	.ent	Send
+Send:
+	addiu $2,$0,SC_Send
+	syscall
+	j	$31
+	.end Send
+	
+	.globl Receive
+	.ent	Receive
+Receive:
+	addiu $2,$0,SC_Receive
+	syscall
+	j	$31
+	.end Receive
+	
+	.globl SendFile
+	.ent	SendFile
+SendFile:
+	addiu $2,$0,SC_SendFile
+	syscall
+	j	$31
+	.end SendFile
+	
+	.globl ReceiveFile
+	.ent	ReceiveFile
+ReceiveFile:
+	addiu $2,$0,SC_ReceiveFile
+	syscall
+	j	$31
+	.end ReceiveFile
+
+	.globl Sleep
+	.ent	Sleep
+Sleep:
+	addiu $2,$0,SC_Sleep
+	syscall
+	j	$31
+	.end Sleep
 
 	.globl Close
 	.ent	Close

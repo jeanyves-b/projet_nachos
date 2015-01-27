@@ -37,7 +37,7 @@ class PacketHeader {
 		// MailHeader prepended by the post office)
 };
 
-#define MaxWireSize 	1514	// largest packet that can go out on the wire
+#define MaxWireSize 	550	// largest packet that can go out on the wire
 #define MaxPacketSize 	(MaxWireSize - sizeof(struct PacketHeader))	
 // data "payload" of the largest packet
 

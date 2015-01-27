@@ -189,7 +189,7 @@ ExceptionHandler (ExceptionType which)
 							 if (chars_to_copy>0) {
 								 copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, chars_to_copy);
 							 }
-							 delete buf;
+							 delete [] buf;
 						 }
 						 
 						 break; 
@@ -221,6 +221,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_GetTid: {
 						machine->WriteRegister(2, currentThread->id);
+						break;
 				}
 			case SC_ForkExec:{ //ForkExec
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
@@ -231,6 +232,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_GetPid: {
 						machine->WriteRegister(2, currentThread->getPid());
+						break;
 				}
 			case SC_Send: {
 					unsigned size = (unsigned)machine->ReadRegister(5);
@@ -245,6 +247,7 @@ ExceptionHandler (ExceptionType which)
 					delete [] buffer;
 					
 					machine->WriteRegister(2, sent);
+					break;
 				}
 			case SC_Receive: {
 					unsigned size = (unsigned)machine->ReadRegister(6);
@@ -252,21 +255,28 @@ ExceptionHandler (ExceptionType which)
 						break;
 					}
 					char *buffer = new char[size];
-					postOffice->ReceiveUnfixedSize(machine->ReadRegister(5), buffer, size);
-					copyStringToMachine(buffer, machine->ReadRegister(4), size);
+					postOffice->ReceiveUnfixedSize(machine->ReadRegister(4), buffer, size);
+					copyStringToMachine(buffer, machine->ReadRegister(5), size);
 					delete [] buffer;
+					break;
 				}
 			case SC_SendFile: {
 					char *buffer = new char[MaxStringSize];
 					copyStringFromMachine(machine->ReadRegister(4),buffer,MaxStringSize);
 					machine->WriteRegister(2, postOffice->SendFile(buffer, machine->ReadRegister(5), machine->ReadRegister(6), machine->ReadRegister(7)));
 					delete [] buffer;
+					break;
 				}
 			case SC_ReceiveFile: {
 					char *buffer = new char[MaxStringSize];
 					copyStringFromMachine(machine->ReadRegister(5),buffer,MaxStringSize);
 					machine->WriteRegister(2, postOffice->ReceiveFile(machine->ReadRegister(4), buffer));
 					delete [] buffer;
+					break;
+				}
+			case SC_Sleep: {
+					Delay (machine->ReadRegister(4));
+					break;
 				}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
