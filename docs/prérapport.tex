@@ -21,9 +21,9 @@
 
 \section{questionnement sur le contenu/la forme du rapport}
 	-> utilité de dire que nous aons dût modifier les fonctions de lecture/écriture en mémoire.
-	-> possibilité d'un process qui se crée, mais le dernier process se termine avant que le compteur est été incrémenté? -> le process en cour de lancement ne se lancera jamais?
-	-> faire des schema, notament pour la mémoire virtuelle et les id des threads
-	-> test de la partie process
+	\\ -> possibilité d'un process qui se crée, mais le dernier process se termine avant que le compteur est été incrémenté? -> le process en cour de lancement ne se lancera jamais?
+	\\ -> faire des schema, notament pour la mémoire virtuelle et les id des threads
+	\\ -> test de la partie process
 
 \tableofcontents{}
 \newpage
@@ -113,6 +113,26 @@
 			\item{SIGNATURE : } \texttt{int GetPid()}
 			\item{DESCRIPTION : Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours. } 
 		\end{description}
+		
+	\subsection{Système de fichiers}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int mkdir(..)}
+			\item{DESCRIPTION : } 
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{-1} : } 
+		\end{description}
+		\vspace{2.5mm}
+	
+	\subsection{Réseau}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int Send(..)}
+			\item{DESCRIPTION : } 
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{-1} : } 
+				\subitem{\texttt{-2} : } 
+				\subitem{\texttt{-3} : } 
+		\end{description}
+		\vspace{2.5mm}
 
 \section{Test}
 	\subsection{Organisation}
@@ -199,7 +219,7 @@
 			dès l'appel à join du thread d'id x, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant appel la fonction Sleep. Elle l'enlevera de la liste d'attente du scheduler pour ne pas le réveiller inutilement, c'est le thread sur lequel le join a été effectué qui reveillera ce thread lors de son appel a UserThreadExit
 
 	\subsection{Mémoire virtuelle}
-		\subsubsection{pagination mémoire}
+		\subsubsection{Pagination mémoire}
 			le frame provider, utilise une bitmap et toutes les fonction implémentées pour celle-ci. La fonction de recherche d'un bit vide nous est utilisé pour aller chercher une page vide et son adresse. Et la fonction retournant le nombre de bit a 0 est utilisé pour avoir le nombre de page libre. La fonction libérant les pages utilise la fonction des bitmaps pour libérer le bit correspondant dans la bitmap.\\
 			nous avons pu remarqué qu'avec la façon dont nous avons implémenté notre table de page : ppn (physical page number) = vpn (virtual page number) + 128 (taille d'une page)
 				-> ceci est une faille de sécurité car elle permet de faire d'aller écrire à des endroit où l'on ne devrait pas pouvoir.
@@ -207,10 +227,10 @@
 			Lorsque quelque chose demande de la mémoire (création d'un process, enregistrement d'un fichier...), la bitmap nous donne une adresse puis l'adresse de la page est donée au programme pour qu'il puisse y inscrire ce dont il a besoin.\\
 			Lors de la fin du programme, la(les) page(s) est déclarée(s) vide et le bit correspondant est remit à 0.
 		\subsubsection{Implémentation de Fork et ForkExec}
-			Ces deux fonctions sont inspiré de StartProcess. Elles font appel à l'appel system do_UserProcessCreate. ce dernier va Ouvrir l'executable, lui Allouer de la mémoire (un addrspace). Il va ensuite créer le thread et y attacher la mémoire allouée. Il va enfin mettre à jour le nombre de processus créés.
-				/!/ForkExec le thread créé sur StartUserProcess/!/
-			La différence entre ForkExec et Fork est que ForkExec ne mets pas la mémoire à la même adresse que celle du thread en cours.
-			avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a 0 en se terminant.}
+			{Ces deux fonctions sont inspiré de StartProcess. Elles font appel à l'appel system \texttt{do\_UserProcessCreate}. ce dernier va ouvrir l'executable, lui allouer de la mémoire (un addrspace). Il va ensuite créer le thread et y attacher la mémoire allouée. Il va enfin mettre à jour le nombre de processus créés.
+			\\ /!/ForkExec le thread créé sur StartUserProcess/!/
+			\\ La différence entre ForkExec et Fork est que ForkExec ne mets pas la mémoire à la même adresse que celle du thread en cours.
+			\\ Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
 
 	\subsection{système de fichier}
 la position dans les dossier n'est pas sauvegarder entre deux éxécutions

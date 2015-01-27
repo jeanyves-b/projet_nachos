@@ -1,0 +1,159 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{listings}
+\usepackage{lmodern} 
+
+\setbeamertemplate{footline}[frame number] 
+\setbeamertemplate{footline}{%
+  \raisebox{5pt}{\makebox[\paperwidth]{\hfill\makebox[10pt]{\scriptsize\insertframenumber\hspace{5pt}}}}}
+\beamertemplatenavigationsymbolsempty
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   TITLE PAGE                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\includegraphics[width=5cm]{LOGO_IM2AG_UJF.eps}
+\\ Projet Nachos}
+\subtitle{M1 Informatique/MOSIG}   
+\author{Amine Aït-Mouloud
+\\ Sébastien Avril
+\\ Jean-Yves Bottraud
+\\ El Hadji Malick Diagne
+}
+\date{Janvier 2015} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\frame{\titlepage} 
+
+\begin{frame}
+    \tableofcontents
+\end{frame}
+
+\section{Implémentation}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\subsection{Multithreading}
+\begin{frame}{Modèle utilisé pour le multithreading}
+   
+\end{frame}
+
+
+\subsection{Gestion de la mémoire}
+\begin{frame}{Gestion de la mémoire virtuelle}
+    \begin{itemize}
+        \item \textbf{Problème :} partager la mémoire physique entre plusieurs processus.
+        \item \textbf{Solution :}
+            \begin{itemize}
+                \item ...
+                \item ...
+            \end{itemize}
+        \item \textbf{Améloirations possibles :}
+            \begin{itemize}
+                \item ...
+                \item ...
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Modèle utilisé pour la gestion de la mémoire}
+    
+\end{frame}
+
+\subsection{Système de fichiers}
+\begin{frame}{Modèle de système de fichiers utilisé}
+    
+\end{frame}
+
+\subsection{Réseau}
+
+\begin{frame}{API réseau}
+    \begin{itemize}
+        \item ...
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Modèle réseau utilisé}
+    
+\end{frame}
+
+\begin{frame}{Améliorations possibles}
+    \begin{itemize}
+        \item ...
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+    \center{Fin.}
+\end{frame}
+
+\end{document}
