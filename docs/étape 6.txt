@@ -40,4 +40,8 @@ Transfert de fichier
 		Réception du contenu du fichier à recevoir sur un buffer
 		Ecriture du contenu du buffer sur le fichier
 		
+Appels système
+	Send/Receive -> Envoi/Reception sans taille fixe
+	SendFile/ReceiveFile -> Envoi/Reception de fichier sans taille fixe
+		
 SCHEMATISER TOUT ÇA!!
