@@ -41,6 +41,10 @@
 #define SC_GetTid		20
 #define SC_ForkExec		21 
 #define SC_GetPid		22
+#define SC_Send 		23
+#define SC_Receive		24
+#define SC_SendFile		25
+#define SC_ReceiveFile	26
 
 #ifdef IN_USER_MODE
 
@@ -156,8 +160,17 @@ int GetTid();
 /*Start a new process which start the executable 's'*/
 int ForkExec( char *s);
 
-/*Get current process id*/
-int GetPid();
+/* Sends data of certain size*/
+unsigned Send(char *data, unsigned size, int localPort, int to, int remotePort);
+
+/* Receives data of certain size*/
+void Receive(int localPort, char* data, unsigned size);
+
+/* sends file */
+int SendFile(char *path, int localPort, int to, int remotePort);
+
+/* receives file */
+int ReceiveFile(int localPort, const char *path);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

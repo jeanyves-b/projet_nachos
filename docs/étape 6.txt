@@ -26,7 +26,16 @@ Transfert de paquets sans limite de taille
 		Fragmentation du paquet original en N paquets de MaxMailSize octets maximum. ((N-1)*MaxMailSize < taille < N*MaxMailSize)
 		Envoyer les fragments à la suite avec le transfert fiable (attendre l'acquittement de chaque message)
 	Réception
-		Attendre la réception de N paquets ((N-1)*MaxMailSize < taille < N*MaxMailSize) sur le port
+		Attendre la réception de N paquets (N = taille message / MaxMailSize) sur le port
 		Mettre à chaque fois les données des messages reçus dans le grand buffer
+		
+Transfert de fichier
+	Envoi
+		Envoi d'un paquet contenant la taille du fichier à envoyer
+		Envoi du contenu du fichier via le transfert de paquets sans limite de taille
+	Réception
+		Attendre la réception de la taille du fichier à recevoir
+		Réception du contenu du fichier à recevoir sur un buffer
+		Ecriture du contenu du buffer sur le fichier
 		
 SCHEMATISER TOUT ÇA!!

@@ -60,6 +60,9 @@ extern void ThreadTest (void), Copy (const char *unixFile, const char *nachosFil
 extern void Print (char *file), PerformanceTest (void);
 extern void StartProcess (char *file), ConsoleTest (char *in, char *out), SynchConsoleTest (char *in, char *out);
 extern void MailTest (int networkID);
+extern void RingMailTest (int size);
+extern void FileSendTest (const char* file, int farAddr);
+extern void FileReceiveTest (const char* to);
 
 //----------------------------------------------------------------------
 // main
@@ -189,7 +192,7 @@ main (int argc, char **argv)
 			Delay (2);	// delay for 2 seconds
 			// to give the user time to 
 			// start up other nachos's
-			FileReceiveTest (atoi (*(argv + 1)));
+			FileReceiveTest (*(argv + 1));
 			argCount = 2;
 		}
 #endif // NETWORK

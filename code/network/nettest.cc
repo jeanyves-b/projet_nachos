@@ -18,6 +18,7 @@
 
 #include "copyright.h"
 
+#include "network.h"
 #include "system.h"
 #include "network.h"
 #include "post.h"
@@ -48,7 +49,7 @@ MailTest(int farAddr)
 	outMailHdr.length = strlen(data) + 1;
 
 	// Send the first message
-	postOffice->Send(outPktHdr, outMailHdr, data); 
+	postOffice->SendSafe(outPktHdr, outMailHdr, data); 
 
 	// Wait for the first message from the other machine
 	postOffice->Receive(0, &inPktHdr, &inMailHdr, buffer);
@@ -60,7 +61,7 @@ MailTest(int farAddr)
 	outPktHdr.to = inPktHdr.from;
 	outMailHdr.to = inMailHdr.from;
 	outMailHdr.length = strlen(ack) + 1;
-	postOffice->Send(outPktHdr, outMailHdr, ack); 
+	postOffice->SendSafe(outPktHdr, outMailHdr, ack); 
 
 	// Wait for the ack from the other machine to the first message we sent.
 	postOffice->Receive(1, &inPktHdr, &inMailHdr, buffer);
@@ -86,7 +87,7 @@ RingMailTest(int size)
 	
 	unsigned i;
 	for(i = 0; i < 895; i++) {
-		data[i] = netAddr == 0? 'a' + (i%26) : 'z' - (i%26);
+		data[i] = postOffice->getNetAddr() == 0? 'a' + (i%26) : 'z' - (i%26);
 	}
 	data[i++] = '#';
 	data[i++] = 'E';
@@ -96,7 +97,7 @@ RingMailTest(int size)
 
 	// To: destination machine, mailbox 0
 	// From: our machine, reply to: mailbox 1
-	if (netAddr==0)
+	if (postOffice->getNetAddr()==0)
 		postOffice->SendUnfixedSize(data, 900, 1, 1, 0); 
 
 	// Wait for the message from the other machine
@@ -104,8 +105,8 @@ RingMailTest(int size)
 	printf("Got \"%s\"\n",buffer);
 	fflush(stdout);
 	
-	if (farAddr!=0)
-		postOffice->SendUnfixedSize(data, 900, 1, netAddr+1==size?0:netAddr + 1, 0); 
+	if (postOffice->getNetAddr()!=0)
+		postOffice->SendUnfixedSize(data, 900, 1, postOffice->getNetAddr()+1==size?0:postOffice->getNetAddr() + 1, 0); 
 
 	// Then we're done!
 	interrupt->Halt();
@@ -117,7 +118,8 @@ RingMailTest(int size)
 FileSendTest(const char* file, int farAddr)
 {
 	postOffice->SendFile(file, 1, farAddr, 0);
-	
+	printf("Fichier \"%s\" envoyé à \"%d\" avec succès.\n", file, farAddr);
+	fflush(stdout);
 	// Then we're done!
 	interrupt->Halt();
 }
@@ -128,7 +130,8 @@ FileSendTest(const char* file, int farAddr)
 FileReceiveTest(const char* to)
 {
 	postOffice->ReceiveFile(0, to);
-	
+	printf("Fichier reçu placé en: %s\n", to);
+	fflush(stdout);
 	// Then we're done!
 	interrupt->Halt();
 }

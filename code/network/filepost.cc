@@ -34,7 +34,6 @@ PostOffice::SendFile(const char *path, int localPort, MailBoxAddress to, int rem
 		
 	// récupération de la taille du fichier
 	int size = file->Length();
-	
 	if (size <= 0)
 		return -2;
 		
@@ -42,20 +41,36 @@ PostOffice::SendFile(const char *path, int localPort, MailBoxAddress to, int rem
 	this->SendUnfixedSize((char*)(&size), sizeof(int), localPort, to, remotePort);
 
 	// on envoie le contenu du fichier tant qu'il reste des données à envoyer
-	char *buffer = new char[size];
-
+	int sent = 0;
+	int toSendSent, toSend;
+	char *buffer = new char[MaxStringSize];
 	int remaining = size;
-	while (remaining > 0) {
-		remaining -= file->Read(buffer + size - remaining, remaining);
-	}
 	
-	int sent = this->SendUnfixedSize(buffer, (unsigned)(size), localPort, to, remotePort);
+	// on découpe les parties envoyées en MaxStringSize
+	do {
+		if (remaining >= MaxStringSize)
+			toSend = MaxStringSize;
+		else
+			toSend = remaining;
+			
+		toSendSent = 0;
+		while (toSendSent < toSend) {
+			toSendSent += file->Read(buffer + toSendSent, toSend - toSendSent);
+		}
+		remaining -= toSend;
+		
+		sent += this->SendUnfixedSize(buffer, (unsigned)(toSend), localPort, to, remotePort);
+	} while (remaining > 0);
 	
 	delete [] buffer;
 	
 	// on n'a pas envoyé tout le fichier (paquets perdus)
-	if (sent < file->Length()) 
+	if (sent < file->Length()) {
+		delete file;
 		return -3;
+	}
+	
+	delete file;
 		
 	return 0;
 }
@@ -97,15 +112,25 @@ PostOffice::ReceiveFile(int localPort, const char *path) {
 		return -3;
 	
 	// On reçoit les données du fichier en fragments sur un buffer.
-	char *buffer = new char[size];
-	this->ReceiveUnfixedSize(localPort, buffer, size);
+	char *buffer = new char[MaxStringSize];
+	unsigned remaining = size;
+	unsigned toReceive;
+	
+	// on découpe les parties reçues en MaxStringSize
+	do {
+		toReceive = (remaining >= MaxStringSize? MaxStringSize: remaining);
 		
-	// Ecriture du contenu du buffer sur le fichier.
-	int written = 0;
-	while ((unsigned)written < size) {
-		written += file->Write(buffer + written, size  - written);
-	}
-	delete [] buffer;				
+		this->ReceiveUnfixedSize(localPort, buffer, toReceive);
+		remaining -= toReceive;
+		
+		// Ecriture du contenu du buffer sur le fichier.
+		int written = 0;
+		while ((unsigned)written < toReceive) {
+			written += file->Write(buffer + written, toReceive - written);
+		}
+	} while (remaining > 0);
+	delete [] buffer;	
+	delete file;			
 
 	return 0;
 }
