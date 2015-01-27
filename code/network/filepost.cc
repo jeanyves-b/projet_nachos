@@ -95,8 +95,9 @@ PostOffice::ReceiveFile(int localPort, const char *path) {
 	
 	//	On reçoit la taille attendue
 	unsigned size = 0;
-	this->ReceiveUnfixedSize(localPort, (char*)(&size), sizeof(int));
 	
+	this->ReceiveUnfixedSize(localPort, (char*)(&size), sizeof(int));
+	printf("my size is %d \n\n", size);
 	// La taille du fichier est invalide
 	if (size<=0) 
 		return -1;

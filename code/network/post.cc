@@ -418,6 +418,7 @@ PostOffice::PostalDelivery()
 		//	 au demon "sender" s'il était entrain de retransmettre
 		daemonsLock->Acquire();
 		hasMessagePending = false;
+
 		if (isResending) {
 			daemonsLock->Release();
 			startResendingMsg->V();
