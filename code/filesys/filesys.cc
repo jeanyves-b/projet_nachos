@@ -540,11 +540,11 @@ FileSystem::RemoveDir(const char *name)
 	dir = new OpenFile(sector);
 	dirToDelete = new Directory(NumDirEntries);
 	dirToDelete->FetchFrom(dir);
-	if ( !dirToDelete->isEmpty() ){ // teste si le repertoire est vide
+	if ( !dirToDelete->isEmpty() ){ // repertoire pas vide
 			delete directory;
 			delete dir;
 			delete dirToDelete;
-			return false;  
+			return false;    // on empeche la suppression
 		}
 	
 	fileHdr = new FileHeader;
@@ -687,6 +687,7 @@ void
 FileSystem::Close(const char* name){
 	int i;
 		
+		lock->P();
 		i = FindIndex(name);
 		if(i != -1 ){ 
 		openFileTable[i].count--;
@@ -694,8 +695,8 @@ FileSystem::Close(const char* name){
 			delete openFileTable[i].file;
 			openFileTable[i].used = false;
 			openFileTable[i].file = NULL;
-			
 		}
+		lock->V();
 }
 
 //----------------------------------------------------------------------
