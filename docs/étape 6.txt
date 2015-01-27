@@ -20,6 +20,7 @@ Implémentation de solution de transfert fiable de paquets:
 	Faiblesse:
 		Les ACK peuvent être perdus facilement, et si une machine s'éteint en ayant envoyé un ACK qui sera perdu, 
 			l'expéditeur retentera toujours d'envoyer le message
+		Le transfert se fait exclusivement entre deux machines en même temps.
 Transfert de paquets sans limite de taille
 	Envoi
 		Fragmentation du paquet original en N paquets de MaxMailSize octets maximum. ((N-1)*MaxMailSize < taille < N*MaxMailSize)
@@ -42,6 +43,8 @@ Transfert de fichier
 Appels système
 	Send/Receive -> Envoi/Reception sans taille fixe
 	SendFile/ReceiveFile -> Envoi/Reception de fichier sans taille fixe
+	Seuls ces appels systèmes ont été implentés pour permettre une utilisation plus facile que celle des sockets UNIX
+		L'utilisateur pourra envoyer/recevoir des données sans avoir à gérer les connexions entre machines
 		
 SCHEMATISER TOUT ÇA!!
 
