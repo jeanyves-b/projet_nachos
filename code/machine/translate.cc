@@ -207,7 +207,7 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
 	// from the virtual address
 	vpn = (unsigned) virtAddr / PageSize;
 	offset = (unsigned) virtAddr % PageSize;
-
+	//printf("Trying to access vpn %d\n",vpn);
 	if (tlb == NULL) {		// => page table => vpn is index into table
 		if (vpn >= pageTableSize) {
 			DEBUG('a', "virtual page # %d too large for page table size %d!\n", 

@@ -144,7 +144,7 @@ class Thread
 		void RestoreUserState ();	// restore user-level register state
 		int AddThread(); //ajoute un fils à ce thread
 		int Join(int user_thread_id); //on attend un thread
-		int JoinFils(); //on attend tous les fils
+		//int JoinFils(); //on attend tous les fils
 		int id;		// identifiant du thread
 
 		AddrSpace *space;		// User code this thread is running.

@@ -63,6 +63,7 @@
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
 #define NumDirEntries 		10
 #define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
+#define openFilesNum			10
 
 //----------------------------------------------------------------------
 // FileSystem::FileSystem
@@ -80,6 +81,8 @@
 FileSystem::FileSystem(bool format)
 { 
 	DEBUG('f', "Initializing the file system.\n");
+	sem = new Semaphore("sem",1);
+	lock = new Semaphore("lock",1);
 	if (format) {
 		BitMap *freeMap = new BitMap(NumSectors);
 		Directory *directory = new Directory(NumDirEntries);
@@ -114,13 +117,16 @@ FileSystem::FileSystem(bool format)
 
 		freeMapFile = new OpenFile(FreeMapSector);
 		directoryFile = new OpenFile(DirectorySector);
-
+		
+		//Now we add the directory '.' to the root directory
+		directory->AddDir(".",DirectorySector);
+		directory->AddDir("..",DirectorySector);
 		// Once we have the files "open", we can write the initial version
 		// of each file back to disk.  The directory at this point is completely
 		// empty; but the bitmap has been changed to reflect the fact that
 		// sectors on the disk have been allocated for the file headers and
 		// to hold the file data for the directory and bitmap.
-
+		
 		DEBUG('f', "Writing bitmap and directory back to disk.\n");
 		freeMap->WriteBack(freeMapFile);	 // flush changes to disk
 		directory->WriteBack(directoryFile);
@@ -128,19 +134,89 @@ FileSystem::FileSystem(bool format)
 		if (DebugIsEnabled('f')) {
 			freeMap->Print();
 			directory->Print();
-
+		}
 			delete freeMap; 
 			delete directory; 
 			delete mapHdr; 
 			delete dirHdr;
-		}
+		currentDir = directoryFile;
+		CreateDir("System");
+		
 	} else {
 		// if we are not formatting the disk, just open the files representing
 		// the bitmap and directory; these are left open while Nachos is running
 		freeMapFile = new OpenFile(FreeMapSector);
 		directoryFile = new OpenFile(DirectorySector);
+		currentDir = directoryFile;
+				
 	}
+	int i;
+	openFileTable = new FileSysEntry[maxOpenFiles];
+	for(i=0;i<maxOpenFiles;i++){
+		openFileTable[i].used = false;
+		openFileTable[i].file = NULL;
+		openFileTable[i].count=0;
+	}
+	
 }
+
+FileSystem::~FileSystem(){
+  delete freeMapFile;
+   if (currentDir != directoryFile){
+     delete currentDir;
+   }
+  delete directoryFile;
+  delete sem;
+  delete lock;
+  delete openFileTable;
+
+}
+
+OpenFile* 
+FileSystem::MoveTo(const char* name,char* s){
+  OpenFile* f;
+   int sector;
+  int cpt =0;
+  int nb = 0;
+  char buf[FileNameMaxLen+1];
+  if (name[0] == '/'){
+    f = directoryFile;
+    cpt++;
+  }else{
+    f = currentDir;
+  }
+  Directory* dir = new Directory(NumDirEntries);
+  dir->FetchFrom(f);
+ 
+  while (name[cpt] != '\n' && name[cpt]!='\0'){
+    if (name[cpt] == '/'){
+     buf[nb] = '\0';
+     sector = dir->FindDir(buf);//on cherche le nom du repertoire
+     if (f != currentDir)
+       delete f;
+     if(sector == -1)
+       return NULL;
+     f = new OpenFile(sector); 
+     dir->FetchFrom(f);
+     nb = 0;
+     cpt++;
+    }else{
+      buf[nb++] = name[cpt++];
+    }
+  }
+  buf[nb]='\0';
+  if (s != NULL){
+    nb = 0;
+    while (buf[nb]!='\0'){
+      s[nb] = buf[nb];
+      nb++;
+    }
+    s[nb] = '\0';
+  }
+  delete dir;
+  return f;
+} 
+      
 
 //----------------------------------------------------------------------
 // FileSystem::Create
@@ -174,18 +250,75 @@ FileSystem::FileSystem(bool format)
 	bool
 FileSystem::Create(const char *name, int initialSize)
 {
-	Directory *directory;
+	Directory* dir;
 	BitMap *freeMap;
 	FileHeader *hdr;
+	OpenFile* f;
 	int sector;
 	bool success;
-
+	char filename[FileNameMaxLen+1];
+	f = MoveTo(name,filename);
+	if (f == NULL)
+	  return FALSE;
+	
 	DEBUG('f', "Creating file %s, size %d\n", name, initialSize);
+	dir = new Directory(NumDirEntries);
+	dir->FetchFrom(f);
+	if (dir->Find(name) != -1)
+	success = FALSE;
+	else {	
+		freeMap = new BitMap(NumSectors);
+		freeMap->FetchFrom(freeMapFile);
 
-	directory = new Directory(NumDirEntries);
-	directory->FetchFrom(directoryFile);
+		sector = freeMap->Find();	// find a sector to hold the file header
+		if (sector == -1) 		
+			success = FALSE;		// no free block for file header 
+		else if (!dir->Add(filename, sector))
+			success = FALSE;	// no space in directory
+		else {
+			hdr = new FileHeader;
+			sem->P();
+			if (!hdr->Allocate(freeMap, initialSize)){
+				sem->V();
+				success = FALSE;	// no space on disk for data
+			}else {	
+				sem->V();
+				success = TRUE;
+				// everthing worked, flush all changes back to disk
+				hdr->WriteBack(sector); 		
+				dir->WriteBack(f);
+				freeMap->WriteBack(freeMapFile);
+			}
+			delete hdr;
+		}
+		delete freeMap;
+	}
+	delete dir;
+	if (f!=currentDir && f != directoryFile)
+	  delete f;
+	return success;
+}
 
-	if (directory->Find(name) != -1)
+
+	bool
+FileSystem::CreateDir(const char *name)
+{
+	Directory* dir;
+	BitMap *freeMap;
+	FileHeader *hdr;
+	OpenFile* f;
+	int sector;
+	bool success;
+	char filename[FileNameMaxLen+1];
+	f = MoveTo(name,filename);
+	if (f == NULL)
+	  return FALSE;
+	
+	DEBUG('f', "Creating Directory %s\n", name);
+
+	dir = new Directory(NumDirEntries);
+	dir->FetchFrom(f);
+	if (dir->Find(name) != -1)
 		success = FALSE;			// file is already in directory
 	else {	
 		freeMap = new BitMap(NumSectors);
@@ -193,25 +326,43 @@ FileSystem::Create(const char *name, int initialSize)
 		sector = freeMap->Find();	// find a sector to hold the file header
 		if (sector == -1) 		
 			success = FALSE;		// no free block for file header 
-		else if (!directory->Add(name, sector))
+		else if (!dir->AddDir(filename, sector))
 			success = FALSE;	// no space in directory
 		else {
 			hdr = new FileHeader;
-			if (!hdr->Allocate(freeMap, initialSize))
+			sem->P();
+			if (!hdr->Allocate(freeMap, DirectoryFileSize)){
+				sem->V();
 				success = FALSE;	// no space on disk for data
-			else {	
+			}else {
+				sem->V();	
+				int parentSector = dir->Find(".");
 				success = TRUE;
 				// everthing worked, flush all changes back to disk
 				hdr->WriteBack(sector); 		
-				directory->WriteBack(directoryFile);
+				dir->WriteBack(f);
 				freeMap->WriteBack(freeMapFile);
+				InitializeDir(sector,parentSector);
 			}
 			delete hdr;
 		}
 		delete freeMap;
 	}
-	delete directory;
+	delete dir;
+	if (f!=currentDir && f != directoryFile)
+	  delete f;
 	return success;
+}
+
+void
+FileSystem::InitializeDir(int childSector,int parentSector){
+  OpenFile* file = new OpenFile(childSector);
+  Directory* dir = new Directory(NumDirEntries);
+  ASSERT(NumDirEntries >= 2);
+  dir->AddDir(".", childSector);
+  dir->AddDir("..",parentSector);
+  
+  dir->WriteBack(file);
 }
 
 //----------------------------------------------------------------------
@@ -226,18 +377,56 @@ FileSystem::Create(const char *name, int initialSize)
 
 	OpenFile *
 FileSystem::Open(const char *name)
-{ 
-	Directory *directory = new Directory(NumDirEntries);
-	OpenFile *openFile = NULL;
-	int sector;
-
-	DEBUG('f', "Opening file %s\n", name);
-	directory->FetchFrom(directoryFile);
-	sector = directory->Find(name); 
-	if (sector >= 0) 		
-		openFile = new OpenFile(sector);	// name was found in directory 
-	delete directory;
-	return openFile;				// return NULL if not found
+{ 			
+		OpenFile *openFile = NULL;	
+		
+		lock->P();
+		openFile = Find(name);
+		
+		if (openFile != NULL){ // le fichier est dans la table 
+			return openFile;
+		}else{
+			if(GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+				return NULL;
+		}	
+			
+		Directory *directory = new Directory(NumDirEntries);
+		OpenFile *f;
+		int sector;
+		char filename[FileNameMaxLen+1];		
+			
+		f = MoveTo(name,filename);
+		
+		if (f == NULL)
+		  return NULL;
+		DEBUG('f', "Opening file %s\n", name);
+		directory->FetchFrom(f);
+		sector = directory->Find(filename); 
+		if (sector >= 0) {		
+			openFile = new OpenFile(sector);	// name was found in directory 
+			
+		}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
+			f = MoveTo("/System/",NULL);
+			if (f == NULL){
+			return NULL;
+			}
+			directory->FetchFrom(f);
+			sector = directory->Find(filename);
+			if (sector >= 0){ 		
+			openFile = new OpenFile(sector);
+			}
+		}
+		if(openFile != NULL)		
+			AddFile(name,openFile); // on ajoute le fichier dans la table
+			
+		
+		delete directory;
+		if (f != currentDir && f != directoryFile)
+		  delete f;
+		lock->V();
+		return openFile;				// return NULL if not found
+	
+	
 }
 
 //----------------------------------------------------------------------
@@ -261,9 +450,9 @@ FileSystem::Remove(const char *name)
 	BitMap *freeMap;
 	FileHeader *fileHdr;
 	int sector;
-
+	
 	directory = new Directory(NumDirEntries);
-	directory->FetchFrom(directoryFile);
+	directory->FetchFrom(currentDir);
 	sector = directory->Find(name);
 	if (sector == -1) {
 		delete directory;
@@ -280,12 +469,106 @@ FileSystem::Remove(const char *name)
 	directory->Remove(name);
 
 	freeMap->WriteBack(freeMapFile);		// flush to disk
-	directory->WriteBack(directoryFile);        // flush to disk
+	directory->WriteBack(currentDir);        // flush to disk
 	delete fileHdr;
 	delete directory;
 	delete freeMap;
+	
+	return TRUE;
+}
+
+int
+FileSystem::Cd(const char* name){
+  int sector;
+  int error = 0;
+  Directory* dir =new Directory(NumDirEntries);
+  OpenFile* f;
+  char filename[FileNameMaxLen+1];
+  f = MoveTo(name,filename);
+  if (f == NULL)
+    error =  1;
+  else{
+    dir->FetchFrom(f);
+    //printf("f:%p\ncurrentDir:%p\nfilename:%s\n",f,currentDir,filename);
+    if (filename[0] == '\0'){
+      currentDir = f;
+    }else{
+	if (f!=currentDir && f != directoryFile)
+	    delete f;
+      sector= dir->FindDir(filename);
+      if (sector == -1){
+	printf("Le repertoire est introuvable\n");
+	error = 1;
+      }else{
+	if (currentDir != directoryFile){//le fichier ouvert sur le repertoire root doit rester ouvert
+	  delete currentDir;
+	}
+	currentDir = new OpenFile(sector);
+      }
+    }
+  }
+  if (error == 0){
+    printf("Now in %s\n",name);
+    List();
+  }
+  delete dir;
+  return error;
+}
+  
+
+// remove directory
+
+	bool
+FileSystem::RemoveDir(const char *name)
+{ 
+	Directory *directory;
+	Directory *dirToDelete;
+	BitMap *freeMap;
+	FileHeader *fileHdr;
+	OpenFile* dir;
+	int sector;
+
+	directory = new Directory(NumDirEntries);
+	directory->FetchFrom(currentDir);
+	sector = directory->Find(name);
+	
+	if (sector == -1) {
+		delete directory;
+		return FALSE;			 // file not found 
+	}
+	
+	dir = new OpenFile(sector);
+	dirToDelete = new Directory(NumDirEntries);
+	dirToDelete->FetchFrom(dir);
+	if ( !dirToDelete->isEmpty() ){ // repertoire pas vide
+			delete directory;
+			delete dir;
+			delete dirToDelete;
+			return false;    // on empeche la suppression
+		}
+	
+	fileHdr = new FileHeader;
+	fileHdr->FetchFrom(sector);
+
+	freeMap = new BitMap(NumSectors);
+	freeMap->FetchFrom(freeMapFile);
+
+	fileHdr->Deallocate(freeMap);  		// remove data blocks
+	freeMap->Clear(sector);			// remove header block
+	directory->Remove(name);
+
+	freeMap->WriteBack(freeMapFile);		// flush to disk
+	directory->WriteBack(currentDir);        // flush to disk
+	delete fileHdr;
+	delete directory;
+	delete dir;
+	delete dirToDelete;
+	delete freeMap;
 	return TRUE;
 } 
+
+// end remove dir
+
 
 //----------------------------------------------------------------------
 // FileSystem::List
@@ -297,7 +580,7 @@ FileSystem::List()
 {
 	Directory *directory = new Directory(NumDirEntries);
 
-	directory->FetchFrom(directoryFile);
+	directory->FetchFrom(currentDir);
 	directory->List();
 	delete directory;
 }
@@ -331,11 +614,104 @@ FileSystem::Print()
 	freeMap->FetchFrom(freeMapFile);
 	freeMap->Print();
 
-	directory->FetchFrom(directoryFile);
+	directory->FetchFrom(currentDir);
 	directory->Print();
 
 	delete bitHdr;
 	delete dirHdr;
 	delete freeMap;
 	delete directory;
-} 
+}
+
+
+//----------------------------------------------------------------------
+// 	ajoute un fichier dans la liste des fichiers ouverts 
+//  return index du fichier ajouté dans la table -1 en cas d'erreur
+//----------------------------------------------------------------------
+ 
+int
+FileSystem::AddFile(const char* name,OpenFile* open){
+	int i = 0;
+		
+	i = GetNextEntry(); // cherche une entrée libre
+	if(i == -1) //table de fichiers ouverts pleine 
+		return -1;
+	
+	openFileTable[i].used = true;
+	openFileTable[i].file = open;
+	openFileTable[i].count++;
+	strncpy(openFileTable[i].name, name, FileNameMaxLen); 
+
+
+	return i;
+}
+
+//----------------------------------------------------------------------
+// FileSysTable::find
+// renvoie l'openfile du fichier 
+//	return NULL si fichier absent
+//----------------------------------------------------------------------
+
+OpenFile * 
+FileSystem::Find(const char* name){
+	int i=0;
+	
+	for(i=0;i<maxOpenFiles;i++){
+		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
+			return openFileTable[i].file;
+	}
+	
+	return NULL;
+	
+}	
+// retourne l'index du fichier dans la table
+int 
+FileSystem::FindIndex(const char *name){
+	int i=0;
+	
+	for(i=0;i<maxOpenFiles;i++){
+		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
+			return i;
+	}
+	
+	return -1;
+	
+}
+
+//----------------------------------------------------------------------
+// FileSysTable::close 
+// Décremente le nombre de thread qui ouvre le fichier. 
+// Férme le fichier si aucun thread ne l'utilise
+//----------------------------------------------------------------------
+void 
+FileSystem::Close(const char* name){
+	int i;
+		
+		lock->P();
+		i = FindIndex(name);
+		if(i != -1 ){ 
+		openFileTable[i].count--;
+		if(openFileTable[i].count == 0 )
+			delete openFileTable[i].file;
+			openFileTable[i].used = false;
+			openFileTable[i].file = NULL;
+		}
+		lock->V();
+}
+
+//----------------------------------------------------------------------
+// return la prochaine entrée valide de la table des fichiers ouverts
+// -1 si la table est pleine
+//----------------------------------------------------------------------
+int 
+FileSystem::GetNextEntry(){
+	int i;
+	
+    for(i=0;i<maxOpenFiles;i++){
+		if( !openFileTable[i].used )
+			return i;
+	}
+	
+	return -1;
+	
+}

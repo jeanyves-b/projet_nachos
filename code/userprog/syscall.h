@@ -41,11 +41,16 @@
 #define SC_GetTid		20
 #define SC_ForkExec		21 
 #define SC_GetPid		22
-#define SC_Send 		23
-#define SC_Receive		24
-#define SC_SendFile		25
-#define SC_ReceiveFile	26
-#define SC_Sleep		27
+#define SC_MkDir		23
+#define SC_RmDir		24
+#define SC_Cd			25
+#define SC_MkFile		26
+#define SC_RmFile		27
+#define SC_Send 		28
+#define SC_Receive		29
+#define SC_SendFile		30
+#define SC_ReceiveFile	31
+#define SC_Sleep		32
 
 #ifdef IN_USER_MODE
 
@@ -175,6 +180,21 @@ int ReceiveFile(int localPort, char *path);
 
 /* sleeps x secondes */
 void Sleep(int x);
+
+/*create a directory*/
+int mkdir(char* name);
+
+/*remove a directory*/
+int rmdir(char* name);
+
+/*create a file*/
+int mkfile(char* name, int initialSize);
+
+/*remove a file*/
+int rmfile(char* name);
+
+/*move to a directory*/
+void cd (char* name);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

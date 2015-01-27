@@ -11,8 +11,10 @@ void thread2(void *n){
 
 int main()
 {
+
 	UserThreadCreate(thread2, 0);
-	ForkExec("userpages0");
-	ForkExec("userpages1");
+	ForkExec("userpages");
+	//ForkExec("userpages1");
+
 	return 0;
 }

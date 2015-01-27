@@ -1,11 +1,8 @@
 #include "syscall.h"
 
-	int
-main ()
+int main ()
 {
-	SpaceId newProc;
-	OpenFileId input = ConsoleInput;
-	OpenFileId output = ConsoleOutput;
+	int newProc;
 	char prompt[2], buffer[60];
 	int i;
 
@@ -14,24 +11,20 @@ main ()
 
 	while (1)
 	{
-		Write (prompt, 2, output);
+		for (i=0;i<2;i++)
+		  PutChar (prompt[i]);
 
 		i = 0;
-
 		do
 		{
-
-			Read (&buffer[i], 1, input);
-
+			buffer[i] = GetChar ();
+			PutChar(buffer[i]);
 		}
 		while (buffer[i++] != '\n');
-
 		buffer[--i] = '\0';
-
 		if (i > 0)
 		{
-			newProc = Exec (buffer);
-			Join (newProc);
+			newProc = ForkExec(buffer);
 		}
 	}
 }

@@ -96,6 +96,7 @@ Directory::FindIndex(const char *name)
 	return -1;		// name not in directory
 }
 
+
 //----------------------------------------------------------------------
 // Directory::Find
 // 	Look up file name in directory, and return the disk sector number
@@ -114,6 +115,17 @@ Directory::Find(const char *name)
 		return table[i].sector;
 	return -1;
 }
+
+int
+Directory::FindDir(const char *name){
+  int i = FindIndex(name);
+
+	if (i != -1)
+	  if (table[i].isDir)
+		return table[i].sector;
+	return -1;
+}
+
 
 //----------------------------------------------------------------------
 // Directory::Add
@@ -137,6 +149,25 @@ Directory::Add(const char *name, int newSector)
 			table[i].inUse = TRUE;
 			strncpy(table[i].name, name, FileNameMaxLen); 
 			table[i].sector = newSector;
+			table[i].isDir = FALSE;
+			return TRUE;
+		}
+	return FALSE;	// no space.  Fix when we have extensible files.
+}
+
+
+	bool
+Directory::AddDir(const char *name, int newSector)
+{ 
+	if (FindIndex(name) != -1)
+		return FALSE;
+
+	for (int i = 0; i < tableSize; i++)
+		if (!table[i].inUse) {
+			table[i].inUse = TRUE;
+			strncpy(table[i].name, name, FileNameMaxLen); 
+			table[i].sector = newSector;
+			table[i].isDir = TRUE;
 			return TRUE;
 		}
 	return FALSE;	// no space.  Fix when we have extensible files.
@@ -170,8 +201,13 @@ Directory::Remove(const char *name)
 Directory::List()
 {
 	for (int i = 0; i < tableSize; i++)
-		if (table[i].inUse)
-			printf("%s\n", table[i].name);
+		if (table[i].inUse){
+			printf("%s", table[i].name);
+			if (table[i].isDir){
+			  printf("\tDir");
+			}
+			printf("\n");
+		}
 }
 
 //----------------------------------------------------------------------
@@ -195,3 +231,19 @@ Directory::Print()
 	printf("\n");
 	delete hdr;
 }
+
+//----------------------------------------------------------------------
+// Directory::isEmpty
+// 	renvoie vrai si le repertoire est vide et false sinon 
+//----------------------------------------------------------------------
+
+	bool
+Directory::isEmpty()
+{
+	for (int i = 0; i < tableSize; i++)
+		if (table[i].inUse &&  strncmp(table[i].name, "..\0", FileNameMaxLen) && strncmp(table[i].name, ".\0", FileNameMaxLen))
+			return false;
+	
+	return true;		
+}
+

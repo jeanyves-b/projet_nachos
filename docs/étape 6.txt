@@ -20,7 +20,6 @@ Implémentation de solution de transfert fiable de paquets:
 	Faiblesse:
 		Les ACK peuvent être perdus facilement, et si une machine s'éteint en ayant envoyé un ACK qui sera perdu, 
 			l'expéditeur retentera toujours d'envoyer le message
-			
 Transfert de paquets sans limite de taille
 	Envoi
 		Fragmentation du paquet original en N paquets de MaxMailSize octets maximum. ((N-1)*MaxMailSize < taille < N*MaxMailSize)
@@ -28,7 +27,7 @@ Transfert de paquets sans limite de taille
 	Réception
 		Attendre la réception de N paquets (N = taille message / MaxMailSize) sur le port
 		Mettre à chaque fois les données des messages reçus dans le grand buffer
-		
+
 Transfert de fichier
 	Envoi
 		Envoi d'un paquet contenant la taille du fichier à envoyer
@@ -45,3 +44,4 @@ Appels système
 	SendFile/ReceiveFile -> Envoi/Reception de fichier sans taille fixe
 		
 SCHEMATISER TOUT ÇA!!
+

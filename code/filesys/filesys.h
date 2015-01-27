@@ -34,9 +34,22 @@
 
 #ifndef FS_H
 #define FS_H
+#define FileNameMaxLen 		9	// for simplicity, we assume 
+// file names are <= 9 characters long
+#define maxOpenFiles 10
 
 #include "copyright.h"
 #include "openfile.h"
+#include "vector"
+#include "synch.h"
+
+class FileSysEntry {
+	public:
+		bool used ;
+		OpenFile* file;
+		char name[FileNameMaxLen + 1]; 
+		int count;
+};
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 // calls to UNIX, until the real file system
@@ -61,10 +74,14 @@ class FileSystem {
 		}
 
 		bool Remove(char *name) { return Unlink(name) == 0; }
+		bool CreateDir(const char *name){return TRUE;}
+		bool RemoveDir(const char *name){return TRUE;} // delete a directory
 
+		int Cd(const char* name){return 0;}
 };
 
 #else // FILESYS
+
 class FileSystem {
 	public:
 		FileSystem(bool format);		// Initialize the file system.
@@ -74,22 +91,41 @@ class FileSystem {
 		// the disk, so initialize the directory
 		// and the bitmap of free blocks.
 
+		~FileSystem();
 		bool Create(const char *name, int initialSize);  	
 		// Create a file (UNIX creat)
+		
+		bool CreateDir(const char *name);  
 
 		OpenFile* Open(const char *name); 	// Open a file (UNIX open)
 
 		bool Remove(const char *name); 	// Delete a file (UNIX unlink)
+		
+		bool RemoveDir(const char *name); // delete a directory
+
+		int Cd(const char* name);
 
 		void List();			// List all the files in the file system
 
 		void Print();			// List all the files and their contents
+		int AddFile(const char* name,OpenFile* open);
+		void Close(const char* name);
+		OpenFile* Find(const char* name);		
+		int GetNextEntry();
+		int FindIndex(const char *name);
 
 	private:
+		void InitializeDir(int,int);
+		OpenFile* MoveTo(const char* name,char* s);
 		OpenFile* freeMapFile;		// Bit map of free disk blocks,
 		// represented as a file
 		OpenFile* directoryFile;		// "Root" directory -- list of 
 		// file names, represented as a file
+		OpenFile* currentDir; //the current directory
+		Semaphore* sem;
+		Semaphore* lock;
+		FileSysEntry* openFileTable;
+		
 };
 
 #endif // FILESYS

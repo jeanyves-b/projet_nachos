@@ -5,7 +5,7 @@ partie 1 : adressage virtuel par une table de pages
 		écrire un petit programe de test qui écrit des caractère entrelacé à l'écran.
 	action 2
 		examiner executable->ReadAt
-			lis depuis un fichier et mets dans un emplacement mémoire
+			lis depuis un fichier et mets dans un emplacement mémoire.
 			l'emplacement mémoire choisit est la mémoire principale (pas de virtualisation)
 	action 3
 		écrire une fonction qui écrit en mémoire en utilisant l'adressage virtuel
@@ -22,28 +22,35 @@ partie 1 : adressage virtuel par une table de pages
 			utilisation d'une bitmap
 				utilisation des méthodes proposées pour:
 					chercher un cadre vide et l'utiliser
-					libérer un cadre				NumAvailableFrame
+					libérer un cadre
+					NumAvailableFrame
 	action 6
 		refaire addrspace pour utiliser la pagination
-			ppn = GetEmptyFrame de FrameProvider
+			ppn = GetEmptyFrame de FrameProvider (bitmap)
 				vérifier que page valide: >=0
 			libérer toutes les pages physiques de la pageTable de l'espace d'adressage à sa destruction
 
 choix d'implémentation
+	ReadAtVirtual():
 	façon d'écrire dans la mémoire
 		Ecriture dans buffer avec ReadAt
 		Ecriture du buffer vers page virtuelle avec WriteMem
+	On enlève les interruptions pour éviter qu'un autre thread prenne la main alors que
+	la pageTable de la machine a changé.
+	
+	frameprovider:
 	allocation et sytem de cadre/pagination
-
+	le systeme renvoit la première page valide et libre.
+	
 	modification de machine page table size :
 
 
 test
 	allouer des pages
-	allouer un nombre de gapes max
+	allouer un nombre de pages max
 	free des pages
 	faire une succession d'alloc et de free
-	essayer de finir sans free et vois si c'est crade
+	essayer de finir sans free et voir comment c'est crade
 
 partie 2 : executer plusieurs programmes en même temps
 	action 1
@@ -75,6 +82,8 @@ partie 2 : executer plusieurs programmes en même temps
 
 choix d'implémentation
 	dernier process arrete la machine
+		la machine garde un compteur de processus que l'on peut appeler
+		pour s'ajouter au processus en cours ou dire que l'on quitte.
 
 test
 
