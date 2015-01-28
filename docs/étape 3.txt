@@ -34,10 +34,7 @@ structure thread
 					un thread demandera un espace dans la pile à sa création, et le liberera à sa fin
 					l'identifiant en pile d'un thread sera le numéro de la case qui lui sera attribuée dans ce tableau
 						possibilité de calculer l'emplacement de la pile d'un thread dans l'espace d'adressage à partir de son identifiant en pile
-				un tableau dont la clé est l'identifiant unique, et le contenu l'identifiant en pile + 2 (x)
-					x=0 veut dire qu'aucun thread portant cet identifiant unique n'a jamais été créé
-					x=1 veut dire qu'un thread portant cet identifiant unique a été créé, mais a quitté
-					x=2+ veut dire que le thread ayant cet identifiant unique est en cours d'execution, et sa pile est dans le bloc (x - 2)
+				l'identifiant unique est attribué en fonction d'une variable qui s'incrémente.
 
 	raison du plantage d'un thread POSIX (penser a mettre un DEBUG).
 		impossibilité de créer un thread
@@ -66,8 +63,6 @@ structure thread
 
 	do_UserThreadExit
 		tue la thread et nettoie son espace de travail
-		doit attendre la fin de tous les threads lié à ce thread
-			!!pas encore fait
 
 	tester!
 		création d'un thread
@@ -75,7 +70,6 @@ structure thread
 		arreter un thread "proprement"
 			vérifier les fuites mémoires
 			plus dans l'ordonanceur
-			état du parent, et des enfants.
 		effectue correctement une fonction
 			tester avec les fonctions disponible
 
@@ -100,7 +94,7 @@ partie 2:
 			taille de mémoire à définir au départ -> choix de la taille allouer de base
 
 	UserThreadJoin
-		Tableau d'id pour connaitre tous les threads qui ont été crée et leurs états
+		On regarde dans le tableau de la pile si le processus est actif
 		si le thread à attendre est en cours d'éxécution, on appelle Sleep et le thread
 		attendu nous réveilleras.
 		rajout d'une liste de thread en attente.

@@ -61,6 +61,9 @@ aller lire partie 6
 Choix d'implementation:
 	Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
 
+	Lors de l'initialisation du FileSystem, un repertoire system est crée, tous ce que l'on met dedans est accessible ou que l'on
+	soit dans l'arborescence.Par exemple, on peut y mettre cd tous les appels à cd sans chemin spécifié marcheront.
+
 Test:
 Puisque qu'on a pas implementer le shell, les tests sont faits par des appels systèmes(mkdir,rmdir,cd).
 Les premiers test creer/supprimer des repertoires dans le repertoires d'origine'root'. Avec l'implementation de cd nous avons réussi à céeer des sous repertoires sans problèmes. Il faut juste signaler que la création(ou la suppression) de sous repertoires nécessite que le cd et le mkdir soit appeler dans le meme fichier de test parce que lorsque la machine s'arrete on revient à la racine(repertoire root) 	 
@@ -76,7 +79,7 @@ aller lire partie 7
 
 	problème :
 		Ne permet pas de gerer la concurence
-		unn processus peut fermer un fichier encore utilisé par un autre 
+		un processus peut fermer un fichier encore utilisé par un autre 
 		
 partie 3 : support des accès concurents
 	modification des accès concurent
@@ -112,12 +115,15 @@ partie 6 : implentation des noms de chemin (path name)
 	Explication de l'utilisation des path name
 	  par souci de simplicite, très peu d'erreur sont testé donc:
 	    - un repertoire qui n'existe pas dans le fichier produira une erreur
-	  si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
-	  dans le cas contraire, on part du répertoire courant.
 	  il faut ajouter manuellement leur utilisation dans toutes les fonctions
 	  donc il faut tester si les path name marche dans chaques fonctions
 	  (mkdir,cd,rm,...)
-	
+
+choix d'implementation
+	le repertoire courant utilisé par l'utilisateur n'est pas modifié pour que les autres threads/processus puisse s'éxécuter
+	dans le même repertoire.
+	si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
+	dans le cas contraire, on part du répertoire courant.
 				
 partie 7 : amélioration des accès concurents
 	possibilité d'avoir plusieurs lecteur mais un seul écrivain
