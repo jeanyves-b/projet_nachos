@@ -50,6 +50,7 @@
 #define SC_Receive		29
 #define SC_SendFile		30
 #define SC_ReceiveFile	31
+#define SC_GetNbP		32
 
 #ifdef IN_USER_MODE
 
@@ -194,6 +195,8 @@ int rmfile(char* name);
 
 /*move to a directory*/
 void cd (char* name);
+
+unsigned GetNbP();
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 

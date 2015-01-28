@@ -61,8 +61,7 @@ aller lire partie 6
 Choix d'implementation:
 	Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
 
-	Lors de l'initialisation du FileSystem, un repertoire system est crée, tous ce que l'on met dedans est accessible ou que l'on
-	soit dans l'arborescence.Par exemple, on peut y mettre cd tous les appels à cd sans chemin spécifié marcheront.
+	Lors de l'initialisation du FileSystem, un repertoire system est crée, tous ce que l'on met dedans est accessible ou que l'on soit dans l'arborescence. Par exemple, on peut y mettre cd, ce qui fera que tous les appels à cd sans chemin spécifié marcheront.
 
 Test:
 Puisque qu'on a pas implementer le shell, les tests sont faits par des appels systèmes(mkdir,rmdir,cd).

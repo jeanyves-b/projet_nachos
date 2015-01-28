@@ -230,6 +230,10 @@ ExceptionHandler (ExceptionType which)
 						 machine->WriteRegister(2, do_UserProcessCreate(buf));
 						 break;
 					 }
+			case SC_Yield:{
+						currentThread->Yield();
+						break;
+				}
 			#ifdef NETWORK
 			case SC_Send: {
 				
@@ -307,6 +311,10 @@ ExceptionHandler (ExceptionType which)
 						machine->WriteRegister(2,fileSystem->Remove(buf));
 						break;	
 				    }
+			case SC_GetNbP:{
+						machine->WriteRegister(2,machine->GetNbP());
+						break;
+					}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
 					 ASSERT(FALSE);
