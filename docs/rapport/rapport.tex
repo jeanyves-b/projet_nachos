@@ -193,11 +193,12 @@
 
 \section{Test}
 	\subsection{Organisation}
-		{Pour automatiser les tests, nous avons décidé de créer un script qui va lancer nos fichier de test au travers du projet.
-		Nous avons essayer de faire suffisamment de tests pour tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant au numéro de l'étape. Tous ces dossiers sont situé dans code/test.}
+		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. 
+		Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape. Tous ces dossiers sont situés dans \texttt{code/test}. \\
+		Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart des cas, ainsi que des programmes de tests developpés par nos soins (\texttt{.cc}) afin de tester les sorties des tests unitaires.}
 
 	\subsection{Utilisation}
-		{Pour lancer les tests, ils suffit d'exécuter le script testpart.sh situé dans le dossier code/test}
+		{Pour lancer les tests, ils suffit d'exécuter le script \texttt{testpart.sh} situé dans le dossier \texttt{code/test}.}
 
 	\subsection{Tests effectués et comportements}
 		\subsubsection{Console}
