@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-void *forked()
+void forked()
 {
 	PutString("aaabbbcccdddeeefffggghhhiiijjjkkklllmmm");
 }
@@ -8,9 +8,10 @@ void *forked()
 int main()
 {
 	//UserThreadCreate(test, 0);
-	int i, pid[8];
-	for (i=0 ; i<8 ; i++)
-		pid[i] = Fork(forked());
+	//~ int i, pid[8];
+	//~ for (i=0 ; i<8 ; i++)
+		//~ pid[i] = ForkExec(forked());
+
 
 	return 0;
 }
