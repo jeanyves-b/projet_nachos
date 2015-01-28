@@ -160,7 +160,7 @@
 		\end{description}
 		\vspace{2.5mm}
 	
-	\subsection{Réseaux}
+	\subsection{Réseau}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{unsigned Send(char *tosend, unsigned size, int localPort, int to, int remotePort)}
 			\item{DESCRIPTION : Envoie des données de taille \texttt{size} présentes dans le buffer pointé par \texttt{tosend} à la machine présente en adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements seront reçus sur le port local \texttt{localPort}.} 
@@ -218,7 +218,7 @@
 				\item Terminaison d'un thread:
 					\subitem Vérification des fuites mémoires: Toutes les structures allouées sont bien supprimées
 					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés.
-				\item Lancement d'une fonction: Testé avec les fonctions disponibles, elles se sont déroulées correcetement.
+				\item Lancement d'une fonction: Testé avec les fonctions disponibles, elles se sont déroulées correctement.
 			\end{itemize}
 
 		\subsubsection{Mémoire virtuelle}
@@ -226,25 +226,25 @@
 				\item Création d'un processus: OK dans les bonnes conditions et retourne le bon code d'erreur dans les mauvaises.
 					\subitem L'exécutable fourni est bien exécuté.
 				\item Stress de la mémoire
-					\subitem Les fichiers matmult et sort s'éxécutent sans problèmes.
+					\subitem Les fichiers \texttt{matmult} et \texttt{sort} s'exécutent sans problèmes.
 					\subitem Création d'un grand nombre de processus en même temps se passe bien dans les limites de la mémoire disponible. Au-delà, création de processus rejetée.
 				\item Allocation et libération de pages
 				
 			\end{itemize}
 
 		\subsubsection{Système de fichiers}
-		Ces fonctions ont été testées à partir d'appel système car nous n'avons pas implémenté de shell pratique et rapide.
 			\begin{itemize}
-				\item Créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
-				\item Déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
-				\item Suppression dossier/fichier :				validé : Le dossier/fichier est supprimé correctement. Les pages sont libéré et il ne réapparait pas lors de la prochaine lecture du disque.
-				\item Enregistrement de la structure :			validé : La structure s'enregistre correctement et est rechargée sans erreur notable au début de l'éxécution de la machine.
+				\item Créer un dossier/fichier: Le dossier/fichier est créer et est accessible.
+				\item Déplacement vers un dossier parent/fils: On peut se déplacer à volonté dans les dossiers.
+				\item Suppression dossier/fichier: Le dossier/fichier est supprimé correctement. Il ne réapparaît pas lors de la prochaine lecture du disque.
+				\item Persistance du système de fichiers: Le système de fichiers persiste entre deux exécutions de la machine.
 			\end{itemize}
 
 		\subsubsection{Réseau}
 			\begin{itemize}
-				\item Test en anneau. On crée plusieurs machines qui vont recevoir le fichier, le modifier de façon prédictible, puis le renvoyer à la prochaine machine. Validé : le fichier reçu est correcte et il est renvoyé à la bonne machine.
-				\item Envoie/réception de fichier : fichier envoyé et reçu puis enregistré correctement.
+				\item Test en anneau: La machine 1 envoie un message à la machine 2 qui l'envoi à la machine 3 .... qui l'envoie à la machine n, qui renvoi le message à la machine 1.
+					\subitem Les données sont bien reçues et bien renvoyées, même avec une perte de données significative.
+				\item Envoie/réception de fichier: Fichier envoyé et reçu puis enregistré correctement.
 			\end{itemize}
 
 \section{Choix d'implémentation}
