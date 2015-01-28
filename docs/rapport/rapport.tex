@@ -20,30 +20,28 @@
 \maketitle
 
 \section{questionnement sur le contenu/la forme du rapport}
-	\\ -> faire des schema, notament pour la mémoire virtuelle et les id des threads
+	 -> faire des schema, notament pour la mémoire virtuelle et les id des threads
 
-\tableofcontents{}
+\tableofcontents
 \newpage
 \section{Introduction}
 	Ce document représente notre rapport final dans le cadre du projet Nachos proposé pour les parcours M1 Informatique et MOSIG.
-	Seront présentés dans l'ordre: 
-	\begin{itemize}
-		\item{}
-	\end{itemize}
+	Il abordera les principales fonctionnalités du noyau, la documentation des fonctions proposées à l'utilisateur, l'organisation de l'équipe et celle des tests, ainsi que les différents partis pris.
 
 \section{Fonctionnalités du noyau}
 	Voici les partie que nous avons réussi à implémenter jusque là :
 	\begin{itemize}
-		\item Appels system de lecture/écriture : toutes les fonction d'écriture et de lecture ont été portées au niveau utilisateur et sont \emph{thread safe}. Des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran. Il n'y a pas de blocage entre la lecture et l'écriture.
-		\item (partie 3) threads : toutes les fonctions permettant de créer, détruire et gérer des threads on été porté au niveau utilisateur.
-		\item (partie 4) mémoire virtuel : le système de mémoire virtuel à été implémenté. La fonction ForkExec a été portée au niveau utilisateur.
-		\item (partie 5) système de fichier : Il est maintenant possible de créer/supprimer des fichiers et des dossiers et de se déplacer dans l'architecture de dossier au niveau utilisateur. L'architecture est sauvegarder d'une éxécution à la suivante.
-		\item (partie 6) réseaux : 
+		\item Appels système de lecture et d'écriture : Caractères, chaînes de caractères, et entiers.
+		\item Multithreading: Création, destruction d'un thread, ainsi que l'attente d'un autre thread. Partage de la pile d'exécution entre threads.
+		\item Multi-processus s'exécutant en parallèle. 
+		\item Adressage virtuel via un page de tables.
+		\item Un système de fichiers: Création et suppression de fichiers/dossiers, ainsi que déplacement dans hiérarchie.
+		\item Transmission synchrone sur le réseau avec attente d'acquittement avant prochaine transmission.
+		\item API d'envoi et de réception de messages et de fichiers par réseau. 
 	\end{itemize}
-	pour toutes ces parties, nos tests n'ont révélé aucun problème. Les tests effectué sont détaillé dans la section qui leur dédiés.
 
-\section{Spécification des fonctions utilisateur}
-	\subsection{Console}
+\section{Documentation des fonctions utilisateur}
+	\subsection{Console synchrone}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{char GetChar()}
 			\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans la cas de la fin de fichier.}
@@ -79,8 +77,8 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int UserThreadCreate(void *f(void*), void* arg)}
 			\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument arg. L'identifiant du thread est unique tout au long de l'exécution du processus. \\
-			Le thread créé est \emph{de facto} dans le même processus que le thread dans lequel il a été créé, et est considéré comme "fils" de celui-ci. \\
-			Lorsqu'un thread termine (même le thread \texttt{main}), il attend la terminaison de tous ses "fils".
+			Le thread créé est \emph{de facto} dans le même processus que le thread dans lequel il a été créé. \\
+			Si l'un des threads d'un processus appelle \texttt{exit}, la gestion de l'attente des threads non terminés est gérée par la terminaison du processus.
 			\item{VALEUR DE RETOUR : } Identifiant du thread en cas de succès, code d'erreur négatif sinon:
 				\subitem{\texttt{-1} : } Raison inconnue.
 				\subitem{\texttt{-2} : } Pas assez d'espace dans la pile du processus.
@@ -88,7 +86,7 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void UserThreadExit()}
-			\item{DESCRIPTION : } Termine le thread en cours d'éxecution et libère son emplacement dans la pile. Elle attend la fin de tous les threads fils de ce thread avant de terminer son exécution. Si c'est le dernier thread du processus, ce dernier se termine aussi et les ressources qu'il utilise sont libérées.
+			\item{DESCRIPTION : } Termine le thread en cours d'éxecution et libère son emplacement dans la pile. Si c'est le dernier thread du processus, ce dernier se termine aussi après avoir attendu ses threads toujours en cours d'exécution et les ressources qu'il utilise sont libérées.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
@@ -102,9 +100,7 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetTid()}
 			\item{DESCRIPTION : Renvoie le l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
-			\item{VALEUR DE RETOUR : }
-				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
-				\subitem{\texttt{} : }
+			\item{VALEUR DE RETOUR : } Identifiant du thread en cours d'exécution.
 		\end{description}
 	\subsection{Mémoire virtuelle}
 		\begin{description}
@@ -119,61 +115,79 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetPid()}
 			\item{DESCRIPTION : } Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours.
-			\item{VALEUR DE RETOUR : }
-				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
-				\subitem{\texttt{} : }
+			\item{VALEUR DE RETOUR : } Identifiant du processus en cours d'exécution.
 		\end{description}
 		
 	\subsection{Système de fichiers}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int mkdir(char *name)}
-			\item{DESCRIPTION : } Crée un répertoire portant le nom *name dans le répertoire courrant.
+			\item{DESCRIPTION : } Crée un répertoire portant le nom \texttt{name} dans le répertoire courrant.
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Le chemin spécifié n'existe pas, soit on ne peux plus ajouter d'élément dans le dossier courant.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le chemin spécifié n'existe pas, ou le dossier en cours contient déjà 8 fichiers/dossiers.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int rmdir(char *name)}
-			\item{DESCRIPTION : } Supprime le répertoire portant le nom *name du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
+			\item{DESCRIPTION : } Supprime le répertoire portant le nom \texttt{name} du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int mkfile(char *name, int initialsize)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. le dossier contient déjà 8 fichiers, un fichier du même nom existe déjà, ou bien il n'y a plus de place sur le disque.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier contient déjà 8 fichiers/dossiers, un fichier du même nom existe déjà, ou bien il n'y a plus de place sur le disque.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int rmfile(char *name)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Il n'y a pas de fichier de ce nom dans le répertoire courrant.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Il n'y a pas de fichier de ce nom dans le répertoire courrant.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int cd(char *name)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Le dossier de destination est introuvable ou bien il ne peux pas être ouvert.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier de destination est introuvable ou bien il ne peut être ouvert.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 	
-	\subsection{Réseau}
+	\subsection{Réseaux}
 		\begin{description}
-			\item{SIGNATURE : } \texttt{int Send(..)}
-			\item{DESCRIPTION : } 
-			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{-1} : } 
-				\subitem{\texttt{-2} : } 
-				\subitem{\texttt{-3} : } 
+			\item{SIGNATURE : } \texttt{unsigned Send(char *tosend, unsigned size, int localPort, int to, int remotePort)}
+			\item{DESCRIPTION : Envoie des données de taille \texttt{size} présentes dans le buffer pointé par \texttt{tosend} à la machine présente en adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements seront reçus sur le port local \texttt{localPort}.} 
+			\item{VALEUR DE RETOUR : Nombre total d'octets envoyés acquittés.} 
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{void Receive(int localPort, char *got, unsigned size)}
+			\item{DESCRIPTION : Attend la réception de données de taille \texttt{size} sur le port local \texttt{localPort}, et les met dans le buffer pointé par \texttt{got}.} 
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int SendFile(char *path, int localPort, int to, int remotePort)}
+			\item{DESCRIPTION : Envoie le fichier présent à l'emplacement \texttt{path} vers la machine ayant l'adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements pour les paquets seront reçus sur le port \texttt{localPort}.} 
+			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès et tous les octets acquittés, code d'erreur négatif sinon: 
+				\subitem{\texttt{-1} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
+				\subitem{\texttt{-2} : } Taille du fichier invalide.
+				\subitem{\texttt{-3} : } Succès partiel, mais pas tous les octets envoyés ont été acquittés.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int ReceiveFile(int localPort, char *path)}
+			\item{DESCRIPTION : Attend la réception d'un fichier sur le port local \texttt{localPort}, et les met dans un fichier à l'emplacement décrit dans le buffer pointé par \texttt{path}.} 
+			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès et tous les octets acquittés, code d'erreur négatif sinon: 
+				\subitem{\texttt{-1} : } Taille du fichier reçue invalide.
+				\subitem{\texttt{-2} : } Impossible de créer ou d'écraser le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
+				\subitem{\texttt{-3} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
 		\end{description}
 		\vspace{2.5mm}
 

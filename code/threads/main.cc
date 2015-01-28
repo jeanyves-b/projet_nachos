@@ -163,6 +163,27 @@ main (int argc, char **argv)
 		{			// performance test
 			PerformanceTest ();
 		}
+		else if (!strcmp (*argv, "-cd"))
+		{			// changer de repertoire
+			fileSystem->Cd (*(argv + 1));
+		}
+		else if (!strcmp (*argv, "-mkdir"))
+		{			//  creer un repertoire
+			fileSystem->CreateDir (*(argv + 1));
+		}
+		else if (!strcmp (*argv, "-rmdir"))
+		{			// supprimer un repertoire
+			fileSystem->RemoveDir (*(argv + 1));
+		}
+		else if (!strcmp (*argv, "-init"))
+		{			// initialisation du fichier systeme
+			
+			Copy ("etape4/forkexec", "System/fork");
+			Copy ("etape4/makeprocess", "System/make");
+			Copy ("etape3/userpages0", "System/userpages");
+			Copy ("etape3/userpages0", "System/user");
+			argCount = 3;
+		}
 #endif // FILESYS
 #ifdef NETWORK
 		if (!strcmp (*argv, "-o"))
