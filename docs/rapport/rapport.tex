@@ -20,10 +20,7 @@
 \maketitle
 
 \section{questionnement sur le contenu/la forme du rapport}
-	-> utilité de dire que nous avons dût modifier les fonctions de lecture/écriture en mémoire.
-	\\ -> possibilité d'un process qui se crée, mais le dernier process se termine avant que le compteur est été incrémenté? -> le process en cour de lancement ne se lancera jamais?
 	\\ -> faire des schema, notament pour la mémoire virtuelle et les id des threads
-	\\ -> test de la partie process
 
 \tableofcontents{}
 \newpage
@@ -191,45 +188,51 @@
 	\subsection{Tests effectués et comportements}
 		\subsubsection{Console}
 			\begin{itemize}
-				\item une chaine de 1 caractères 			validé : écrit le caractère	correctement à l'écran ou bien dans le fichier de destination
-				\item utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
-				\item ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
-				\item trop de caractères					validé : sépare la chaine écrire en plusieurs chaines de taille équivalante à taillemax (situer dans le fichier .cc)
-				\item pas de caractère 						validé : si rien n'est entrée, rien ne se passe et si on entre juste le caractère retour chariot, il est traité comme n'importe quelle lettre
-				\item arrêt avec EOF 						validé : arrete la lecture de fichier.
+				\item Une chaine de 1 caractères 			validé : écrit le caractère	correctement à l'écran ou bien dans le fichier de destination
+				\item Utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
+				\item Ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
+				\item Trop de caractères					validé : sépare la chaine écrire en plusieurs chaines de taille équivalante à taillemax (situer dans le fichier .cc)
+				\item Pas de caractère 						validé : si rien n'est entrée, rien ne se passe et si on entre juste le caractère retour chariot, il est traité comme n'importe quelle lettre
+				\item Arrêt avec EOF 						validé : arrete la lecture de fichier.
 			\end{itemize}
 
 		\subsubsection{Thread}
 			\begin{itemize}
-				\item création d'un thread :
-					\subitem test de création courante 				validé : le thread se crée
-					\subitem tester toutes les possibilités d'échecs	validé : retourne la bonne erreur
-					\subitem très grand nombre de threads 				validé : crée le threads normalement jusqu'au moment ou l'on dépasse le nombre maximum de threads. A partir ce cette limite, la fonction retourne une erreur.
-				\item arreter un thread avec Exit :
-					\subitem vérifier les fuites mémoires		validé : toutes les structures allouées sont bien supprimées
-					\subitem plus dans l'ordonanceur			validé : l'ordonnanceur n'essaie plus de donner la main à la thread
-					\subitem état du parent					validé : le parent n'a plus le thread courant dans sa liste et continue de touner correctement
-					\subitem état des enfants					validé : on attend la fin des enfants avant de supprimer la thread courante. Ce choix est détaillé dans la partie "choix d'implémentation".
-				\item lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
-				\item retours d'erreurs				validé : quand les mauvais argument sont passé à la fonction ou bien qu'il n'y a plus assez de place pour créer un thread, la fonction renvoie bien le bon code d'erreur.
+				\item Création d'un thread :
+					\subitem Création courante 				validé : le thread se crée
+					\subitem Possibilités d'échecs	validé : retourne la bonne erreur
+					\subitem Très grand nombre de threads 				validé : crée le threads normalement jusqu'au moment ou l'on dépasse le nombre maximum de threads. A partir ce cette limite, la fonction retourne une erreur.
+				\item Arreter un thread avec Exit :
+					\subitem Vérifier les fuites mémoires		validé : toutes les structures allouées sont bien supprimées
+					\subitem Plus dans l'ordonanceur			validé : l'ordonnanceur n'essaie plus de donner la main à la thread
+					\subitem Etat du parent					validé : le parent n'a plus le thread courant dans sa liste et continue de touner correctement
+					\subitem Etat des enfants					validé : on attend la fin des enfants avant de supprimer la thread courante. Ce choix est détaillé dans la partie "choix d'implémentation".
+				\item Lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
+				\item Retours d'erreurs				validé : quand les mauvais argument sont passé à la fonction ou bien qu'il n'y a plus assez de place pour créer un thread, la fonction renvoie bien le bon code d'erreur.
 			\end{itemize}
 
 		\subsubsection{Mémoire virtuelle}
 			\begin{itemize}
-				\item créer un processus :					validé : le processus est créé correctement et la fonction passée en paramètre démarre normalement.
-				\item stress de la mémoire :				validé : les fichiers matmult et sort s'éxécutent sans problèmes.
-				\item allocation et libération de pages : 	validé : les pages sont alloué et libérée correctement. les pages ne sont pas donnée alors qu'elles sont utilisé et ne sont libérée qu'à la fin des processus.
-				\item caractères entrelacé avec processus : ???
-				\item retours d'erreurs : 					validé : les bonnes valeur sont retourné en cas de mauvais arguments ou de manque de place.
+				\item Créer un processus :					validé : le processus est créé correctement et la fonction passée en paramètre démarre normalement.
+				\item Stress de la mémoire :				validé : les fichiers matmult et sort s'éxécutent sans problèmes.
+				\item Allocation et libération de pages : 	validé : les pages sont alloué et libérée correctement. les pages ne sont pas donnée alors qu'elles sont utilisé et ne sont libérée qu'à la fin des processus.
+				\item Caractères entrelacé avec processus : ???
+				\item Retours d'erreurs : 					validé : les bonnes valeur sont retourné en cas de mauvais arguments ou de manque de place.
 			\end{itemize}
 
 		\subsubsection{système de fichier}
 		Ces fonctions ont été testées à partir d'appel système car nous n'avons pas implémenté de shell pratique et rapide.
 			\begin{itemize}
-				\item créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
-				\item déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
-				\item suppression dossier/fichier :				validé : Le dossier/fichier est supprimé correctement. Les pages sont libéré et il ne réapparait pas lors de la prochaine lecture du disque.
-				\item enregistrement de la structure :			validé : La structure s'enregistre correctement et est rechargée sans erreur notable au début de l'éxécution de la machine.
+				\item Créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
+				\item Déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
+				\item Suppression dossier/fichier :				validé : Le dossier/fichier est supprimé correctement. Les pages sont libéré et il ne réapparait pas lors de la prochaine lecture du disque.
+				\item Enregistrement de la structure :			validé : La structure s'enregistre correctement et est rechargée sans erreur notable au début de l'éxécution de la machine.
+			\end{itemize}
+
+		\subsubsection{Réseau}
+			\begin{itemize}
+				\item Test en anneau. On crée plusieurs machines qui vont recevoir le fichier, le modifier de façon prédictible, puis le renvoyer à la prochaine machine. Validé : le fichier reçu est correcte et il est renvoyé à la bonne machine.
+				\item Envoie/réception de fichier : fichier envoyé et reçu puis enregistré correctement.
 			\end{itemize}
 
 \section{Choix d'implémentation}
