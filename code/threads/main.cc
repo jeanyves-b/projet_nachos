@@ -182,6 +182,7 @@ main (int argc, char **argv)
 			Copy ("etape4/makeprocess", "System/make");
 			Copy ("etape3/userpages0", "System/userpages");
 			Copy ("etape3/userpages0", "System/user");
+			Copy ("etape5/cd", "System/cd");
 			argCount = 3;
 		}
 #endif // FILESYS

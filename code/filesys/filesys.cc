@@ -506,7 +506,7 @@ FileSystem::Cd(const char* name){
       }
     }
   }
-  if (error == 0){
+  if (error == true){
     printf("Now in %s\n",name);
     List();
   }
