@@ -41,8 +41,7 @@ aller lire partie 6
 		(cela nous a permit de comprendre que le problème venait des PageTable chargé en mémoire)
 		- un pas à pas avec gdb pour voir les changements d'état de la variable
 	Ces tests ont mis en évidence une section critique dans ReadAtVirtua que l'on a corrigé.
-	
-Choix d'implementation:
+
 	Déplacement dans les répertoires
 		on a rajoute une fonction pour tester l'existence du repertoire demandé
 		cela consiste à ouvrir un fichier(OpenFile) vers le secteur contenant le repertoire
@@ -56,9 +55,14 @@ Choix d'implementation:
 		-lui attribuer un sector libre du bitmap
 		-l'ajouter dans la table du repertoire courant en indiquant que c'est un repertoire 
 		 grace à un variable booleen 'isDir' qu'on a ajouté aux entrées de la table de directory 	 
-		-Pour faciliter les deplacements on initialise la table de nouveau repertoire par le secteur associé au '.' du repertoire 			 courant qui sera le '..' du nouveau repertoire et '.' du nouveau repertoire est associé au secteur de son file header
+		-Pour faciliter les deplacements on initialise la table de nouveau repertoire par le secteur associé au '.' du repertoire 			 courant qui sera le '..' du nouveau repertoire et '.' du nouveau repertoire est associé au secteur de son file header.
+
+	
+Choix d'implementation:
+	Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
+
 Test:
-Puisque qu'on a pas implementer le shell, les tests sont faites par des appels systèmes(mkdir,rmdir,cd).
+Puisque qu'on a pas implementer le shell, les tests sont faits par des appels systèmes(mkdir,rmdir,cd).
 Les premiers test creer/supprimer des repertoires dans le repertoires d'origine'root'. Avec l'implementation de cd nous avons réussi à céeer des sous repertoires sans problèmes. Il faut juste signaler que la création(ou la suppression) de sous repertoires nécessite que le cd et le mkdir soit appeler dans le meme fichier de test parce que lorsque la machine s'arrete on revient à la racine(repertoire root) 	 
 
 partie 2 : implantation de la table système des fichiers ouverts
