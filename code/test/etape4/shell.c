@@ -2,14 +2,15 @@
 
 int main ()
 {
-	int newProc;
+	int result;
+	int breakp = 1;
 	char prompt[2], buffer[60];
 	int i;
 
 	prompt[0] = '-';
 	prompt[1] = '-';
 
-	while (1)
+	while (breakp)
 	{
 		for (i=0;i<2;i++)
 		  PutChar (prompt[i]);
@@ -23,10 +24,20 @@ int main ()
 		buffer[--i] = '\0';
 		if (i > 0)
 		{
-			newProc = ForkExec(buffer);
+			if( (buffer[0] == 'q') && (i == 1)){
+				breakp = 0;
+			}else{
+				result = ForkExec(buffer);
+				if (result < 0){
+					PutString("Commande inconnue\n");
+				}
+				while (GetNbP() > 1){
+					Yield();
+				}		
+			}
+				
 		}
-		while (GetNbP() > 1){
-			Yield();
-		}
+		
 	}
+	return 0;
 }

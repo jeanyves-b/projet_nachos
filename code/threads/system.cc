@@ -192,7 +192,9 @@ Cleanup ()
 #endif
 
 #ifdef USER_PROGRAM
-	delete currentThread->space;
+	if ( currentThread->space != NULL){
+		delete currentThread->space;
+	}	
 	delete machine;
 	delete synchconsole;
 #endif

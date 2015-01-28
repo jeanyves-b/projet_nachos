@@ -24,7 +24,7 @@ void StartUserProcess(int data) {
 //		négatif sinon.
 //---------------------------------------------------------------------
 int do_UserProcessCreate(char *s){
-
+	printf("here");
 	OpenFile *executable = fileSystem->Open(s);
 	if (executable == NULL)
 		return -1;
@@ -38,9 +38,9 @@ int do_UserProcessCreate(char *s){
 	Thread *newThread = new Thread(s);
 	if (newThread == NULL){
 		delete addrSpace;
-		return -4;
+		return -3;
 	}
-
+	
 
 	newThread->space = addrSpace;
 	newThread->id = 0;
