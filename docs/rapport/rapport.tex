@@ -15,7 +15,7 @@
 
 \begin{document}
 
-\title {Rapport Projet NachOS \\ M1 Informatique}
+\title {Rapport Projet Nachos \\ M1 Informatique/MOSIG \\ Groupe G}
 \author{Amine Ait-Mouloud, Sébastien Avril,\\ Jean-Yves Bottraud, El Hadji Malick Diagne}
 \date{Janvier 2015}
 \maketitle
@@ -48,7 +48,7 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void GetString(char *s, int n)}
-			\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaine récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
+			\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaîne récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
@@ -64,7 +64,7 @@
 		\vspace{3mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void PutString(const char *s)}
-			\item{DESCRIPTION : } Écrit la chaine présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaine sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
+			\item{DESCRIPTION : } Écrit la chaîne présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaîne sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
@@ -121,7 +121,7 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int rmdir(char *name)}
-			\item{DESCRIPTION : } Supprime le répertoire portant le nom \texttt{name} du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
+			\item{DESCRIPTION : } Supprime le répertoire portant le nom \texttt{name} du répertoire courant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
 			\item{VALEUR DE RETOUR : } 
 				\subitem{\texttt{0} : } Le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
 				\subitem{\texttt{1} : } Succès.
@@ -246,7 +246,6 @@
 
 	\subsection{Threads}
 		\subsubsection{Gestion des identifiants de threads}
-			{Deux identifiants:}
 			\begin{itemize}
 				\item{un identifiant séquentiel unique parmi tous les threads du processus.}
 				\item{un identifiant en pile qui représente l'emplacement en pile réservé au thread.}
@@ -264,6 +263,7 @@
 					\item{\texttt{x} est inférieur au nombre de threads créés, mais n'est pas présent dans le tableau: } Le thread a été créé, mais s'est terminé ;
 					\item{\texttt{x} est inférieur au nombre de threads créés, et est présent dans le tableau à la case \texttt{i} : Le thread a été créé, et est en cours d'exécution, et le bloc en pile numéro \texttt{i} lui est alloué.}
 				\end{itemize}
+				~\par{Il n'existe aucune hiérarchie entre threads, tous ceux créés dans un même processus sont au même niveau.}
 		\subsubsection{Implémentation du join}
 			Un vecteur contenant la liste des threads en attente et l'identifiant des threads qui les attends.
 				\begin{itemize}
@@ -272,6 +272,7 @@
 				\end{itemize}
 			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x}, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
 			~\par{Lorsque le thread ayant pour identifiant \texttt{x} se termine, il réveillera le thread qui s'était mis en attente pour qu'il continue son exécution.}
+			~\par{L’identifiant du thread étant unique dans un processus, il est possible de faire autant de \texttt{Join} que possible sur tous les identifiants.}
 
 	\subsection{Mémoire virtuelle}
 		\subsubsection{Pagination mémoire}
@@ -279,14 +280,15 @@
 			~\par{Lors de la création d'un processus, une vérification de la disponibilité d'assez de pages physiques est faite afin de s'assurer que le processus peut s'exécuter. Ensuite, un \emph{mapping} entre les pages virtuelles du processus et les pages physiques disponible est fait.}
 			~\par{Lors de la terminaison d'un processus, les pages physiques utilisées par ce dernier sont toutes libérées.}
 		\subsubsection{Multiprocessus}
-			{La création d'un processus déclenche la création d'un thread noyau avec un nouvel espace d'adressage. L'identifiant processus créé sera juste égal au nombre de processus en cours d'exécution. L'identifiant du processus n'est donc pas unique tout au long de l'exécution de la machine, mais tous les processus en cours d'exécution auront des identifiants}
-			~\par{Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
+			{La création d'un processus déclenche la création d'un thread noyau avec un nouvel espace d'adressage ainsi que l'incrémentation d'un compteur des processus actifs.}
+			~\par{Lors de la terminaison d'un processus, tous les threads créés dans celui-ci et ne s'étant pas terminé sont attendus, puis si le processus en question est le dernier processus de la machine, terminer la machine.}
+			~\par{Seul un compteur des threads actif est gardé car il n'existe pas hiérarchie entre processus.}
 
-	\subsection{système de fichier}
-la position dans les dossier n'est pas sauvegarder entre deux éxécutions.
-lorsque la machine s'arrète, on reviens à la racine.
-
-	\subsection{réseaux}
+	\subsection{Système de fichiers}
+		{Chaque dossier est composé de 8 fichiers/dossiers maximum (en plus des dossiers spéciaux "\texttt{.}" et "\texttt{..}". Les noms des fichiers ne dépassent pas les 9 caractères.}
+		~\par{Si un fichier n'est pas trouvé dans le répertoire en cours, il sera cherché dans "\texttt{/System}", à l'image d'un "\texttt{/usr/bin}" pour Linux.}
+		
+	\subsection{Réseaux}
 		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois. ON ne peu attendre de message d'acquitement que pour un seul message à la fois. Pour ce faire, on utikisse un deamon qui est bloqué au départ, puis lancé dès que l'on tente d'envoyer un message puis rebloqué lorsque la tentative se fini.
 		le type du message est précisé dans son header. Il peux s'agir soit d'un message normal (MSG), soit d'un message d'acquitement (ACK)
 		la faiblesse de ce système est que les sygnaux d'acquitement peuvent être perdu facilement. Par exemple si une machine s'éteint en ayant envoyé un ACK qui sera perdu, l'expéditeur retentera d'envoyer le message à l'infini.

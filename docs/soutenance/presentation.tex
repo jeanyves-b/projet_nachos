@@ -93,11 +93,15 @@
 \begin{document}
 \frame{\titlepage} 
 
-\begin{frame}
+\begin{frame}{Plan}
     \tableofcontents
 \end{frame}
 
-\section{introduction}
+\section{Introduction}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
+
 \begin{frame}{Présentation du noyau}
 \end{frame}
 
@@ -106,60 +110,97 @@
     \tableofcontents[currentsection]
 \end{frame}
 
+
+\subsection{Console}
+
+\begin{frame}{Console: Lecture/Écriture}
+   \begin{itemize}
+       \item Pas de choix d'implémentation particulier.
+       \item Problème de deux consoles s’exécutant en même temps.
+       \item Écriture et lecture bloqués par deux sémaphores différents.
+   \end{itemize}
+\end{frame}
+
 \subsection{Multithreading}
-\begin{frame}{Modèle utilisé pour le multithreading}
-   
+\begin{frame}{Multithreading: Identifiant et emplacement en pile}
+	\begin{center}
+    	\includegraphics[width=7cm]{../rapport/schema_threads_id.eps}
+	\end{center}
+   \begin{itemize}
+       \item Identifiant unique dans le processus.
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{Multithreading: Attente}
+   \begin{itemize}
+       \item Liste de threads en attente et qui ils attendent.
+		\item Thread qui attend mis en pause et relancé à la fin du thread qu'il attend.
+       \item Attendre si thread en cours d'exécution, retour direct sinon.
+       \item Utilisation d'un compteur de thread créés et du tableau des identifiants pour connaître l'état d'exécution d'un thread.
+   \end{itemize}
 \end{frame}
 
 
 \subsection{Gestion de la mémoire}
-\begin{frame}{Gestion de la mémoire virtuelle}
+\begin{frame}{Gestion de la mémoire: Multi-processus}
     \begin{itemize}
-        \item \textbf{Problème :} partager la mémoire physique entre plusieurs processus.
-        \item \textbf{Solution :}
-            \begin{itemize}
-                \item ...
-                \item ...
-            \end{itemize}
-        \item \textbf{Améliorations possibles :}
-            \begin{itemize}
-                \item ...
-                \item ...
-            \end{itemize}
+        \item Partage de la mémoire physique entre différents processus.
+        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
+        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Modèle utilisé pour la gestion de la mémoire}
-    
-\end{frame}
-
-\begin{frame}{Gestion des processus}
-
+\begin{frame}{Gestion de la mémoire: Mapping VPN-PPN}
+	\begin{itemize}
+		\item METTRE SCHEMA ICI. (Séb?)
+    \end{itemize}
 \end{frame}
 
 \subsection{Système de fichiers}
-\begin{frame}{Modèle de système de fichiers utilisé}
-    
+\begin{frame}{Système de fichiers}
+    \begin{itemize}
+		\item 8 fichiers/dossiers maximum par dossier (+ "\texttt{.}" et "\texttt{..}").
+		\item Dossier "\texttt{/System}" contient tous les exécutables (à l'image de \texttt{/usr/bin} pour Linux).
+    \end{itemize}
 \end{frame}
 
 \subsection{Réseau}
 
-\begin{frame}{API réseau}
+\begin{frame}{Réseau: Modèle utilisé}
     \begin{itemize}
-        \item ...
+        \item METTRE SCHEMA ICI. (Amine will do)
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Modèle réseau utilisé}
-    
+\begin{frame}{Réseau: API fournie}
+    \begin{itemize}
+        \item Envoi et réception de données sans limite de taille.
+        \item Envoi et réception de fichiers.
+    \end{itemize}
 \end{frame}
 
+\subsection{Améliorations possibles}
 \begin{frame}{Améliorations possibles}
     \begin{itemize}
         \item ...
     \end{itemize}
 \end{frame}
 
+\section{Gestion du projet}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Gestion du projet}
+    \begin{itemize}
+        \item ...
+    \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
 \begin{frame}{Conclusion}
     \center{Fin.}
 \end{frame}
