@@ -42,7 +42,6 @@ int do_UserProcessCreate(char *s){
 		return -4;
 	}
 
-
 	newThread->space = addrSpace;
 	newThread->id = 0;
 	addrSpace->pid = machine->IncrProcess();

@@ -382,13 +382,7 @@ FileSystem::Open(const char *name)
 		int i;
 		
 		lock->P();
-		i=FindIndex(name);
-		if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
-			return NULL;
-		if(i != -1) // fichier présent dans la table
-			return openFileTable[i].file;
-				
-			
+					
 		Directory *directory = new Directory(NumDirEntries);
 		OpenFile *f;
 		int sector;
@@ -402,7 +396,13 @@ FileSystem::Open(const char *name)
 		directory->FetchFrom(f);
 		sector = directory->Find(filename); 
 		if (sector >= 0) {		
-			openFile = new OpenFile(sector);	// name was found in directory 
+			i=FindIndex(sector);
+			if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+				return NULL;
+			if(i != -1) // fichier présent dans la table
+				openFile = openFileTable[i].file;
+			else
+				openFile = new OpenFile(sector);	// name was found in directory 
 			
 		}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
 			f = MoveTo("/System/",NULL);
@@ -411,12 +411,19 @@ FileSystem::Open(const char *name)
 			}
 			directory->FetchFrom(f);
 			sector = directory->Find(filename);
-			if (sector >= 0){ 		
-			openFile = new OpenFile(sector);
+			if (sector >= 0){ 	
+				i=FindIndex(sector);
+				if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+					return NULL;
+				if(i != -1) // fichier présent dans la table
+					openFile =  openFileTable[i].file;
+				else
+					openFile = new OpenFile(sector);	// name was found in directory 
+				
 			}
 		}
-		if(openFile != NULL && FindIndex(name) != -1 )		
-			AddFile(name,openFile); // on ajoute le fichier dans la table
+		if(openFile != NULL && FindIndex(sector) != -1 )		
+			AddFile(sector,openFile); // on ajoute le fichier dans la table
 			
 		
 		delete directory;
@@ -636,7 +643,7 @@ FileSystem::Print()
 //----------------------------------------------------------------------
  
 int
-FileSystem::AddFile(const char* name,OpenFile* open){
+FileSystem::AddFile(int secteur,OpenFile* open){
 	int i = 0;
 		
 	i = GetNextEntry(); // cherche une entrée libre
@@ -646,40 +653,23 @@ FileSystem::AddFile(const char* name,OpenFile* open){
 	openFileTable[i].used = true;
 	openFileTable[i].file = open;
 	openFileTable[i].count++;
-	strncpy(openFileTable[i].name, name, FileNameMaxLen); 
+	openFileTable[i].secteur = secteur;
 
 
 	return i;
 }
 
-//----------------------------------------------------------------------
-// FileSysTable::find
-// renvoie l'openfile du fichier 
-//	return NULL si fichier absent
-//----------------------------------------------------------------------
 
-OpenFile * 
-FileSystem::Find(const char* name){
-	int i=0;
-	
-	for(i=0;i<maxOpenFiles;i++){
-		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
-			return openFileTable[i].file;
-	}
-	
-	return NULL;
-	
-}	
 //----------------------------------------------------------------------
 // retourne l'index du fichier dans la table
 // return -1 si fichier absent
 //----------------------------------------------------------------------
 int 
-FileSystem::FindIndex(const char *name){
+FileSystem::FindIndex(int secteur){
 	int i=0;
 	
 	for(i=0;i<maxOpenFiles;i++){
-		if( openFileTable[i].used && (strncmp(openFileTable[i].name,name,FileNameMaxLen)==0) )
+		if( openFileTable[i].used && (openFileTable[i].secteur == secteur) )
 			return i;
 	}
 	
@@ -694,10 +684,10 @@ FileSystem::FindIndex(const char *name){
 //----------------------------------------------------------------------
 void 
 FileSystem::Close(const char* name){
-	int i;
+	int i=0;
 		
 		lock->P();
-		i = FindIndex(name);
+		//i = FindIndex(name);
 		if(i != -1 ){ 
 		openFileTable[i].count--;
 		if(openFileTable[i].count == 0 )
