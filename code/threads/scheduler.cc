@@ -119,7 +119,7 @@ Scheduler::Run (Thread * nextThread)
 	// of view of the thread and from the perspective of the "outside world".
 
 	SWITCH (oldThread, nextThread);
-	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->space!=NULL?currentThread->space->pid:0);
+	DEBUG ('t', "Now in thread \"%s %d (pid: %d)\"\n", currentThread->getName (), currentThread->id, currentThread->getPid());
 
 	// If the old thread gave up the processor because it was finishing,
 	// we need to delete its carcass.  Note we cannot delete the thread
@@ -127,8 +127,7 @@ Scheduler::Run (Thread * nextThread)
 	// point, we were still running on the old thread's stack!
 	if (threadToBeDestroyed != NULL)
 	{	
-
-		if (threadToBeDestroyed->space->StackIsEmpty()) {
+		if (threadToBeDestroyed->space != NULL && threadToBeDestroyed->space->StackIsEmpty()) {
 			delete threadToBeDestroyed->space;
 		}
 		delete threadToBeDestroyed;

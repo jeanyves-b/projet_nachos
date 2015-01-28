@@ -46,6 +46,11 @@
 #define SC_Cd			25
 #define SC_MkFile		26
 #define SC_RmFile		27
+#define SC_Send 		28
+#define SC_Receive		29
+#define SC_SendFile		30
+#define SC_ReceiveFile	31
+#define SC_Sleep		32
 
 #ifdef IN_USER_MODE
 
@@ -161,8 +166,20 @@ int GetTid();
 /*Start a new process which start the executable 's'*/
 int ForkExec( char *s);
 
-/*Get current process id*/
-int GetPid();
+/* Sends data of certain size*/
+unsigned Send(char *tosend, unsigned size, int localPort, int to, int remotePort);
+
+/* Receives data of certain size*/
+void Receive(int localPort, char *got, unsigned size);
+
+/* sends file */
+int SendFile(char *path, int localPort, int to, int remotePort);
+
+/* receives file */
+int ReceiveFile(int localPort, char *path);
+
+/* sleeps x secondes */
+void Sleep(int x);
 
 /*create a directory*/
 int mkdir(char* name);

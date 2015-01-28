@@ -189,7 +189,7 @@ ExceptionHandler (ExceptionType which)
 							 if (chars_to_copy>0) {
 								 copyStringToMachine(buf + copied_chars, machine->ReadRegister(4) + copied_chars, chars_to_copy);
 							 }
-							 delete buf;
+							 delete [] buf;
 						 }
 						 
 						 break; 
@@ -221,6 +221,7 @@ ExceptionHandler (ExceptionType which)
 					 }
 			case SC_GetTid: {
 						machine->WriteRegister(2, currentThread->id);
+						break;
 				}
 			case SC_ForkExec:{ //ForkExec
 						 DEBUG('a', "Starting a new process, initiated by user program.\n");
@@ -230,8 +231,55 @@ ExceptionHandler (ExceptionType which)
 						 break;
 					 }
 			case SC_GetPid: {
-						machine->WriteRegister(2, currentThread->space!=NULL?currentThread->space->pid:0);
+						machine->WriteRegister(2, currentThread->getPid());
 						break;
+				}
+			#ifdef NETWORK
+			case SC_Send: {
+				
+					unsigned size = (unsigned)machine->ReadRegister(5);
+					if (size > MaxStringSize) {
+						machine->WriteRegister(2, 0);
+						break;
+					}
+					
+					char *buffer = new char[size];
+					copyStringFromMachine(machine->ReadRegister(4),buffer,size);
+					unsigned sent = postOffice->SendUnfixedSize(buffer, size, machine->ReadRegister(6), machine->ReadRegister(7), machine->ReadRegister(8));
+					delete [] buffer;
+					
+					machine->WriteRegister(2, sent);
+					break;
+				}
+			case SC_Receive: {
+					unsigned size = (unsigned)machine->ReadRegister(6);
+					if (size > MaxStringSize) {
+						break;
+					}
+					char *buffer = new char[size];
+					postOffice->ReceiveUnfixedSize(machine->ReadRegister(4), buffer, size);
+					copyStringToMachine(buffer, machine->ReadRegister(5), size);
+					delete [] buffer;
+					break;
+				}
+			case SC_SendFile: {
+					char *buffer = new char[MaxStringSize];
+					copyStringFromMachine(machine->ReadRegister(4),buffer,MaxStringSize);
+					machine->WriteRegister(2, postOffice->SendFile(buffer, machine->ReadRegister(5), machine->ReadRegister(6), machine->ReadRegister(7)));
+					delete [] buffer;
+					break;
+				}
+			case SC_ReceiveFile: {
+					char *buffer = new char[MaxStringSize];
+					copyStringFromMachine(machine->ReadRegister(5),buffer,MaxStringSize);
+					machine->WriteRegister(2, postOffice->ReceiveFile(machine->ReadRegister(4), buffer));
+					delete [] buffer;
+					break;
+				}
+			#endif
+			case SC_Sleep: {
+					Delay (machine->ReadRegister(4));
+					break;
 				}
 			case SC_MkDir:{
 						char buf[MaxStringSize];

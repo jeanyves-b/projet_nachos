@@ -108,7 +108,7 @@ Network::Send(PacketHeader hdr, char* data)
 
 	ASSERT((sendBusy == FALSE) && (hdr.length > 0) 
 			&& (hdr.length <= MaxPacketSize) && (hdr.from == ident));
-	DEBUG('n', "Sending to addr %d, %d bytes... ", hdr.to, hdr.length);
+	DEBUG('n', "Sending to addr %d, %d bytes\t ", hdr.to, hdr.length);
 
 	interrupt->Schedule(NetworkSendDone, (int)this, NetworkTime, NetworkSendInt);
 
@@ -122,7 +122,7 @@ Network::Send(PacketHeader hdr, char* data)
 	*(PacketHeader *)buffer = hdr;
 	bcopy(data, buffer + sizeof(PacketHeader), hdr.length);
 	SendToSocket(sock, buffer, MaxWireSize, toName);
-	delete []buffer;
+	delete [] buffer;
 }
 
 // read a packet, if one is buffered

@@ -41,8 +41,7 @@ aller lire partie 6
 		(cela nous a permit de comprendre que le problème venait des PageTable chargé en mémoire)
 		- un pas à pas avec gdb pour voir les changements d'état de la variable
 	Ces tests ont mis en évidence une section critique dans ReadAtVirtua que l'on a corrigé.
-	
-Choix d'implementation:
+
 	Déplacement dans les répertoires
 		on a rajoute une fonction pour tester l'existence du repertoire demandé
 		cela consiste à ouvrir un fichier(OpenFile) vers le secteur contenant le repertoire
@@ -52,22 +51,36 @@ Choix d'implementation:
 		on ne peut pas supprimer un repertoire non vide (. et .. ne sont pas considére comme des repertoires "normaux")
 	
 	Créer un repertoire
-		
+		-Tester s'il n'est pas présent dans le repertoire courant
+		-lui attribuer un sector libre du bitmap
+		-l'ajouter dans la table du repertoire courant en indiquant que c'est un repertoire 
+		 grace à un variable booleen 'isDir' qu'on a ajouté aux entrées de la table de directory 	 
+		-Pour faciliter les deplacements on initialise la table de nouveau repertoire par le secteur associé au '.' du repertoire 			 courant qui sera le '..' du nouveau repertoire et '.' du nouveau repertoire est associé au secteur de son file header.
+
+	
+Choix d'implementation:
+	Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
+
+	Lors de l'initialisation du FileSystem, un repertoire system est crée, tous ce que l'on met dedans est accessible ou que l'on
+	soit dans l'arborescence.Par exemple, on peut y mettre cd tous les appels à cd sans chemin spécifié marcheront.
+
+Test:
+Puisque qu'on a pas implementer le shell, les tests sont faits par des appels systèmes(mkdir,rmdir,cd).
+Les premiers test creer/supprimer des repertoires dans le repertoires d'origine'root'. Avec l'implementation de cd nous avons réussi à céeer des sous repertoires sans problèmes. Il faut juste signaler que la création(ou la suppression) de sous repertoires nécessite que le cd et le mkdir soit appeler dans le meme fichier de test parce que lorsque la machine s'arrete on revient à la racine(repertoire root) 	 
 
 partie 2 : implantation de la table système des fichiers ouverts
 aller lire partie 7
 	nb max de fichiers ouvert : 10
 
 	choix :
-		tableau de fichier ouvert?
+		tableau de dix entrées . Les entrees contiennent le nom du fichier et le nombre de processus qui l'on ouvert
+		A chaque fois que le systemes ouvre un fichier on regarde s'il est dans la table des fichiers ouverts. Si c'est le cas
+		on l'ajoute pas dans la table sinon on teste si la limite de fichier ouvert n'est pas atteint puis on l'ajoute 
 
 	problème :
-		ne pas avoir plus de 10 fichiers ouvert
-		possibilité d'ouvrir 10 fichier
-		orienter correctement les lecture/écriture
-		vérifier la fermeture correct des fichiers
-		enregistrer les fichiers/répertoire à la bonne place sur le disque
-
+		Ne permet pas de gerer la concurence
+		un processus peut fermer un fichier encore utilisé par un autre 
+		
 partie 3 : support des accès concurents
 	modification des accès concurent
 		plusieur lecteur
@@ -102,12 +115,15 @@ partie 6 : implentation des noms de chemin (path name)
 	Explication de l'utilisation des path name
 	  par souci de simplicite, très peu d'erreur sont testé donc:
 	    - un repertoire qui n'existe pas dans le fichier produira une erreur
-	  si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
-	  dans le cas contraire, on part du répertoire courant.
 	  il faut ajouter manuellement leur utilisation dans toutes les fonctions
 	  donc il faut tester si les path name marche dans chaques fonctions
 	  (mkdir,cd,rm,...)
-	
+
+choix d'implementation
+	le repertoire courant utilisé par l'utilisateur n'est pas modifié pour que les autres threads/processus puisse s'éxécuter
+	dans le même repertoire.
+	si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
+	dans le cas contraire, on part du répertoire courant.
 				
 partie 7 : amélioration des accès concurents
 	possibilité d'avoir plusieurs lecteur mais un seul écrivain

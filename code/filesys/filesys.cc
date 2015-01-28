@@ -479,13 +479,13 @@ FileSystem::Remove(const char *name)
 int
 FileSystem::Cd(const char* name){
   int sector;
-  int error = 0;
+  int error = TRUE;
   Directory* dir =new Directory(NumDirEntries);
   OpenFile* f;
   char filename[FileNameMaxLen+1];
   f = MoveTo(name,filename);
   if (f == NULL)
-    error =  1;
+    error =  FALSE;
   else{
     dir->FetchFrom(f);
     //printf("f:%p\ncurrentDir:%p\nfilename:%s\n",f,currentDir,filename);
@@ -497,7 +497,7 @@ FileSystem::Cd(const char* name){
       sector= dir->FindDir(filename);
       if (sector == -1){
 	printf("Le repertoire est introuvable\n");
-	error = 1;
+	error = FALSE;
       }else{
 	if (currentDir != directoryFile){//le fichier ouvert sur le repertoire root doit rester ouvert
 	  delete currentDir;
@@ -640,7 +640,7 @@ FileSystem::AddFile(const char* name,OpenFile* open){
 	int i = 0;
 		
 	i = GetNextEntry(); // cherche une entrée libre
-	if(i == -1) //table de fichiers ouverts pleine 
+	if(i == -1) //table des entrées est pleine 
 		return -1;
 	
 	openFileTable[i].used = true;

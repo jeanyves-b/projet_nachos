@@ -18,6 +18,7 @@
 
 #include "copyright.h"
 
+#include "network.h"
 #include "system.h"
 #include "network.h"
 #include "post.h"
@@ -48,7 +49,7 @@ MailTest(int farAddr)
 	outMailHdr.length = strlen(data) + 1;
 
 	// Send the first message
-	postOffice->Send(outPktHdr, outMailHdr, data); 
+	postOffice->SendSafe(outPktHdr, outMailHdr, data); 
 
 	// Wait for the first message from the other machine
 	postOffice->Receive(0, &inPktHdr, &inMailHdr, buffer);
@@ -60,13 +61,77 @@ MailTest(int farAddr)
 	outPktHdr.to = inPktHdr.from;
 	outMailHdr.to = inMailHdr.from;
 	outMailHdr.length = strlen(ack) + 1;
-	postOffice->Send(outPktHdr, outMailHdr, ack); 
+	postOffice->SendSafe(outPktHdr, outMailHdr, ack); 
 
 	// Wait for the ack from the other machine to the first message we sent.
 	postOffice->Receive(1, &inPktHdr, &inMailHdr, buffer);
 	printf("Got \"%s\" from %d, box %d\n",buffer,inPktHdr.from,inMailHdr.from);
 	fflush(stdout);
 
+	// Then we're done!
+	interrupt->Halt();
+}
+
+// Teste l'envoi de gros message (900 octets) so us forme de token que la
+//	première machine (celle ayant l'id 0) enverra d'abord
+//	puis attendra, alors que les autres machines (id supérieur à 0)
+//	attendront de recevoir le message avant de l'envoyer. La dernière 
+//	machine renverra vers 0.
+// Ce test est utile pour tester un anneau.
+// option -m <machine id> -ri <taille de l'anneau>
+	void
+RingMailTest(int size)
+{
+	char *data = new char[200];
+	char *buffer = new char[200];
+	
+	unsigned i;
+	for(i = 0; i < 195; i++) {
+		data[i] = postOffice->getNetAddr() == 0? 'a' + (i%26) : 'z' - (i%26);
+	}
+	data[i++] = '#';
+	data[i++] = 'E';
+	data[i++] = 'N';
+	data[i++] = 'D';
+	data[i] = '\0';
+
+	// To: destination machine, mailbox 0
+	// From: our machine, reply to: mailbox 1
+	if (postOffice->getNetAddr()==0)
+		postOffice->SendUnfixedSize(data, 200, 1, 1, 0); 
+
+	// Wait for the message from the other machine
+	postOffice->ReceiveUnfixedSize(0, buffer, 200);
+	printf("Got \"%s\"\n",buffer);
+	fflush(stdout);
+	
+	if (postOffice->getNetAddr()!=0)
+		postOffice->SendUnfixedSize(data, 200, 1, postOffice->getNetAddr()+1==size?0:postOffice->getNetAddr() + 1, 0); 
+
+	// Then we're done!
+	interrupt->Halt();
+}
+
+// Envoie un fichier vers la machine indiquée 
+//	option -m <adresse machine> -fs <nom du fichier> <adresse distance>
+	void
+FileSendTest(const char* file, int farAddr)
+{
+	postOffice->SendFile(file, 1, farAddr, 0);
+	printf("Fichier \"%s\" envoyé à \"%d\" avec succès.\n", file, farAddr);
+	fflush(stdout);
+	// Then we're done!
+	interrupt->Halt();
+}
+
+// Reçoit un fichier et le mets à l'endroit indiqué
+//	option -m <adresse machine> -fr <nom du fichier>
+	void
+FileReceiveTest(const char* to)
+{
+	postOffice->ReceiveFile(0, to);
+	printf("Fichier reçu placé en: %s\n", to);
+	fflush(stdout);
 	// Then we're done!
 	interrupt->Halt();
 }
