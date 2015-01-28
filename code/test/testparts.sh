@@ -27,7 +27,6 @@ echo "forkerror : test les possibilités d'erreur du fork"
 
 echo "## Étape 5 ##"
 ./etape5/lancer.sh
-./etape5/tester
 
 echo "## Étape 6 ##"
 echo pas encore définie
