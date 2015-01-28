@@ -1,0 +1,40 @@
+Tests d'anneau: 
+	A l'envoi:
+		Envoie un message d'un taille determinée sous le format suivant:
+			"XX_*************...**"
+				XX = adresse de la machine
+				*******..** = suite de lettre
+	A la reception
+		Reçoit le message précédent et renvoit le message
+			"YY_########..###" 
+				YY = XX + 1 (si XX vaut 02, YY vaudra 03)
+				# = * + 1 (exemple si * vaut A, # vaudra B)
+	ring_0 fait l'envoi vers la machine 1 et attends une réception
+		représente le premier noeud de l'anneau
+		doit être lancé avec -m 0
+	ring_i attend une réception et fait l'envoi vers la machine XX+2
+		représente un noeud intermediaire de l'anneau'
+		doit être lancé avec -m i avec i > 0
+	ring_last attend une réception et fait l'envoi vers la machine 0
+		représente le dernier noeud de l'anneau'
+		doit être lancé avec -m i avec i > 0
+
+	
+	Exemple:
+		On exécute les trois machines suivantes avec une taille de 5:
+			-m 0 -x ring_0 (A)
+			-m 1 -x ring_i (B)
+			-m 2 -x ring_last (C)
+			
+		A envoi "00_AB" à B et attend une réception
+		B reçoit "00_AB" et envoi "01_BC" à C
+		C reçoit "01_BC" et envoi "02_CD" à A
+		A reçoit "02_CD" execution terminée
+		
+Tests d'envoi de fichiers
+	filesend
+		Envoi le fichier 00_text présent dans le repertoire d'execution à la machine à l'adresse 1
+	filereceive
+		Recoit le fichier 00_text et le stocke dans le repertoire d'execution sous le nom "01_received_text"
+		
+		
