@@ -21,7 +21,7 @@ void StartUserProcess(int data) {
 //	Permet de forker un processus qui lance le fichier executable donné
 //		dans s. 
 //
-//	Retourne le pid du processus en cas de succès, un code d'erreur
+//	Retourne le 0 en cas de succès, un code d'erreur
 //		négatif sinon.
 //---------------------------------------------------------------------
 int do_UserProcessCreate(char *s){
@@ -48,7 +48,7 @@ int do_UserProcessCreate(char *s){
 	addrSpace->pid = machine->IncrProcess();
 	newThread->ForkExec(StartUserProcess, 0);
 
-	return addrSpace->pid;
+	return 0;
 }
 
 void do_UserProcessExit(){

@@ -230,10 +230,6 @@ ExceptionHandler (ExceptionType which)
 						 machine->WriteRegister(2, do_UserProcessCreate(buf));
 						 break;
 					 }
-			case SC_GetPid: {
-						machine->WriteRegister(2, currentThread->getPid());
-						break;
-				}
 			#ifdef NETWORK
 			case SC_Send: {
 				

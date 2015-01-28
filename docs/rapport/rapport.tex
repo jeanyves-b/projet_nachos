@@ -20,9 +20,6 @@
 \date{Janvier 2015}
 \maketitle
 
-\section{questionnement sur le contenu/la forme du rapport}
-	 -> faire des schema, notament pour la mémoire virtuelle et les id des threads
-
 \tableofcontents
 \newpage
 \section{Introduction}
@@ -107,16 +104,10 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int ForkExec(char *path)}
 			\item{DESCRIPTION : } Crée un nouveau processus dans un environnement vide, et y exécute le fichier exécutable dont le nom est pointé par \texttt{path}.
-			\item{VALEUR DE RETOUR : } Identifiant du processus créé en cas de succès, code d'erreur négatif sinon:
+			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès, code d'erreur négatif sinon:
 				\subitem{\texttt{-1} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
 				\subitem{\texttt{-2}, \texttt{-4} : } Impossible de créer un environnement d'exécution.
 				\subitem{\texttt{-3} : } Pas assez de pages libres en mémoire pour créer l'espace d'adressage du processus.
-		\end{description}
-		\vspace{2.5mm}
-		\begin{description}
-			\item{SIGNATURE : } \texttt{int GetPid()}
-			\item{DESCRIPTION : } Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours.
-			\item{VALEUR DE RETOUR : } Identifiant du processus en cours d'exécution.
 		\end{description}
 		
 	\subsection{Système de fichiers}
@@ -263,9 +254,9 @@
 			\begin{figure}[h]
 				  \centering
 				  \includegraphics{schema_threads_id.eps}
-				  \caption{Structures de gestion de l’identifiant de thread.}
+				  \caption{Exemple d'un état des structures de gestion de l’identifiant de thread.}
 			\end{figure}
-			~\par{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de $0$ à $N-1$. $N-1$ étant le bloc ayant l'adresse de pile la plus petite, et $0$ le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsque se termine.}
+			~\par{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread + un \emph{padding} afin d'éviter les débordements. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de \texttt{0} à \texttt{N-1}. \texttt{N-1} étant le bloc ayant l'adresse de pile la plus petite, et \texttt{0} le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsque se termine.}
 			~\par{Afin de stocker les identifiants uniques et les identifiants en pile des threads, on utilise un tableau de taille N (nombre maximal de threads dans un processus), où chaque numéro de case représente un bloc en pile, et le contenu de la case représente l'identifiant unique du thread qui est alloué actuellement dans ce bloc en pile (si positif ou nul), ou que ce dernier n'est pas alloué (négatif, -1). Voir Figure 1.}
 			~\par{Afin de tester l'état d'un thread ayant pour identifiant unique \texttt{x}, on utilise les algorithmes suivants: }
 				\begin{itemize}
@@ -279,21 +270,17 @@
 					\item élément who : Thread qui attend
 					\item élément forId : identifiant du thread que who doit attendre
 				\end{itemize}
-			~\par{Dès l'appel à join du thread d'id x, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant appel la fonction Sleep. Elle l'enlevera de la liste d'attente du scheduler pour ne pas le réveiller inutilement, c'est le thread sur lequel le join a été effectué qui reveillera ce thread lors de son appel a UserThreadExit}
+			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x}, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
+			~\par{Lorsque le thread ayant pour identifiant \texttt{x} se termine, il réveillera le thread qui s'était mis en attente pour qu'il continue son exécution.}
 
 	\subsection{Mémoire virtuelle}
 		\subsubsection{Pagination mémoire}
-			le frame provider, utilise une bitmap et toutes les fonction implémentées pour celle-ci. La fonction de recherche d'un bit vide nous est utilisé pour aller chercher une page vide et son adresse. Et la fonction retournant le nombre de bit a 0 est utilisé pour avoir le nombre de page libre. La fonction libérant les pages utilise la fonction des bitmaps pour libérer le bit correspondant dans la bitmap.\\
-			nous avons pu remarqué qu'avec la façon dont nous avons implémenté notre table de page : ppn (physical page number) = vpn (virtual page number) + 128 (taille d'une page)
-				-> ceci est une faille de sécurité car elle permet de faire d'aller écrire à des endroit où l'on ne devrait pas pouvoir.
-				-> cette implémntation permet tout de même d'avoir tous les autres avantages des pages virtuelles\\
-			Lorsque quelque chose demande de la mémoire (création d'un process, enregistrement d'un fichier...), la bitmap nous donne une adresse puis l'adresse de la page est donée au programme pour qu'il puisse y inscrire ce dont il a besoin.\\
-			Lors de la fin du programme, la(les) page(s) est déclarée(s) vide et le bit correspondant est remit à 0.
-		\subsubsection{Implémentation de Fork et ForkExec}
-			{Ces deux fonctions sont inspiré de StartProcess. Elles font appel à l'appel system \texttt{do\_UserProcessCreate}. ce dernier va ouvrir l'executable, lui allouer de la mémoire (un addrspace). Il va ensuite créer le thread et y attacher la mémoire allouée. Il va enfin mettre à jour le nombre de processus créés.
-			\\ /!/ForkExec le thread créé sur StartUserProcess/!/
-			\\ La différence entre ForkExec et Fork est que ForkExec ne mets pas la mémoire à la même adresse que celle du thread en cours.
-			\\ Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
+			{Toutes les demandes de mémoire se font via le \texttt{FrameProvider} qui garde une \texttt{Bitmap} des pages vides ou non en mémoire physique.}
+			~\par{Lors de la création d'un processus, une vérification de la disponibilité d'assez de pages physiques est faite afin de s'assurer que le processus peut s'exécuter. Ensuite, un \emph{mapping} entre les pages virtuelles du processus et les pages physiques disponible est fait.}
+			~\par{Lors de la terminaison d'un processus, les pages physiques utilisées par ce dernier sont toutes libérées.}
+		\subsubsection{Multiprocessus}
+			{La création d'un processus déclenche la création d'un thread noyau avec un nouvel espace d'adressage. L'identifiant processus créé sera juste égal au nombre de processus en cours d'exécution. L'identifiant du processus n'est donc pas unique tout au long de l'exécution de la machine, mais tous les processus en cours d'exécution auront des identifiants}
+			~\par{Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
 
 	\subsection{système de fichier}
 la position dans les dossier n'est pas sauvegarder entre deux éxécutions.
