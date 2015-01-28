@@ -27,10 +27,17 @@
 
 \tableofcontents{}
 \newpage
+\section{Introduction}
+	Ce document représente notre rapport final dans le cadre du projet Nachos proposé pour les parcours M1 Informatique et MOSIG.
+	Seront présentés dans l'ordre: 
+	\begin{itemize}
+		\item{}
+	\end{itemize}
+
 \section{Fonctionnalités du noyau}
 	Voici les partie que nous avons réussi à implémenter jusque là :
 	\begin{itemize}
-		\item (aprtie 2) appel system : toutes les fonction d'écriture et de lecture ont été portées au niveau utilisateur et sont 'thread safe'. Nous avons aussi utilisé des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran. Il n'y a pas de blocage entre la lecture et l'écriture.
+		\item Appels system de lecture/écriture : toutes les fonction d'écriture et de lecture ont été portées au niveau utilisateur et sont \emph{thread safe}. Des sémaphores afin de permettre aux fonction PutString et GetString d'afficher/lire une chaine entière avant qu'une autre thread puisse écrire/lire à l'écran. Il n'y a pas de blocage entre la lecture et l'écriture.
 		\item (partie 3) threads : toutes les fonctions permettant de créer, détruire et gérer des threads on été porté au niveau utilisateur.
 		\item (partie 4) mémoire virtuel : le système de mémoire virtuel à été implémenté. La fonction ForkExec a été portée au niveau utilisateur.
 		\item (partie 5) système de fichier : Il est maintenant possible de créer/supprimer des fichiers et des dossiers et de se déplacer dans l'architecture de dossier au niveau utilisateur. L'architecture est sauvegarder d'une éxécution à la suivante.

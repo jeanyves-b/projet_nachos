@@ -234,7 +234,9 @@ ExceptionHandler (ExceptionType which)
 						machine->WriteRegister(2, currentThread->getPid());
 						break;
 				}
+			#ifdef NETWORK
 			case SC_Send: {
+				
 					unsigned size = (unsigned)machine->ReadRegister(5);
 					if (size > MaxStringSize) {
 						machine->WriteRegister(2, 0);
@@ -274,6 +276,7 @@ ExceptionHandler (ExceptionType which)
 					delete [] buffer;
 					break;
 				}
+			#endif
 			case SC_Sleep: {
 					Delay (machine->ReadRegister(4));
 					break;
