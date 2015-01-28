@@ -379,16 +379,15 @@ FileSystem::InitializeDir(int childSector,int parentSector){
 FileSystem::Open(const char *name)
 { 			
 		OpenFile *openFile = NULL;	
+		int i;
 		
 		lock->P();
-		openFile = Find(name);
-		
-		if (openFile != NULL){ // le fichier est dans la table 
-			return openFile;
-		}else{
-			if(GetNextEntry() == -1 ) // table de fichiers ouverts pleine
-				return NULL;
-		}	
+		i=FindIndex(name);
+		if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+			return NULL;
+		if(i != -1) // fichier présent dans la table
+			return openFileTable[i].file;
+				
 			
 		Directory *directory = new Directory(NumDirEntries);
 		OpenFile *f;
@@ -416,7 +415,7 @@ FileSystem::Open(const char *name)
 			openFile = new OpenFile(sector);
 			}
 		}
-		if(openFile != NULL)		
+		if(openFile != NULL && FindIndex(name) != -1 )		
 			AddFile(name,openFile); // on ajoute le fichier dans la table
 			
 		
@@ -526,10 +525,17 @@ FileSystem::RemoveDir(const char *name)
 	BitMap *freeMap;
 	FileHeader *fileHdr;
 	OpenFile* dir;
+	OpenFile* f;
 	int sector;
-
+	char filename[FileNameMaxLen+1];
+	
+	if( !strncmp(name, ".\0", FileNameMaxLen) ) // si le repertoire à supprimer est le repertoire courant
+		return false; 
+	f = MoveTo(name,filename);
+	if (f == NULL)
+	  return FALSE;
 	directory = new Directory(NumDirEntries);
-	directory->FetchFrom(currentDir);
+	directory->FetchFrom(f);
 	sector = directory->Find(name);
 	
 	if (sector == -1) {
@@ -558,7 +564,7 @@ FileSystem::RemoveDir(const char *name)
 	directory->Remove(name);
 
 	freeMap->WriteBack(freeMapFile);		// flush to disk
-	directory->WriteBack(currentDir);        // flush to disk
+	directory->WriteBack(f);        // flush to disk
 	delete fileHdr;
 	delete directory;
 	delete dir;
@@ -664,7 +670,10 @@ FileSystem::Find(const char* name){
 	return NULL;
 	
 }	
+//----------------------------------------------------------------------
 // retourne l'index du fichier dans la table
+// return -1 si fichier absent
+//----------------------------------------------------------------------
 int 
 FileSystem::FindIndex(const char *name){
 	int i=0;
