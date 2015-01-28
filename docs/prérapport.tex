@@ -98,6 +98,9 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetTid()}
 			\item{DESCRIPTION : Renvoie le l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
+			\item{VALEUR DE RETOUR : }
+				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
+				\subitem{\texttt{} : }
 		\end{description}
 	\subsection{Mémoire virtuelle}
 		\begin{description}
@@ -111,15 +114,51 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetPid()}
-			\item{DESCRIPTION : Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours. } 
+			\item{DESCRIPTION : } Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours.
+			\item{VALEUR DE RETOUR : }
+				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
+				\subitem{\texttt{} : }
 		\end{description}
 		
 	\subsection{Système de fichiers}
 		\begin{description}
-			\item{SIGNATURE : } \texttt{int mkdir(..)}
+			\item{SIGNATURE : } \texttt{int mkdir(char *name)}
+			\item{DESCRIPTION : } Crée un répertoire portant le nom *name dans le répertoire courrant.
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{0} : } L'opération a échoué. Le chemin spécifié n'existe pas, soit on ne peux plus ajouter d'élément dans le dossier courant.
+				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int rmdir(char *name)}
+			\item{DESCRIPTION : } Supprime le répertoire portant le nom *name du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{0} : } L'opération a échoué. le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
+				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int mkfile(char *name, int initialsize)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{-1} : } 
+				\subitem{\texttt{0} : } L'opération a échoué. le dossier contient déjà 8 fichiers, un fichier du même nom existe déjà, ou bien il n'y a plus de place sur le disque.
+				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int rmfile(char *name)}
+			\item{DESCRIPTION : } 
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{0} : } L'opération a échoué. Il n'y a pas de fichier de ce nom dans le répertoire courrant.
+				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+		\end{description}
+		\vspace{2.5mm}
+		\begin{description}
+			\item{SIGNATURE : } \texttt{int cd(char *name)}
+			\item{DESCRIPTION : } 
+			\item{VALEUR DE RETOUR : } 
+				\subitem{\texttt{0} : } L'opération a échoué. Le dossier de destination est introuvable ou bien il ne peux pas être ouvert.
+				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
 		\end{description}
 		\vspace{2.5mm}
 	
@@ -140,7 +179,7 @@
 		Nous avons essayer de faire suffisamment de tests pour tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant au numéro de l'étape. Tous ces dossiers sont situé dans code/test.}
 
 	\subsection{Utilisation}
-		{Pour lancer les tests, ils suffit d'exécuter le script testpart.sh situer dans le dossier code/test}
+		{Pour lancer les tests, ils suffit d'exécuter le script testpart.sh situé dans le dossier code/test}
 
 	\subsection{Tests effectués et comportements}
 		\subsubsection{Console}
@@ -178,7 +217,7 @@
 			\end{itemize}
 
 		\subsubsection{système de fichier}
-		créer à partir d'appel système!!!
+		Ces fonctions ont été testées à partir d'appel système car nous n'avons pas implémenté de shell pratique et rapide.
 			\begin{itemize}
 				\item créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
 				\item déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
@@ -234,7 +273,8 @@
 			\\ Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
 
 	\subsection{système de fichier}
-la position dans les dossier n'est pas sauvegarder entre deux éxécutions
+la position dans les dossier n'est pas sauvegarder entre deux éxécutions.
+lorsque la machine s'arrète, on reviens à la racine.
 
 	\subsection{réseaux}
 		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois. ON ne peu attendre de message d'acquitement que pour un seul message à la fois. Pour ce faire, on utikisse un deamon qui est bloqué au départ, puis lancé dès que l'on tente d'envoyer un message puis rebloqué lorsque la tentative se fini.
