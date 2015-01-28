@@ -1,0 +1,16 @@
+makeprocess
+	crée un thread
+	et un autre process
+
+forkexec
+	crée des process en boucle
+
+matmult - sort
+	test de stress du system de mémoire virtuelle
+	
+shell
+	crée des process en boucle
+	leur fait faire des getchar
+
+forkerror
+	test les possibilités d'erreur du fork
