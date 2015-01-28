@@ -158,6 +158,7 @@
 			\end{itemize}
 
 		\subsubsection{système de fichier}
+		créer à partir d'appel système!!!
 			\begin{itemize}
 				\item créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
 				\item déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
@@ -216,6 +217,11 @@
 la position dans les dossier n'est pas sauvegarder entre deux éxécutions
 
 	\subsection{réseaux}
+		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois. ON ne peu attendre de message d'acquitement que pour un seul message à la fois. Pour ce faire, on utikisse un deamon qui est bloqué au départ, puis lancé dès que l'on tente d'envoyer un message puis rebloqué lorsque la tentative se fini.
+		le type du message est précisé dans son header. Il peux s'agir soit d'un message normal (MSG), soit d'un message d'acquitement (ACK)
+		la faiblesse de ce système est que les sygnaux d'acquitement peuvent être perdu facilement. Par exemple si une machine s'éteint en ayant envoyé un ACK qui sera perdu, l'expéditeur retentera d'envoyer le message à l'infini.
+		pour transferer les fichiers, un premier paquet est envoyé contenant la taille du fichier à envoyer. puis l'envoie est fragmenté en plusieurs paquets de MaxStringSize si la taille du fichier supérieure à cette limite utilisateur. Le récépteur met tous les paquet dans un buffer dont la taille est définie par le contenu du premier paquet, pusi écrit le contenu du buffer dans un fichier.
+		
 
 \section{Organisation du travail}
 	\subsection{Fonctionement du groupe}
@@ -227,18 +233,19 @@ la position dans les dossier n'est pas sauvegarder entre deux éxécutions
 	\subsection{Planning}
 	\begin{itemize}
 		\item semaine 1 :
-			\subitem mise en place du shmilblick
+			\subitem mise en place du projet
 			\subitem nous avons commencé par faire la partie 1 chacun de notre coté,
 			\subitem puis nous avons tous travaillé ensemble sur les parties 2 puis 3.
 
 		\item semaine 2 :
-			\subitem cette semaine, nous avons commencer par finir la partie 3, puis nous avons enchainé sur la partie 4.
+			\subitem cette semaine, nous avons commencer par finir la partie 3
+			\subitem puis nous avons enchainé sur la partie 4.
 
 		\item semaine 3 :
 			\subitem Malik : partie 5
 			\subitem Amine : partie 6
 			\subitem Sebastien : débug partie 4 et 5
-			\subitem Jean-Yves : HS (petit travail de mise en page)
+			\subitem Jean-Yves : travail de mise en page et avancement du rapport
 
 		\item semaine 4 :
 			\subitem lundi/mardi : fin des partie 5 et 6 et debug du reste
@@ -246,7 +253,5 @@ la position dans les dossier n'est pas sauvegarder entre deux éxécutions
 			\subitem jeudi : entrainement pour la présentation
 			\subitem vendredi : D-day
 	\end{itemize}
-
-\section{remarque/commentaire}
 
 \end{document}
