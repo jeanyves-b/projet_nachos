@@ -47,7 +47,7 @@ class FileSysEntry {
 	public:
 		bool used ;
 		OpenFile* file;
-		char name[FileNameMaxLen + 1]; 
+		int secteur; 
 		int count;
 };
 
@@ -108,11 +108,10 @@ class FileSystem {
 		void List();			// List all the files in the file system
 
 		void Print();			// List all the files and their contents
-		int AddFile(const char* name,OpenFile* open);
+		int AddFile(int secteur,OpenFile* open);
 		void Close(const char* name);
-		OpenFile* Find(const char* name);		
 		int GetNextEntry();
-		int FindIndex(const char *name);
+		int FindIndex(int i);
 
 	private:
 		void InitializeDir(int,int);
