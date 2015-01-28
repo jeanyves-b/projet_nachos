@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title {Rapport Projet NachOS \\ M1 Informatique}
+\title {Rapport Projet NachOS \\ M1 Informatique \\ Groupe G}
 \author{Amine Ait-Mouloud, Sébastien Avril,\\ Jean-Yves Bottraud, El Hadji Malick Diagne}
 \date{Janvier 2015}
 \maketitle
@@ -295,8 +295,8 @@
 			\\ Avant de se fermer, la machine attend la fin du dernier process. Pour savoir si le processus actuel est le dernier, la machine garde un compteur du nombre de processus en cours de fonctionement, qui est incrémenté quand un process est créer et qui est décrémenté quand un process se termine. Le dernier process est donc celui qui met le compteur a $0$ en se terminant.}
 
 	\subsection{système de fichier}
-la position dans les dossier n'est pas sauvegarder entre deux éxécutions.
-lorsque la machine s'arrète, on reviens à la racine.
+la position dans les dossier n'est pas sauvegarder entre deux éxécutions.Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
+à la racine, .. représente le dossier actuel.
 
 	\subsection{réseaux}
 		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois. ON ne peu attendre de message d'acquitement que pour un seul message à la fois. Pour ce faire, on utikisse un deamon qui est bloqué au départ, puis lancé dès que l'on tente d'envoyer un message puis rebloqué lorsque la tentative se fini.

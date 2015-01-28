@@ -15,7 +15,7 @@ int main()
 
 	for (i=0 ; i<N ; i++)
 	{
-		pid = ForkExec("../halt");
+		pid = ForkExec("halt");
 		if(pid == -2 || pid == -4)
 		{
 			PutString("test 2 : OK\n");
