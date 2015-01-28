@@ -18,13 +18,15 @@ int main ()
 		do
 		{
 			buffer[i] = GetChar ();
-			PutChar(buffer[i]);
 		}
 		while (buffer[i++] != '\n');
 		buffer[--i] = '\0';
 		if (i > 0)
 		{
 			newProc = ForkExec(buffer);
+		}
+		while (GetNbP() > 1){
+			Yield();
 		}
 	}
 }

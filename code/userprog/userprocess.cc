@@ -12,7 +12,6 @@
 void StartUserProcess(int data) {
 	currentThread->space->InitRegisters ();	// set the initial register values
 	currentThread->space->RestoreState ();		// load page table register
-	synchconsole->SynchPutString("Starting process");
 	machine->Run();
 }
 

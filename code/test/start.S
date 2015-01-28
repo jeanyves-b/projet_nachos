@@ -266,6 +266,14 @@ cd:
 	syscall
 	j	$31
 	.end cd
+	
+	.globl GetNbP
+	.ent	GetNbP
+GetNbP:
+	addiu $2,$0,SC_GetNbP
+	syscall
+	j	$31
+	.end getNbP
 
 	.globl Close
 	.ent	Close

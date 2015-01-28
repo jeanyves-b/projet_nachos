@@ -188,13 +188,14 @@ class Machine {
 		//	compteur de processus lancés par la machine
 		int IncrProcess();
 		int DecrProcess();
+		unsigned GetNbP();
 
 	private:
 		bool singleStep;		// drop back into the debugger after each
 		// simulated instruction
 		int runUntilTime;		// drop back into the debugger when simulated
 		// time reaches this value
-		unsigned processCount;
+		unsigned processCount; //Number of process running
 		Lock *pCount;
 };
 

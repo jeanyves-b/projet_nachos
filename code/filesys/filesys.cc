@@ -497,8 +497,7 @@ FileSystem::Cd(const char* name){
 	    delete f;
       sector= dir->FindDir(filename);
       if (sector == -1){
-	printf("Le repertoire est introuvable\n");
-	error = 1;
+			error = 1;
       }else{
 	if (currentDir != directoryFile){//le fichier ouvert sur le repertoire root doit rester ouvert
 	  delete currentDir;
