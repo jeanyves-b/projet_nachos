@@ -102,7 +102,14 @@
     \tableofcontents[currentsection]
 \end{frame}
 
-\begin{frame}{Présentation du noyau}
+\begin{frame}{Principales fonctionnalités}
+	\begin{itemize}
+       \item Gestion d'entrées/sorties
+       \item Multithreading
+       \item Mémoire virtuelle et multi-processus
+       \item Un système de fichiers
+       \item Transmission de données et de fichiers sur le réseau
+   \end{itemize}
 \end{frame}
 
 \section{Implémentation}
@@ -116,8 +123,8 @@
 \begin{frame}{Console: Lecture/Écriture}
    \begin{itemize}
        \item Pas de choix d'implémentation particulier.
-       \item Problème de deux consoles s’exécutant en même temps.
        \item Écriture et lecture bloqués par deux sémaphores différents.
+       \item Problème de deux consoles s’exécutant en même temps.
    \end{itemize}
 \end{frame}
 
@@ -166,15 +173,15 @@
 
 \subsection{Réseau}
 
-\begin{frame}{Réseau: Modèle utilisé}
-    \begin{itemize}
-        \item METTRE SCHEMA ICI. (Amine will do)
-    \end{itemize}
+\begin{frame}{Réseau: Protocole utilisé}
+        \begin{center}
+			\includegraphics[width=10cm]{schema_reseau.pdf}
+		\end{center}
 \end{frame}
 
 \begin{frame}{Réseau: API fournie}
     \begin{itemize}
-        \item Envoi et réception de données sans limite de taille.
+        \item Envoi et réception de données fiable sans limite de taille.
         \item Envoi et réception de fichiers.
     \end{itemize}
 \end{frame}
