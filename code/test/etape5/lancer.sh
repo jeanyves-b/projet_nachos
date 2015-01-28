@@ -2,14 +2,14 @@
 
 echo "lancement des programme de test de l'étape 5"
 echo "lancement de mkdir"
-./../../build/nachos-step6 -x ./../../build/mkdir
+./../../build/nachos-step6 -x -rs ./../../build/mkdir
 echo "lancement de rmdir"
-./../../build/nachos-step6 -x ./../../build/rmdir
+./../../build/nachos-step6 -x -rs ./../../build/rmdir
 echo "lancement de mkfile"
-./../../build/nachos-step6 -x ./../../build/mkfile
+./../../build/nachos-step6 -x -rs ./../../build/mkfile
 echo "lancement de rmfile"
-./../../build/nachos-step6 -x ./../../build/rmfile
+./../../build/nachos-step6 -x -rs ./../../build/rmfile
 echo "lancement de cd"
-./../../build/nachos-step6 -x ./../../build/cd
+./../../build/nachos-step6 -x -rs ./../../build/cd
 echo "fin du lancer de l'étape 5"
 echo ""
