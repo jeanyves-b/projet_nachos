@@ -20,7 +20,7 @@
 \maketitle
 
 \section{questionnement sur le contenu/la forme du rapport}
-	\\ -> faire des schema, notament pour la mémoire virtuelle et les id des threads
+	 -> faire des schema, notament pour la mémoire virtuelle et les id des threads
 
 \tableofcontents
 \newpage
@@ -100,9 +100,7 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetTid()}
 			\item{DESCRIPTION : Renvoie le l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
-			\item{VALEUR DE RETOUR : }
-				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
-				\subitem{\texttt{} : }
+			\item{VALEUR DE RETOUR : } Identifiant du thread en cours d'exécution.
 		\end{description}
 	\subsection{Mémoire virtuelle}
 		\begin{description}
@@ -117,50 +115,48 @@
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetPid()}
 			\item{DESCRIPTION : } Renvoie le l'identifiant du processus en cours d'exécution dans le contexte de l'exécution en cours.
-			\item{VALEUR DE RETOUR : }
-				\subitem{\texttt{>0} : } L'execution s'est passé correctement et la valeur retournée correspond au Pid du process en cours.
-				\subitem{\texttt{} : }
+			\item{VALEUR DE RETOUR : } Identifiant du processus en cours d'exécution.
 		\end{description}
 		
 	\subsection{Système de fichiers}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int mkdir(char *name)}
-			\item{DESCRIPTION : } Crée un répertoire portant le nom *name dans le répertoire courrant.
+			\item{DESCRIPTION : } Crée un répertoire portant le nom \texttt{name} dans le répertoire courrant.
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Le chemin spécifié n'existe pas, soit on ne peux plus ajouter d'élément dans le dossier courant.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le chemin spécifié n'existe pas, ou le dossier en cours contient déjà 8 fichiers/dossiers.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int rmdir(char *name)}
-			\item{DESCRIPTION : } Supprime le répertoire portant le nom *name du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
+			\item{DESCRIPTION : } Supprime le répertoire portant le nom \texttt{name} du répertoire courrant. Si le dossier n'est pas vide, cette fonction retournera une erreur.
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier à supprimer est introuvable ou bien le répertoire n'est pas vide.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int mkfile(char *name, int initialsize)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. le dossier contient déjà 8 fichiers, un fichier du même nom existe déjà, ou bien il n'y a plus de place sur le disque.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier contient déjà 8 fichiers/dossiers, un fichier du même nom existe déjà, ou bien il n'y a plus de place sur le disque.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int rmfile(char *name)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Il n'y a pas de fichier de ce nom dans le répertoire courrant.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Il n'y a pas de fichier de ce nom dans le répertoire courrant.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int cd(char *name)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } L'opération a échoué. Le dossier de destination est introuvable ou bien il ne peux pas être ouvert.
-				\subitem{\texttt{1} : } L'opération s'est dérouler correctement.
+				\subitem{\texttt{0} : } Le dossier de destination est introuvable ou bien il ne peut être ouvert.
+				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
 	
