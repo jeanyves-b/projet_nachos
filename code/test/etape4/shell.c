@@ -18,7 +18,6 @@ int main ()
 		do
 		{
 			buffer[i] = GetChar ();
-			PutChar(buffer[i]);
 		}
 		while (buffer[i++] != '\n');
 		buffer[--i] = '\0';
