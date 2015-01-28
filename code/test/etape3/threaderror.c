@@ -18,9 +18,10 @@ void thread(void *n)
 
 void joinerror3(void *n)
 {
+	int id = *((int*)n);
 	if (id != 0)
 	{
-		error = UserThreadJoin(id);
+		int error = UserThreadJoin(id);
 		if (error == -3)
 			PutString("test 3 : OK\n");
 		else
@@ -33,7 +34,7 @@ int main()
 {
 	int n = 100;
 	int error = 0;
-	unsigned id = UserThreadCreate(joinerror3, NULL);
+	unsigned id = UserThreadCreate(joinerror3, 0);
 
 	if (id >= 0)
 	{
@@ -57,8 +58,8 @@ int main()
 	unsigned ids[N];
 	for(i = 0; i<N; i++)
 	{
-		id[i] = UserThreadCreate(thread, (void *)&n);
-		if (id[i] == -2 || id[i] == -1)
+		ids[i] = UserThreadCreate(thread, (void *)&n);
+		if (ids[i] == -2 || ids[i] == -1)
 		{
 			PutString("test 4 : OK\n");
 			i = N;
