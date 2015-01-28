@@ -124,7 +124,7 @@ class PostOffice {
 		// machine.  The fromBox in the MailHeader is 
 		// the return box for ack's.
 		
-		bool SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
+		bool SendFiable(PacketHeader pktHdr, MailHeader mailHdr, const char *data);
 		// Send a message and waits for its acknowledgment or MAXREEMISSIONS tries
 		//	to return. Uses Send.
 		

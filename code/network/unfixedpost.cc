@@ -53,7 +53,7 @@ PostOffice::SendUnfixedSize(char* data, unsigned size, int localPort,
 		
 		memcpy(fragment, data + bytesSent, bytesToSend);
 		mailHdr->length = bytesToSend;
-		if (this->SendSafe(*pktHdr, *mailHdr, static_cast<char const *>(fragment))) {
+		if (this->SendFiable(*pktHdr, *mailHdr, static_cast<char const *>(fragment))) {
 			bytesSent += bytesToSend;
 		}
 		bytesTriedToSend += bytesToSend;

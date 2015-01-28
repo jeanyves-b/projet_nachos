@@ -13,13 +13,14 @@
 \usepackage[french]{babel}
 \usepackage{graphicx}
 
-\begin{document}
-
-\title {Rapport Projet Nachos \\ M1 Informatique/MOSIG \\ Groupe G}
+\title {\vspace*{\fill}Rapport Projet Nachos \\ M1 Informatique/MOSIG \\ Groupe G}
 \author{Amine Ait-Mouloud, Sébastien Avril,\\ Jean-Yves Bottraud, El Hadji Malick Diagne}
-\date{Janvier 2015}
+\date{Janvier 2015\vspace*{\fill}}
+
+\begin{document}
 \maketitle
 
+\newpage
 \tableofcontents
 \newpage
 \section{Introduction}
@@ -290,41 +291,29 @@
 		~\par{Si un fichier n'est pas trouvé dans le répertoire en cours, il sera cherché dans "\texttt{/System}", à l'image d'un "\texttt{/usr/bin}" pour Linux.}
 		
 	\subsection{Réseaux}
-		Une tentative d'envoi ne se termine que lorsqu'il un message reçoit son acquittement ou qu'il ait été renvoyé (TEMPO*MAXREEMISSIONS) fois. ON ne peu attendre de message d'acquitement que pour un seul message à la fois. Pour ce faire, on utikisse un deamon qui est bloqué au départ, puis lancé dès que l'on tente d'envoyer un message puis rebloqué lorsque la tentative se fini.
-		le type du message est précisé dans son header. Il peux s'agir soit d'un message normal (MSG), soit d'un message d'acquitement (ACK)
-		la faiblesse de ce système est que les sygnaux d'acquitement peuvent être perdu facilement. Par exemple si une machine s'éteint en ayant envoyé un ACK qui sera perdu, l'expéditeur retentera d'envoyer le message à l'infini.
-		pour transferer les fichiers, un premier paquet est envoyé contenant la taille du fichier à envoyer. puis l'envoie est fragmenté en plusieurs paquets de MaxStringSize si la taille du fichier supérieure à cette limite utilisateur. Le récépteur met tous les paquet dans un buffer dont la taille est définie par le contenu du premier paquet, pusi écrit le contenu du buffer dans un fichier.
+		\subsubsection{En-tête du message}
+			{En plus des informations déjà présentes dans l'en-tête d'un paquet, le type du message (message de données (\texttt{MSG}) ou messages d'acquittement (\texttt{ACK}), ainsi qu'un identifiant séquentiel unique parmi les messages envoyés de la machine en cours, sont ajouté dans cet en-tête.}
+		\subsubsection{Démons}
+			{Le démon "\texttt{postal worker}" déjà implémenté, et dont la tâche était simplement d'attendre la réception des paquets, et de les mettre sur le bon port, se voit ajouter la tâche de renvoyer des acquittements pour les paquets de type \texttt{MSG}, ainsi que d'acquitter les paquets selon les identifiants des paquets de type \texttt{ACK} reçus.}
+			~\par{Un second démon nommé "\texttt{postal sender}" tourne aussi en fond, et s'occupe de retransmettre toutes les "\texttt{TEMPO}" secondes le paquet, un maximum de "{MAXREEMISSIONS}" fois, tant que le "\texttt{postal worker}" n'aura pas signifié qu'un acquittement a été reçu pour le message en attente d'acquittement.}
+		\subsubsection{Transmission fiable d'un seul paquet }
+			{Lors de l'envoi, un paquet \texttt{MSG} est envoyé à la bonne destination via la couche réseau physique simulée par Nachos, et on déclenche le démon "\texttt{postal sender}" qui s'occupe de retransmettre périodiquement le paquet tout en attendant un acquittement.
+		\subsubsection{Transmission sans limite de taille}
+			{Les données sont fragmentées en plusieurs paquets d'une taille maximale de \texttt{MaxMailSize} et transmises à séquentiellement à l'aide de la couche de transmission fiable.}
+			~\par{La taille maximale pour une transmission de données est la taille maximale d'une zone mémoire, c'est à dire \texttt{MaxStringSize}.}
+		\subsubsection{Transmission de fichiers}
+			{À l'aide de la couche de transmission sans limite de taille, la taille du fichier est envoyée, puis le contenu du fichier par parties de \texttt{MaxStringSize}. }
+			~\par{À la réception, dès qu'une partie du fichier source est reçue, elle est écrite par fragments de \texttt{MaxStringSize} dans le fichier destination. La taille du fichier source reçue en premier sert à initialiser la taille du fichier destination, ainsi qu'à connaître la quantité de données attendue.}
 		
 
 \section{Organisation du travail}
-	\subsection{Fonctionement du groupe}
-		Malik : code/docs\\
-		Amine : code/debug/docs\\
-		Sebastien : code/debug/docs\\
-		Jean-Yves : organisation/docs/tests\\
-
-	\subsection{Planning}
-	\begin{itemize}
-		\item semaine 1 :
-			\subitem mise en place du projet
-			\subitem nous avons commencé par faire la partie 1 chacun de notre coté,
-			\subitem puis nous avons tous travaillé ensemble sur les parties 2 puis 3.
-
-		\item semaine 2 :
-			\subitem cette semaine, nous avons commencer par finir la partie 3
-			\subitem puis nous avons enchainé sur la partie 4.
-
-		\item semaine 3 :
-			\subitem Malik : partie 5
-			\subitem Amine : partie 6
-			\subitem Sebastien : débug partie 4 et partie 5
-			\subitem Jean-Yves : travail de mise en page et avancement du rapport
-
-		\item semaine 4 :
-			\subitem Lundi/mardi : fin des partie 5 et 6 et debug du reste
-			\subitem Mercredi : fin du débug, fin du rapport (mise en page + schema + correction de contenu) et préparation du contenu de la présentation
-			\subitem Jeudi : finition des diapos et entrainement pour la présentation.
-			\subitem vendredi : D-day
-	\end{itemize}
+		{L'équipe s'est réuni presque tous les jours de semaine à l'université afin de connaître le reste de l'équipe, et adapter le planning quand il le fallait.}
+		~\par{Avant de démarrer chaque étape, chaque membre a bien lu le sujet de celle-ci. S'en suivait une discussion qui permettait de répartir les tâches pour cette partie entre les différents membres de l'équipe.}
+		~\par{L'utilisation d'un \emph{repository} git a permit l'échange rapide et intuitif de code entre les membres de l'équipe, ainsi qu'un retour à des versions plus stables lorsque cela a été nécessaire.}
+		~\par{Afin de valider une certaine implémentation, les tests unitaires devait tous réussir.}
+		~\par{Des outils tels \emph{gdb} ainsi que \emph{valgrind} ont permis une détection beaucoup plus simplifiée des bugs et des fuites mémoire.}
+		~\par{Sur les quatre premières étapes, le travail s'effectuait par des équipes de deux personnes, travaillant chacune sur une partie de l'étape en parallèle, ce qui a permis une progression assez rapide sur ces étapes.}
+		~\par{En ce qui concerne les deux dernières parties, elles ont été réalisées en parallèle en fin de semaine 3 et début de semaine 4. Durant cette période, le \emph{repository} a été divisé en deux branches pour permettre le travail en parallèle des deux équipes.}
+		~\par{Les derniers jours ont été exclusivement réservés à la fusion des deux branches du \emph{repository}, la complétion du rapport, la présentation de soutenance, et celle de la démo.}
 
 \end{document}
