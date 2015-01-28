@@ -6,11 +6,6 @@ int main()
   PutString("Enter Directory name");
   GetString(buffer,15);
   cd(buffer);
-  PutString("Enter Directory name");
-  GetString(buffer,15);
-  cd(buffer);
-  PutString("Enter Directory name");
-  GetString(buffer,15);
-  cd(buffer);
+
   return 0;
 }

@@ -26,10 +26,14 @@ echo "forkerror : test les possibilités d'erreur du fork"
 ./etape4/lancer.sh
 
 echo "## Étape 5 ##"
+echo "mkdir : crée un dossier"
+echo "rmdir : supprime un dossier"
+echo "mkfile : crée un fichier"
+echo "rmfile : supprime un fichier"
+echo "cd : crée des dossier et se déplace dedans"
 ./etape5/lancer.sh
 
 echo "## Étape 6 ##"
 echo pas encore définie
 #./etape6/lancer.sh
-#./etape6/tester
 

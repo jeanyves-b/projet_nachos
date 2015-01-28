@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
+\usepackage{graphicx}
 
 \begin{document}
 
@@ -160,7 +161,7 @@
 		\end{description}
 		\vspace{2.5mm}
 	
-	\subsection{Réseaux}
+	\subsection{Réseau}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{unsigned Send(char *tosend, unsigned size, int localPort, int to, int remotePort)}
 			\item{DESCRIPTION : Envoie des données de taille \texttt{size} présentes dans le buffer pointé par \texttt{tosend} à la machine présente en adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements seront reçus sur le port local \texttt{localPort}.} 
@@ -191,11 +192,10 @@
 		\end{description}
 		\vspace{2.5mm}
 
-\section{Test}
+\section{Tests}
 	\subsection{Organisation}
-		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. 
-		Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion del a mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}. \\
-		Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart des cas, ainsi que des programmes de tests developpés par nos soins (\texttt{.cc}) afin de tester les sorties des tests unitaires.}
+		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion del a mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}.}
+		~\par{Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart des cas, ainsi que des programmes de tests developpés par nos soins (\texttt{.cc}) afin de tester les sorties des tests unitaires.}
 
 	\subsection{Utilisation}
 		{Pour lancer les tests, ils suffit d'exécuter le script \texttt{testpart.sh} situé dans le dossier \texttt{code/test}.}
@@ -203,85 +203,83 @@
 	\subsection{Tests effectués et comportements}
 		\subsubsection{Console}
 			\begin{itemize}
-				\item Écriture d'une chaine de 1 caractère : Écrit le caractère correctement sur la console.
+				\item Écriture d'une chaine de 1 caractère: Écrit le caractère correctement sur la console.
 				\item Utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
-				\item Ecriture/lecture parallèle			validé : possibilité de faire des caractère entrelacé avec putchar ou bien des string continue avec putstring
-				\item Trop de caractères					validé : sépare la chaine écrire en plusieurs chaines de taille équivalante à taillemax (situer dans le fichier .cc)
-				\item Pas de caractère 						validé : si rien n'est entrée, rien ne se passe et si on entre juste le caractère retour chariot, il est traité comme n'importe quelle lettre
-				\item Arrêt avec EOF: Arrête la console, n'est pas confondu avec \texttt{ÿ}.
+				\item Ecriture/lecture parallèle: Les chaînes de caractères sont écrites/lues d'un coup quelque soit l'ordonnancement, les lectures/écritures de caractères seuls peuvent être entralacés selon l'ordonancement.
+				\item Dépassement de la taille maximale d'une chaine: Chaine tronquée.
+				\item Arrêt avec \texttt{Ctrl+D} en début de ligne: Arrête la console, n'est pas confondu avec \texttt{ÿ}.
 			\end{itemize}
 
-		\subsubsection{Thread}
+		\subsubsection{Multithreading}
 			\begin{itemize}
 				\item Création d'un thread :
-					\subitem Création courante 				validé : le thread se crée
-					\subitem Possibilités d'échecs	validé : retourne la bonne erreur
-					\subitem Très grand nombre de threads 				validé : crée le threads normalement jusqu'au moment ou l'on dépasse le nombre maximum de threads. A partir ce cette limite, la fonction retourne une erreur.
-				\item Arreter un thread avec Exit :
-					\subitem Vérifier les fuites mémoires		validé : toutes les structures allouées sont bien supprimées
-					\subitem Plus dans l'ordonanceur			validé : l'ordonnanceur n'essaie plus de donner la main à la thread
-					\subitem Etat du parent					validé : le parent n'a plus le thread courant dans sa liste et continue de touner correctement
-					\subitem Etat des enfants					validé : on attend la fin des enfants avant de supprimer la thread courante. Ce choix est détaillé dans la partie "choix d'implémentation".
-				\item Lancement d'une fonction		validé : testé avec les fonctions disponible, elles sont effectuées correcetement
-				\item Retours d'erreurs				validé : quand les mauvais argument sont passé à la fonction ou bien qu'il n'y a plus assez de place pour créer un thread, la fonction renvoie bien le bon code d'erreur.
+					\subitem Création d'un thread: OK dans les bonnes conditions et retourne le bon code d'erreur dans les mauvaises.
+					\subitem Création d'un très grand nombre de threads: Crée le threads normalement jusqu'au moment où ce n'est plus possible (pile pleine, ou nombre maximal de threads atteint). Gestion d'erreur fonctionnelle.
+				\item Terminaison d'un thread:
+					\subitem Vérification des fuites mémoires: Toutes les structures allouées sont bien supprimées
+					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés.
+				\item Lancement d'une fonction: Testé avec les fonctions disponibles, elles se sont déroulées correctement.
 			\end{itemize}
 
 		\subsubsection{Mémoire virtuelle}
 			\begin{itemize}
-				\item Créer un processus :					validé : le processus est créé correctement et la fonction passée en paramètre démarre normalement.
-				\item Stress de la mémoire :				validé : les fichiers matmult et sort s'éxécutent sans problèmes.
-				\item Allocation et libération de pages : 	validé : les pages sont alloué et libérée correctement. les pages ne sont pas donnée alors qu'elles sont utilisé et ne sont libérée qu'à la fin des processus.
-				\item Caractères entrelacé avec processus : ???
-				\item Retours d'erreurs : 					validé : les bonnes valeur sont retourné en cas de mauvais arguments ou de manque de place.
+				\item Création d'un processus: OK dans les bonnes conditions et retourne le bon code d'erreur dans les mauvaises.
+					\subitem L'exécutable fourni est bien exécuté.
+				\item Stress de la mémoire
+					\subitem Les fichiers \texttt{matmult} et \texttt{sort} s'exécutent sans problèmes.
+					\subitem Création d'un grand nombre de processus en même temps se passe bien dans les limites de la mémoire disponible. Au-delà, création de processus rejetée.
+				\item Allocation et libération de pages
+				
 			\end{itemize}
 
-		\subsubsection{système de fichier}
-		Ces fonctions ont été testées à partir d'appel système car nous n'avons pas implémenté de shell pratique et rapide.
+		\subsubsection{Système de fichiers}
 			\begin{itemize}
-				\item Créer un dossier/fichier :				validé : Le dossier/fichier est créer et est accessible.
-				\item Déplacement vers un dossier parent/fils :	validé : On peux se déplacer à volonter dans les dossiers.
-				\item Suppression dossier/fichier :				validé : Le dossier/fichier est supprimé correctement. Les pages sont libéré et il ne réapparait pas lors de la prochaine lecture du disque.
-				\item Enregistrement de la structure :			validé : La structure s'enregistre correctement et est rechargée sans erreur notable au début de l'éxécution de la machine.
+				\item Créer un dossier/fichier: Le dossier/fichier est créer et est accessible.
+				\item Déplacement vers un dossier parent/fils: On peut se déplacer à volonté dans les dossiers.
+				\item Suppression dossier/fichier: Le dossier/fichier est supprimé correctement. Il ne réapparaît pas lors de la prochaine lecture du disque.
+				\item Persistance du système de fichiers: Le système de fichiers persiste entre deux exécutions de la machine.
 			\end{itemize}
 
 		\subsubsection{Réseau}
 			\begin{itemize}
-				\item Test en anneau. On crée plusieurs machines qui vont recevoir le fichier, le modifier de façon prédictible, puis le renvoyer à la prochaine machine. Validé : le fichier reçu est correcte et il est renvoyé à la bonne machine.
-				\item Envoie/réception de fichier : fichier envoyé et reçu puis enregistré correctement.
+				\item Test en anneau: La machine 1 envoie un message à la machine 2 qui l'envoi à la machine 3 .... qui l'envoie à la machine n, qui renvoi le message à la machine 1.
+					\subitem Les données sont bien reçues et bien renvoyées, même avec une perte de données significative.
+				\item Envoie/réception de fichier: Fichier envoyé et reçu puis enregistré correctement.
 			\end{itemize}
 
 \section{Choix d'implémentation}
 	\subsection{Console}
-	    {Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, nous avons due créer 2 appel systèmes et quelques fonctions utilisateurs. Les appels système appelent les descriptions des fonctions utilisateurs. Cette section étant très guidée dans le sujet, nous n'avons eu aucun choix d'implémentation particulier.
-	    Nous avons sécurisé des lecture/écriture pour le multithreading. les fonctions de lectures (GetInt, GetChar et GetString) ne peuvent plus s'intérompre les une les autres et les fonctions d'écritures (PutChar, PutInt et PutString) ne s'intérompent plus les unes les autre non plus. Mais les fonctions d'écriture peuvent intérompre les fonction de lecture et inversement.}
+	  	{Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, les appels système de lecture et d'écriture ont été créés. Cette section étant très guidée dans le sujet, aucun choix d'implémentation particulier ne s'est posé.}
+	     ~\par{La lecture et l'écriture ont été sécurisées avec un sémaphore chacun. Les fonctions de lectures (\texttt{GetInt}, \texttt{GetChar} et \texttt{GetString}) ne peuvent pas interrompre les une les autres et les fonctions d'écritures (\texttt{PutChar}, \texttt{PutInt} et \texttt{PutString}) ne interrompent plus les unes les autres non plus. Mais les fonctions d'écriture peuvent interrompre les fonction de lecture et inversement.}
+		~\par{\texttt{GetString} et \texttt{PutString} appelant respectivement \texttt{GetChar} et \texttt{PutChar}, des version internes \emph{sans sémaphore} de ces deux dernières routines ont été implémentées pouvoir les appeler depuis les deux premières sans récursion de sémaphores.}
 
 	\subsection{Threads}
-		\subsubsection{La structure thread}
-			\begin{itemize}
-				\item id : son id, permetant d'acceder à son adresse mémoire
-				\item liste de tout ses fils : utilisé pour faire une join sur les fils au moment de UserThreadExit
-			\end{itemize}
-		\subsubsection{Gestion des identifiants de threads et de la pile}
+		\subsubsection{Gestion des identifiants de threads}
 			{Deux identifiants:}
 			\begin{itemize}
-				\item{un identifiant unique: unique parmi tous les threads du processus.}
-				\item{un identifiant en pile : pour les processus actifs.}
+				\item{un identifiant séquentiel unique parmi tous les threads du processus.}
+				\item{un identifiant en pile qui représente l'emplacement en pile réservé au thread.}
 			\end{itemize}
-			{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de 0 à N: N étant le bloc ayant l'adresse de pile la plus petite, et 0 le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsque se termine. \\
-			Afin de stocker les identifiants uniques et les identifiants en pile des threads, on utilise un tableau de taille N (nombre maximal de threads dans un processus), où chaque numéro de case représente un bloc en pile, et le contenu de la case représente l'identifiant unique du thread qui est alloué actuellement dans ce bloc en pile (si positif ou nul), ou que ce dernier n'est pas alloué (négatif, -1).\\
-			Afin de tester l'état d'un thread ayant pour identifiant unique \texttt{x}, on utilise les algorithmes suivants: }
+			\begin{figure}[h]
+				  \centering
+				  \includegraphics{schema_threads_id.eps}
+				  \caption{Structures de gestion de l’identifiant de thread.}
+			\end{figure}
+			~\par{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de $0$ à $N-1$. $N-1$ étant le bloc ayant l'adresse de pile la plus petite, et $0$ le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsque se termine.}
+			~\par{Afin de stocker les identifiants uniques et les identifiants en pile des threads, on utilise un tableau de taille N (nombre maximal de threads dans un processus), où chaque numéro de case représente un bloc en pile, et le contenu de la case représente l'identifiant unique du thread qui est alloué actuellement dans ce bloc en pile (si positif ou nul), ou que ce dernier n'est pas alloué (négatif, -1). Voir Figure 1.}
+			~\par{Afin de tester l'état d'un thread ayant pour identifiant unique \texttt{x}, on utilise les algorithmes suivants: }
 				\begin{itemize}
 					\item{\texttt{x} est supérieur au nombre de threads créés: } Le thread n'a jamais été créé ;
 					\item{\texttt{x} est inférieur au nombre de threads créés, mais n'est pas présent dans le tableau: } Le thread a été créé, mais s'est terminé ;
 					\item{\texttt{x} est inférieur au nombre de threads créés, et est présent dans le tableau à la case \texttt{i} : Le thread a été créé, et est en cours d'exécution, et le bloc en pile numéro \texttt{i} lui est alloué.}
 				\end{itemize}
-		\subsubsection{Implementation du join}
-			structures : vecteur séquentiel contenant la liste des threads en attente et l'identifiant des threads qu'ils attend
+		\subsubsection{Implémentation du join}
+			Un vecteur contenant la liste des threads en attente et l'identifiant des threads qui les attends.
 				\begin{itemize}
-					\item élement who : Thread qui attend
-					\item élement forId : identifiant du thread que who doit attendre
+					\item élément who : Thread qui attend
+					\item élément forId : identifiant du thread que who doit attendre
 				\end{itemize}
-			dès l'appel à join du thread d'id x, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant appel la fonction Sleep. Elle l'enlevera de la liste d'attente du scheduler pour ne pas le réveiller inutilement, c'est le thread sur lequel le join a été effectué qui reveillera ce thread lors de son appel a UserThreadExit
+			~\par{Dès l'appel à join du thread d'id x, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant appel la fonction Sleep. Elle l'enlevera de la liste d'attente du scheduler pour ne pas le réveiller inutilement, c'est le thread sur lequel le join a été effectué qui reveillera ce thread lors de son appel a UserThreadExit}
 
 	\subsection{Mémoire virtuelle}
 		\subsubsection{Pagination mémoire}

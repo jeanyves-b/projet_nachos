@@ -239,4 +239,9 @@ int Machine::DecrProcess(){
 	return id;
 }
 
+unsigned
+Machine::GetNbP(){
+	return processCount;
+}
+
 
