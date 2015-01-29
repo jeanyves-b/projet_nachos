@@ -135,13 +135,12 @@
    \end{itemize}
 \end{frame}
 
-\begin{frame}{Multithreading: Attente et terminaison}
+\begin{frame}{Multithreading: Attente}
    \begin{itemize}
        \item Liste de threads en attente et qui ils attendent.
 		\item Thread qui attend mis en pause et relancé à la fin du thread qu'il attend.
        \item Attendre si thread en cours d'exécution, retour direct sinon.
        \item Utilisation d'un compteur de thread créés et du tableau des identifiants pour connaître l'état d'exécution d'un thread.
-       \item Terminaison automatique des threads ayant terminé l'exécution de leur fonction.
    \end{itemize}
 \end{frame}
 
@@ -156,7 +155,7 @@
  		\end{itemize}
         \item Arrêt automatique
         \begin{itemize}
- 			\item Attente des threads fils
+ 			\item Attente des threads appartenant à ce processus
  			\item Vérification du nombre de processus
  		\end{itemize}
         \item Relation entre processus
@@ -178,22 +177,49 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Gestion de la mémoire: Autre fonctionnalités et problème}
+\begin{frame}{Gestion de la mémoire: What else?}
     \begin{itemize}
         \item Shell
         \begin{itemize}
  			\item Attente active
  		\end{itemize}
-        \item L'ordonnancement
-        \item 
+        \item Les problèmes
+        \begin{itemize}
+ 		\item L'ordonnancement
+ 		\item bzero
+  		\end{itemize}
+        \item Les tests
+        \begin{itemize}
+ 		\item Création de plusieurs processus simple
+ 		\item Création de plusieurs processus compliqué
+ 		\item Création d'un processus avec un executable erroné
+ 		\item Vérification des arrêts automatiques
+  		\end{itemize}
     \end{itemize}
 \end{frame}
 
 \subsection{Système de fichiers}
-\begin{frame}{Système de fichiers}
+
+\begin{frame}{Système de fichiers: Mise en place }
     \begin{itemize}
 		\item 8 fichiers/dossiers maximum par dossier (+ "\texttt{.}" et "\texttt{..}").
+		\item Mise en place d'une hiérarchie de répertoire.
+		\item Prise en compte du pathname.
 		\item Dossier "\texttt{/System}" contient tous les exécutables (à l'image de \texttt{/usr/bin} pour Linux).
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Tests }
+    \begin{itemize}
+		\item Appel système pour créer, supprimer et se déplacer entre les répertoires.
+		\item Lancer des exécutables dans le système de Nachos.
+		
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Problèmes et extensions }
+    \begin{itemize}
+		\item Problème de création de processus. 
+		\item Table de fichiers ouverts.
+		
     \end{itemize}
 \end{frame}
 
@@ -211,6 +237,15 @@
         \item L'utilisateur n'a pas à configurer des connexions entre deux machines.
         \item Envois synchrones avec attente d'acquittement pour chaque message.
         \item Retransmission périodique du message s'il n'est pas acquitté.
+    \end{itemize}
+\end{frame}
+
+\subsection{Améliorations possibles}
+\begin{frame}{Améliorations possibles}
+    \begin{itemize}
+        \item Utilisation d'un cache TLB.
+        \item Table des fichiers ouverts.
+        \item Migration de processus via le réseau.
     \end{itemize}
 \end{frame}
 

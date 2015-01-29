@@ -24,7 +24,6 @@ void thread2(void *n){
 
 int main()
 {
-  
  	int id = UserThreadCreate(thread1, 0);
  	int id2 = UserThreadCreate(thread2, 0);
  	//int error;
