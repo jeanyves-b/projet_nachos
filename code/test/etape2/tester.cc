@@ -9,13 +9,13 @@
 //----------------------------------------------------------------------
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
 
 #define NBTEST 4
 
-int TestString(char * entree, char* sortie)
+int TestString(string entree, string sortie)
 {
-	if (!strcmp(entree,sortie))
+	if (entree.compare(sortie))
 	{
 		printf("..... OK\n");
 		return 0;
@@ -32,8 +32,10 @@ int main()
 	//intitialisation des constante de tests
 	int testnb = 0;
 	int nbfautes = 0;
-	char fileout[] = "out0.txt\0";
-	char fileexpe[] = "expe0.txt\0";
+	char fileout[10] = "out0.txt\0";
+	char fileexpe[10] = "expe0.txt\0";
+	char *argv[];
+	char *envp[] = {NULL};
 
 	for (int i=0; i<NBTEST; i++)
 	{
