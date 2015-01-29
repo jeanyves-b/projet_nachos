@@ -17,7 +17,7 @@ int main(){
 	UserThreadCreate(thread, (void*)(&n3));
 	UserThreadCreate(test, (void*)(&n3)); 
 
-	PutString("On quitte main");
+	PutString("On quitte main.");
 	return 0;
 }
 
@@ -38,11 +38,9 @@ void thread(void *n){
 	}
 
 	PutChar('\n');
-	PutString("On quitte un thread \"fils\"");
-	UserThreadExit();
+	PutString("On atteint la fin d'un thread lancé.");
 }
 
 void test(void *n){
-	PutString("thread test");
-	UserThreadExit();
+	PutString("On est dans le thread test lancé et on a fini.");
 }

@@ -6,18 +6,18 @@ echo -e "	Lancement de test en \033[33;1manneau de taille 8\033[0m"
 ./../../build/nachos-final -cp ./../../build/etape6/ring_0 r0 > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/ring_i ri > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/ring_last rn > /dev/null
-gnome-terminal --title="Membre 1 de l'anneau" -e "./../../build/nachos-final -m 1 -rs 7 -x ri -d z"
-gnome-terminal --title="Membre 2 de l'anneau" -e "./../../build/nachos-final -m 2 -rs 7 -x ri -d z"
-gnome-terminal --title="Membre 3 de l'anneau" -e "./../../build/nachos-final -m 3 -rs 7 -x ri -d z"
-gnome-terminal --title="Membre 4 de l'anneau" -e "./../../build/nachos-final -m 4 -rs 7 -x ri -d z"
-gnome-terminal --title="Membre 5 de l'anneau" -e "./../../build/nachos-final -m 5 -rs 7 -x ri -d z"
-gnome-terminal --title="Membre 6 de l'anneau" -e "./../../build/nachos-final -m 6 -rs 7 -x ri -d z"
 gnome-terminal --title="Membre 7 de l'anneau (dernier)" -e "./../../build/nachos-final -m 7 -rs 7 -x rn -d z"
+gnome-terminal --title="Membre 6 de l'anneau" -e "./../../build/nachos-final -m 6 -rs 7 -x ri -d z"
+gnome-terminal --title="Membre 5 de l'anneau" -e "./../../build/nachos-final -m 5 -rs 7 -x ri -d z"
+gnome-terminal --title="Membre 4 de l'anneau" -e "./../../build/nachos-final -m 4 -rs 7 -x ri -d z"
+gnome-terminal --title="Membre 3 de l'anneau" -e "./../../build/nachos-final -m 3 -rs 7 -x ri -d z"
+gnome-terminal --title="Membre 2 de l'anneau" -e "./../../build/nachos-final -m 2 -rs 7 -x ri -d z"
+gnome-terminal --title="Membre 1 de l'anneau" -e "./../../build/nachos-final -m 1 -rs 7 -x ri -d z"
 ./../../build/nachos-final -m 0 -rs 7 -x r0  -d z
 ./../../build/nachos-final -r r0 > /dev/null
 ./../../build/nachos-final -r ri > /dev/null
 ./../../build/nachos-final -r rn > /dev/null
-echo -e "Appuyer sur [Entrée] pour passer au test \033[33;1mad'envoi de fichier de 3750 octets\033[0m"; read;
+echo -e "Appuyer sur [Entrée] pour passer au test \033[33;1md'envoi de fichier de 3750 octets\033[0m"; read;
 ./../../build/nachos-final -cp ./../../build/etape6/filesend fileS > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/filereceive fileR > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/initnetwork initN > /dev/null

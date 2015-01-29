@@ -40,21 +40,24 @@ cd etape4
 ./lancer.sh
 cd ..
 echo
-echo -e "Appuyer sur [Enter] pour passer à l'\033[31;1métape 5\033[0m.."; read;
-
-echo -e "\033[31;1m## Étape 5 ##\033[0m"
-echo "mkdir : crée un dossier"
-echo "rmdir : supprime un dossier"
-echo "mkfile : crée un fichier"
-echo "rmfile : supprime un fichier"
-echo "cd : crée des dossier et se déplace dedans"
-echo
-echo -e "Appuyer sur [Enter] pour lancer les tests de l'\033[31;1métape 5\033[0m.."; read;
-cd etape5
-./lancer.sh
-cd ..
-echo
 echo -e "Appuyer sur [Enter] pour passer à l'\033[31;1métape 6\033[0m.."; read;
+clear
+read
+read
+
+#echo -e "\033[31;1m## Étape 5 ##\033[0m"
+#echo "mkdir : crée un dossier"
+#echo "rmdir : supprime un dossier"
+#echo "mkfile : crée un fichier"
+#echo "rmfile : supprime un fichier"
+#echo "cd : crée des dossier et se déplace dedans"
+#echo
+#echo -e "Appuyer sur [Enter] pour lancer les tests de l'\033[31;1métape 5\033[0m.."; read;
+#cd etape5
+#./lancer.sh
+#cd ..
+#echo
+#echo -e "Appuyer sur [Enter] pour passer à l'\033[31;1métape 6\033[0m.."; read;
 
 echo -e "\033[31;1m## Étape 6 ##\033[0m"
 cd etape6
