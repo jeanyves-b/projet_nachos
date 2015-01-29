@@ -49,7 +49,7 @@ MailTest(int farAddr)
 	outMailHdr.length = strlen(data) + 1;
 
 	// Send the first message
-	postOffice->SendSafe(outPktHdr, outMailHdr, data); 
+	postOffice->SendFiable(outPktHdr, outMailHdr, data); 
 
 	// Wait for the first message from the other machine
 	postOffice->Receive(0, &inPktHdr, &inMailHdr, buffer);
@@ -61,7 +61,7 @@ MailTest(int farAddr)
 	outPktHdr.to = inPktHdr.from;
 	outMailHdr.to = inMailHdr.from;
 	outMailHdr.length = strlen(ack) + 1;
-	postOffice->SendSafe(outPktHdr, outMailHdr, ack); 
+	postOffice->SendFiable(outPktHdr, outMailHdr, ack); 
 
 	// Wait for the ack from the other machine to the first message we sent.
 	postOffice->Receive(1, &inPktHdr, &inMailHdr, buffer);
