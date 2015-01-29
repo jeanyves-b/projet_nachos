@@ -168,6 +168,10 @@ FileSystem::~FileSystem(){
   delete directoryFile;
   delete sem;
   delete lock;
+  for(int i=0;i<maxOpenFiles;i++)
+		if(openFileTable[i].file != NULL)
+			delete openFileTable[i].file;
+	
   delete openFileTable;
 
 }
