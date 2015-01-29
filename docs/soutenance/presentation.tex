@@ -135,12 +135,13 @@
    \end{itemize}
 \end{frame}
 
-\begin{frame}{Multithreading: Attente}
+\begin{frame}{Multithreading: Attente et terminaison}
    \begin{itemize}
        \item Liste de threads en attente et qui ils attendent.
 		\item Thread qui attend mis en pause et relancé à la fin du thread qu'il attend.
        \item Attendre si thread en cours d'exécution, retour direct sinon.
        \item Utilisation d'un compteur de thread créés et du tableau des identifiants pour connaître l'état d'exécution d'un thread.
+       \item Terminaison automatique des threads ayant terminé l'exécution de leur fonction.
    \end{itemize}
 \end{frame}
 
@@ -212,15 +213,6 @@
         \item Retransmission périodique du message s'il n'est pas acquitté.
     \end{itemize}
     
-\end{frame}
-
-\subsection{Améliorations possibles}
-\begin{frame}{Améliorations possibles}
-    \begin{itemize}
-        \item Utilisation d'un cache TLB.
-        \item Table des fichiers ouverts.
-        \item Migration de processus via le réseau.
-    \end{itemize}
 \end{frame}
 
 \section{Gestion du projet}
