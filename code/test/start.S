@@ -290,6 +290,14 @@ GetNbP:
 	syscall
 	j	$31
 	.end getNbP
+	
+	.globl ls
+	.ent	ls
+ls:
+	addiu $2,$0,SC_LS
+	syscall
+	j	$31
+	.end ls
 
 	.globl Close
 	.ent	Close

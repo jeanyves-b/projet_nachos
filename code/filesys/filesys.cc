@@ -379,7 +379,7 @@ FileSystem::InitializeDir(int childSector,int parentSector){
 FileSystem::Open(const char *name)
 { 			
 		OpenFile *openFile = NULL;	
-		int i;
+		//int i;
 		
 		lock->P();
 					
@@ -396,12 +396,12 @@ FileSystem::Open(const char *name)
 		directory->FetchFrom(f);
 		sector = directory->Find(filename); 
 		if (sector >= 0) {		
-			i=FindIndex(sector);
-			if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
-				return NULL;
-			if(i != -1) // fichier présent dans la table
-				openFile = openFileTable[i].file;
-			else
+			//i=FindIndex(sector);
+			//if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+				//return NULL;
+			//if(i != -1) // fichier présent dans la table
+				//openFile = openFileTable[i].file;
+			//else
 				openFile = new OpenFile(sector);	// name was found in directory 
 			
 		}else{//si le fichier n'est pas trouvé on cherche dans le repertoire 'system'
@@ -412,12 +412,12 @@ FileSystem::Open(const char *name)
 			directory->FetchFrom(f);
 			sector = directory->Find(filename);
 			if (sector >= 0){ 	
-				i=FindIndex(sector);
-				if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
-					return NULL;
-				if(i != -1) // fichier présent dans la table
-					openFile =  openFileTable[i].file;
-				else
+				//i=FindIndex(sector);
+				//if(i == -1 && GetNextEntry() == -1 ) // table de fichiers ouverts pleine
+					//return NULL;
+				//if(i != -1) // fichier présent dans la table
+					//openFile =  openFileTable[i].file;
+				//else
 					openFile = new OpenFile(sector);	// name was found in directory 
 				
 			}
@@ -453,13 +453,18 @@ FileSystem::Open(const char *name)
 FileSystem::Remove(const char *name)
 { 
 	Directory *directory;
+	OpenFile* f;
 	BitMap *freeMap;
 	FileHeader *fileHdr;
 	int sector;
+	char filename[FileNameMaxLen+1];
 	
+	f = MoveTo(name,filename);
+	if (f == NULL)
+		return FALSE;
 	directory = new Directory(NumDirEntries);
-	directory->FetchFrom(currentDir);
-	sector = directory->Find(name);
+	directory->FetchFrom(f);
+	sector = directory->Find(filename);
 	if (sector == -1) {
 		delete directory;
 		return FALSE;			 // file not found 
@@ -544,7 +549,13 @@ FileSystem::RemoveDir(const char *name)
 	  return FALSE;
 	directory = new Directory(NumDirEntries);
 	directory->FetchFrom(f);
-	sector = directory->Find(name);
+	if (filename[0] != '\0')
+		sector = directory->FindDir(filename);
+	else{
+		delete directory;
+		return FALSE;
+	}
+		
 	
 	if (sector == -1) {
 		delete directory;
@@ -599,6 +610,36 @@ FileSystem::List()
 	delete directory;
 }
 
+void
+FileSystem::ListP(const char* name){
+	OpenFile* f;
+	OpenFile* dir;
+	Directory *directory;
+	int sector;
+	char filename[FileNameMaxLen+1];
+	f = MoveTo(name,filename);
+	if (f != NULL){
+		directory = new Directory(NumDirEntries);
+		directory->FetchFrom(f);
+		if( filename[0] != '\0'){
+			sector = directory->FindDir(filename);
+			if (sector != -1){
+				dir = new OpenFile(sector);
+				directory->FetchFrom(dir);
+				directory->List();
+				delete dir;
+			}else{
+				printf("le chemin est incorrecte\n");
+			}
+		}else{
+			directory->List();
+		}
+		delete directory;
+	}else{
+		printf("Le repertoire spécifié est introuvable\n");
+	}
+}
+		
 //----------------------------------------------------------------------
 // FileSystem::Print
 // 	Print everything about the file system:

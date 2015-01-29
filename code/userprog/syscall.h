@@ -51,6 +51,7 @@
 #define SC_SendFile		30
 #define SC_ReceiveFile	31
 #define SC_GetNbP		32
+#define SC_LS			33
 
 #ifdef IN_USER_MODE
 
@@ -195,6 +196,8 @@ int rmfile(char* name);
 
 /*move to a directory*/
 void cd (char* name);
+
+void ls (char* name);
 
 unsigned GetNbP();
 
