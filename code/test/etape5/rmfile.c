@@ -4,6 +4,7 @@ int main()
 {
   
   char buffer[15];
+  PutString("Enter the file to delete:");
   GetString(buffer,15);
   if (rmfile(buffer)){
     PutString("file delete");
