@@ -40,7 +40,7 @@
 #define SC_UserThreadJ	19 //UserThreadJoin
 #define SC_GetTid		20
 #define SC_ForkExec		21 
-#define SC_GetPid		22
+#define SC_Sleep		22
 #define SC_MkDir		23
 #define SC_RmDir		24
 #define SC_Cd			25
@@ -50,8 +50,7 @@
 #define SC_Receive		29
 #define SC_SendFile		30
 #define SC_ReceiveFile	31
-#define SC_Sleep		32
-#define SC_GetNbP		33
+#define SC_GetNbP		32
 
 #ifdef IN_USER_MODE
 

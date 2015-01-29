@@ -477,7 +477,7 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 
 
 //----------------------------------------------------------------------
-// PostOffice::SendSafe
+// PostOffice::SendFiable
 // 	Mets l'entête du mail devant les données, et transmets la demande
 //	  d'envoi au réseau, et attends l'acquittement du message en
 //	  question avant de retourner. 
@@ -499,7 +499,7 @@ PostOffice::Send(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 //----------------------------------------------------------------------
 
 	bool
-PostOffice::SendSafe(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
+PostOffice::SendFiable(PacketHeader pktHdr, MailHeader mailHdr, const char* data)
 {
 	
 	if (DebugIsEnabled('n')) {

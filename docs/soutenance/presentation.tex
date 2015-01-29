@@ -93,83 +93,117 @@
 \begin{document}
 \frame{\titlepage} 
 
-\begin{frame}
+\begin{frame}{Plan}
     \tableofcontents
 \end{frame}
 
+\section{Introduction}
+\begin{frame}{Principales fonctionnalités}
+	\begin{itemize}
+       \item Gestion d'entrées/sorties
+       \item Multithreading
+       \item Mémoire virtuelle et multi-processus
+       \item Système de fichiers
+       \item Transmission de données et de fichiers sur le réseau
+   \end{itemize}
+\end{frame}
+
+\section{Implémentation}
 \begin{frame}{Plan}
     \tableofcontents[currentsection]
 \end{frame}
 
-\section{introduction}
-\begin{frame}{Présentation du noyau}
-	\begin{itemize}
-		\item entrée/sortie
-		\item threads
-		\item virtual mémory
-		\item file system
-		\item réseau
-	\end{itemize}
+
+\subsection{Console}
+
+\begin{frame}{Console: Lecture/Écriture}
+   \begin{itemize}
+       \item Pas de choix d'implémentation particulier.
+       \item Écriture et lecture bloqués par deux sémaphores différents.
+       \item Problème de deux consoles s’exécutant en même temps.
+   \end{itemize}
 \end{frame}
 
-\section{Implémentation}
 \subsection{Multithreading}
-\begin{frame}{Modèle utilisé pour le multithreading}
-   
+\begin{frame}{Multithreading: Identifiant et emplacement en pile}
+	\begin{center}
+    	\includegraphics[width=7cm]{../rapport/schema_threads_id.eps}
+	\end{center}
+   \begin{itemize}
+       \item Identifiant unique dans le processus.
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{Multithreading: Attente}
+   \begin{itemize}
+       \item Liste de threads en attente et qui ils attendent.
+		\item Thread qui attend mis en pause et relancé à la fin du thread qu'il attend.
+       \item Attendre si thread en cours d'exécution, retour direct sinon.
+       \item Utilisation d'un compteur de thread créés et du tableau des identifiants pour connaître l'état d'exécution d'un thread.
+   \end{itemize}
 \end{frame}
 
 
 \subsection{Gestion de la mémoire}
-\begin{frame}{Gestion de la mémoire virtuelle}
+\begin{frame}{Gestion de la mémoire: Multi-processus}
     \begin{itemize}
-        \item \textbf{Problème :} partager la mémoire physique entre plusieurs processus.
-        \item \textbf{Solution :}
-            \begin{itemize}
-                \item ...
-                \item ...
-            \end{itemize}
-        \item \textbf{Améliorations possibles :}
-            \begin{itemize}
-                \item ...
-                \item ...
-            \end{itemize}
+        \item Partage de la mémoire physique entre différents processus.
+        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
+        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Modèle utilisé pour la gestion de la mémoire}
-    
-\end{frame}
-
-\begin{frame}{Gestion des processus}
-
+\begin{frame}{Gestion de la mémoire: Mapping VPN-PPN}
+	\begin{itemize}
+		\item METTRE SCHEMA ICI. (Séb?)
+    \end{itemize}
 \end{frame}
 
 \subsection{Système de fichiers}
-\begin{frame}{Modèle de système de fichiers utilisé}
-    
+\begin{frame}{Système de fichiers}
+    \begin{itemize}
+		\item 8 fichiers/dossiers maximum par dossier (+ "\texttt{.}" et "\texttt{..}").
+		\item Dossier "\texttt{/System}" contient tous les exécutables (à l'image de \texttt{/usr/bin} pour Linux).
+    \end{itemize}
 \end{frame}
 
 \subsection{Réseau}
 
-\begin{frame}{API réseau}
+\begin{frame}{Réseau: Protocole utilisé}
+        \begin{center}
+			\includegraphics[width=10cm]{schema_reseau.pdf}
+		\end{center}
+\end{frame}
+
+\begin{frame}{Réseau: API fournie}
     \begin{itemize}
-        \item couche materiel
-        \item couche system
-        \item couche envoie de paquet
-        \item envoie de fichier
+        \item Envoi et réception de données fiable sans limite de taille.
+        \item Envoi et réception de fichiers.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Modèle réseau utilisé}
-    
-\end{frame}
-
+\subsection{Améliorations possibles}
 \begin{frame}{Améliorations possibles}
     \begin{itemize}
         \item ...
     \end{itemize}
 \end{frame}
 
+\section{Gestion du projet}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}{Gestion du projet}
+    \begin{itemize}
+        \item ...
+    \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}{Plan}
+    \tableofcontents[currentsection]
+\end{frame}
 \begin{frame}{Conclusion}
     \center{Fin.}
 \end{frame}
