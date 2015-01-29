@@ -8,7 +8,7 @@
 	int
 main ()
 {
-	ReceiveFile(0, "01_received_text");
+	ReceiveFile(0, "01_R");
 	Sleep(2);
 	PutString("Fichier reçu.");
 	return 0;
