@@ -6,7 +6,7 @@
  */
 
 #include "syscall.h"
-#define SIZE 52
+#define SIZE 53
 	int
 main ()
 {
