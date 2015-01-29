@@ -1,5 +1,7 @@
 # ce shell permet de lancer les testeur de chaque étape en une seule fois.
 
+./../build/nachos_step6 -f
+
 echo "## Étape 2 ##"
 echo "fichier in0, teste générique et chaine très longue, une grande chaine avec des espaces, ^D, ÿ"
 echo "fichier in1, teste une série de petite chaine"
@@ -37,4 +39,4 @@ echo "cd : crée des dossier et se déplace dedans"
 read -p "Press [Enter] key to start backup..."
 
 echo "## Étape 6 ##"
-echo "étape compiqué à automatisé, nous avons décidé de le laisser manuel."
+./etape6/lancer.sh
