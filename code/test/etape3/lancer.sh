@@ -9,7 +9,7 @@ echo -e "Appuyer sur [Enter] pour lancer une \033[33;1mexécution parallèle\033
 ./../../build/nachos-final -cp ./../../build/etape3/makethreads a > /dev/null
 ./../../build/nachos-final -x a -rs 23 -d z
 ./../../build/nachos-final -r a > /dev/null
-echo -e "Appuyer sur [Enter] pour lancer une \033[33;1mun thrad sans le terminer explicitement\033[0m: "; read;
+echo -e "Appuyer sur [Enter] pour lancer une \033[33;1mun thread sans le terminer explicitement\033[0m: "; read;
 ./../../build/nachos-final -cp ./../../build/etape3/threadsautoexit a > /dev/null
 ./../../build/nachos-final -x a -rs 23 -d z
 ./../../build/nachos-final -r a > /dev/null
