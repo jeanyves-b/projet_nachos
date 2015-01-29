@@ -315,6 +315,17 @@ ExceptionHandler (ExceptionType which)
 						machine->WriteRegister(2,machine->GetNbP());
 						break;
 					}
+			case SC_LS:{
+						char buf[MaxStringSize];
+						int result  = machine->ReadRegister(4);
+						if (result == 0){
+							fileSystem->List();
+						}else{
+							copyStringFromMachine(result,buf,MaxStringSize);
+							fileSystem->ListP(buf);
+						}
+						break;
+				}
 			default: {
 					 printf("Unexpected user mode exception %d %d\n", which, type);
 					 ASSERT(FALSE);

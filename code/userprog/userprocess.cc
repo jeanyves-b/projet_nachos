@@ -24,7 +24,6 @@ void StartUserProcess(int data) {
 //		négatif sinon.
 //---------------------------------------------------------------------
 int do_UserProcessCreate(char *s){
-	printf("here");
 	OpenFile *executable = fileSystem->Open(s);
 	if (executable == NULL)
 		return -1;

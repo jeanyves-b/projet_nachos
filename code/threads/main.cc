@@ -151,7 +151,7 @@ main (int argc, char **argv)
 			fileSystem->Remove (*(argv + 1));
 			argCount = 2;
 		}
-		else if (!strcmp (*argv, "-l"))
+		else if (!strcmp (*argv, "-ls"))
 		{			// list Nachos directory
 			fileSystem->List ();
 		}
@@ -178,12 +178,13 @@ main (int argc, char **argv)
 		else if (!strcmp (*argv, "-init"))
 		{			// initialisation du fichier systeme
 			
-			Copy ("etape4/forkexec", "System/fork");
-			Copy ("etape4/makeprocess", "System/make");
-			Copy ("etape3/userpages0", "System/userpages");
-			Copy ("etape3/userpages0", "System/user");
 			Copy ("etape5/cd", "System/cd");
-			argCount = 3;
+			Copy ("etape5/ls", "System/ls");
+			Copy ("etape5/lsp", "System/lsp");
+			Copy ("etape5/mkdir", "System/mkdir");
+			Copy ("etape5/mkfile", "System/mkfile");
+			Copy ("etape5/rmdir", "System/rmdir");
+			Copy ("etape5/rmfile", "System/rmfile");
 		}
 #endif // FILESYS
 #ifdef NETWORK

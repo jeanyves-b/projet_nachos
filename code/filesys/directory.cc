@@ -112,7 +112,8 @@ Directory::Find(const char *name)
 	int i = FindIndex(name);
 
 	if (i != -1)
-		return table[i].sector;
+		if (!table[i].isDir)
+			return table[i].sector;
 	return -1;
 }
 

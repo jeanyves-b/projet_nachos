@@ -6,7 +6,7 @@
  */
 
 #include "syscall.h"
-#define SIZE 50
+#define SIZE 53
 	int
 main ()
 {
@@ -23,11 +23,14 @@ main ()
 	
 	int i = 3;
 	while (i< SIZE-1) {
-		got[i]++;
+		if (got[i] == 'Z')
+			got[i] = 'A';
+		else
+			got[i]++;
 		i++;
 	}
 	got[SIZE-1] = '\0';
-	
+	Sleep(1);
 	Send(got, SIZE, 1, 0, 0);
 	PutString("chaine envoyée:");
 	PutString(got);

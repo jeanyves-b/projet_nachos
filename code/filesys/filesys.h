@@ -106,7 +106,8 @@ class FileSystem {
 		int Cd(const char* name);
 
 		void List();			// List all the files in the file system
-
+		void ListP(const char* name); //List all the files in the given directory
+		
 		void Print();			// List all the files and their contents
 		int AddFile(int secteur,OpenFile* open);
 		void Close(const char* name);

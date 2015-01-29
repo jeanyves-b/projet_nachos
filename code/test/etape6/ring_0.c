@@ -6,7 +6,7 @@
  */
 
 #include "syscall.h"
-#define SIZE 50
+#define SIZE 53
 	int
 main ()
 {
@@ -22,7 +22,7 @@ main ()
 		i++;
 	}
 	send[SIZE-1] = '\0';
-	
+	Sleep(1);
 	Send(send, SIZE, 1, 1, 0);
 	PutString("chaine envoyée:");
 	PutString(send);

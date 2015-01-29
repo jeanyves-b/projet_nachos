@@ -3,7 +3,7 @@
  *
  *	Since we don't want to pull in the entire C library, we define
  *	what we need for a user program here, namely Start and the system
- *	calls.
+ *	calls.'
  */
 
 #include "syscall.h"
@@ -290,6 +290,14 @@ GetNbP:
 	syscall
 	j	$31
 	.end getNbP
+	
+	.globl ls
+	.ent	ls
+ls:
+	addiu $2,$0,SC_LS
+	syscall
+	j	$31
+	.end ls
 
 	.globl Close
 	.ent	Close
