@@ -155,9 +155,9 @@
 \end{frame}
 
 \begin{frame}{Gestion de la mémoire: Mapping VPN-PPN}
-	\begin{itemize}
-		\item METTRE SCHEMA ICI. (Séb?)
-    \end{itemize}
+	 \begin{center}
+			\includegraphics[width=10cm]{schema_memoire.pdf}
+	\end{center}
 \end{frame}
 
 \subsection{Système de fichiers}
@@ -177,22 +177,21 @@
 \end{frame}
 
 \begin{frame}{Réseau: API fournie}
-    \begin{itemize}
-        \item Envoi et réception de données fiable sans limite de taille.
-        \item Envoi et réception de fichiers.
+	\begin{itemize}
+        \item Interface simple d'envoi et réception de fichiers et de données.
+        \item L'utilisateur n'a pas à configurer des connexions entre deux machines.
+        \item Envois synchrones avec attente d'acquittement pour chaque message.
+        \item Retransmission périodique du message s'il n'est pas acquitté.
     \end{itemize}
+    
 \end{frame}
 
 \subsection{Améliorations possibles}
 \begin{frame}{Améliorations possibles}
     \begin{itemize}
-        \item threads
-        	\subitem
-        \item mémoire virtuel
-        \item système de fichier
-        	\subitem table des fichiers ouvert
-        \item réseaux
-        	\subitem 
+        \item Utilisation d'un cache TLB.
+        \item Table des fichiers ouverts.
+        \item Migration de processus via le réseau.
     \end{itemize}
 \end{frame}
 
@@ -203,8 +202,10 @@
 
 \begin{frame}{Gestion du projet}
     \begin{itemize}
-        \item repository git
-        \item planning
+        \item Utilisation de Git.
+        \item Parallélisation des tâches.
+        \item Travail par équipes de deux.
+        \item Documentation tout au long du projet.
     \end{itemize}
 \end{frame}
 
@@ -213,16 +214,17 @@
     \tableofcontents[currentsection]
 \end{frame}
 
-\subsection{commentaire}
-\begin{frame}{commentaire}
+\begin{frame}{Conclusion}
 	\begin{itemize}
-		\item ce qu'on aurait aimé faire
-			\subitem scheduler
-		\item remarque
+		\item \textbf{Commentaires:}
+		\begin{itemize}
+			\item ce qu'on aurait aimé faire
+				\item scheduler
+			\item remarque
+		\end{itemize}
 	\end{itemize}
 \end{frame}
 
-\subsection{conclusion}
 \begin{frame}{Conclusion}
     \center{Fin.}
 \end{frame}

@@ -1,8 +1,5 @@
 #!/bin/bash
 # init
-#copie les fichiers dans le systeme de fchier nachos
-#executes les programmes
-#remove les fichiers
 
 echo
 echo "## Lancement des programme de test de l'étape 6 ##"
