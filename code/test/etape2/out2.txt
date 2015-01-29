@@ -7,8 +7,8 @@ a
 
 
 aaaaaa
-Machine halting!
 
+[32;1mMachine halting![0m
 Ticks: total 4020, idle 2800, system 1220, user 0
 Disk I/O: reads 2, writes 0
 Console I/O: reads 23, writes 18

@@ -186,7 +186,8 @@ Initialize (int argc, char **argv)
 Cleanup ()
 {
 
-	printf ("\nCleaning up...\n");
+	if (!DebugIsEnabled('z'))
+		printf ("\nCleaning up...\n");
 #ifdef NETWORK
 	delete postOffice;
 #endif

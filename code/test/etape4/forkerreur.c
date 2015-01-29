@@ -9,16 +9,16 @@ int main()
 	int i, pid;
 	pid = ForkExec("papillon");
 	if (pid == -1)
-		PutString("test 1 : OK\n");
+		PutString("Test programme inexistant: OK\n");
 	else
-		PutString("test 1 : NON\n");
+		PutString("Test programme inexistant : NON\n");
 
 	for (i=0 ; i<N ; i++)
 	{
 		pid = ForkExec("halt");
 		if(pid == -2 || pid == -4)
 		{
-			PutString("test 2 : OK\n");
+			PutString("Test trop grand nombre de processus : OK\n");
 			i = N;
 		}
 	}
