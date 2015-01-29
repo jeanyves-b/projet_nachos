@@ -148,9 +148,21 @@
 \subsection{Gestion de la mémoire}
 \begin{frame}{Gestion de la mémoire: Multi-processus}
     \begin{itemize}
-        \item Partage de la mémoire physique entre différents processus.
-        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
-        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
+
+        \item Création d'un processus
+ 		\begin{itemize}
+ 			\item StartUserProcess
+ 		\end{itemize}
+        \item Arrêt automatique
+        \begin{itemize}
+ 			\item Attente des threads fils
+ 			\item Vérification du nombre de processus
+ 		\end{itemize}
+        \item Relation entre processus
+        \begin{itemize}
+ 			\item Compteur
+ 			\item Evolution possible
+ 		\end{itemize}
     \end{itemize}
 \end{frame}
 
@@ -158,6 +170,22 @@
 	 \begin{center}
 			\includegraphics[width=10cm]{schema_memoire.pdf}
 	\end{center}
+	\begin{itemize}
+        \item Partage de la mémoire physique entre différents processus.
+        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
+        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Gestion de la mémoire: Autre fonctionnalités et problème}
+    \begin{itemize}
+        \item Shell
+        \begin{itemize}
+ 			\item Attente active
+ 		\end{itemize}
+        \item L'ordonnancement
+        \item 
+    \end{itemize}
 \end{frame}
 
 \subsection{Système de fichiers}

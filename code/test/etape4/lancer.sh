@@ -16,7 +16,9 @@ echo "lancement de forkexec"
 ./../../build/nachos-final -r a > /dev/null
 echo "lancement de forkerreur"
 ./../../build/nachos-final -cp ./../../build/etape4/forkerreur a > /dev/null
+./../../build/nachos-final -cp ./../../build/etape4/matmult nothing > /dev/null
 ./../../build/nachos-final -x a -rs 23
 ./../../build/nachos-final -r a > /dev/null
+./../../build/nachos-final -r nothing > /dev/null
 echo "fin du lancer de l'étape 4"
 echo ""
