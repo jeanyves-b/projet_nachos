@@ -1,7 +1,6 @@
 #lancer de l'étape 3
 
 ./../../build/nachos-final -f > /dev/null
-./../../build/nachos-final -init > /dev/null
 echo "lancement des programme de test de l'étape 3"
 echo "lancement de userpage0"
 ./../../build/nachos-final -cp ./../../build/etape3/userpages0 a > /dev/null

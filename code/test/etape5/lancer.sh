@@ -1,7 +1,6 @@
 #lancer de l'étape 5
 
 ./../../build/nachos-final -f > /dev/null
-./../../build/nachos-final -init > /dev/null
 echo "lancement des programme de test de l'étape 5"
 echo "lancement de mkdir"
 ./../../build/nachos-final -cp ./../../build/etape5/mkdir a  > /dev/null

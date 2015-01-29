@@ -3,7 +3,6 @@
 #remove les fichiers
 
 ./../../build/nachos-final -f > /dev/null
-./../../build/nachos-final -init > /dev/null
 echo "lancement des programme de test de l'étape 2"
 echo "lancement de getchar"
 ./../../build/nachos-final -cp ./../../build/etape2/getchar a > /dev/null
