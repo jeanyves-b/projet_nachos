@@ -30,7 +30,7 @@ main ()
 		i++;
 	}
 	got[SIZE-1] = '\0';
-	
+	Sleep(1);
 	Send(got, SIZE, 1, 0, 0);
 	PutString("chaine envoyée:");
 	PutString(got);
