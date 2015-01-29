@@ -151,7 +151,7 @@ main (int argc, char **argv)
 			fileSystem->Remove (*(argv + 1));
 			argCount = 2;
 		}
-		else if (!strcmp (*argv, "-l"))
+		else if (!strcmp (*argv, "-ls"))
 		{			// list Nachos directory
 			fileSystem->List ();
 		}
@@ -182,7 +182,7 @@ main (int argc, char **argv)
 			Copy ("etape4/makeprocess", "System/make");
 			Copy ("etape3/userpages0", "System/userpages");
 			Copy ("etape3/userpages0", "System/user");
-			Copy ("etape5/cd", "System/cd");
+			Copy ("etape5/cd", "System/cd");			
 			argCount = 3;
 		}
 #endif // FILESYS
