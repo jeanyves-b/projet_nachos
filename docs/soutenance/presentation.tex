@@ -199,10 +199,27 @@
 \end{frame}
 
 \subsection{Système de fichiers}
-\begin{frame}{Système de fichiers}
+
+\begin{frame}{Système de fichiers: Mise en place }
     \begin{itemize}
 		\item 8 fichiers/dossiers maximum par dossier (+ "\texttt{.}" et "\texttt{..}").
+		\item Mise en place d'une hiérarchie de répertoire.
+		\item Prise en compte du pathname.
 		\item Dossier "\texttt{/System}" contient tous les exécutables (à l'image de \texttt{/usr/bin} pour Linux).
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Tests }
+    \begin{itemize}
+		\item Appel système pour créer, supprimer et se déplacer entre les répertoires.
+		\item Lancer des exécutables dans le système de Nachos.
+		
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Problèmes et extensions }
+    \begin{itemize}
+		\item Problème de création de processus. 
+		\item Table de fichiers ouverts.
+		
     \end{itemize}
 \end{frame}
 
