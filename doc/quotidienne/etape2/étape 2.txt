@@ -1,0 +1,98 @@
+choix sur les appels system putstring/getstring
+	chaine de taille max, 
+faire attention a la mémoire système
+faire attention aux arguments
+
+partie 1 :
+	définir l'utilité de la partie pour le rapport
+		tout le monde à a peu près le même code car partie très guidée.
+		probablement pas la pein de s'étendre trop dessus.
+	définir des fonction d'affichage et de capture de cractère / chaine de caractère utilisable par l'utilisateur.
+	on a définit le program C putchar
+
+partie 2 :
+	writedown/readavail
+		utilisation des sémaphore/mutex
+		faire une chier de jeux de tests... partout
+	prise en compte de tty
+		tester le 1er caractère par rapport à EOF et q
+		vider le buffer après q si q présent en début de ligne
+	ecrire <c> au lieu de c
+		putchar < avant et putchar > après le putchar du caractère si le caractère est c
+
+partie 3 :
+	Création du header SynchConsole.h
+	Création des fonctions de SynchConsole.cc
+		Utilisation des fonctions SynchGetChare et SynchPutChar
+		pour réaliser SynchgetString et SynchPutString
+		
+	Modification du makefile pour compiler SynchConsole
+		Modification de makefile.define-origine pour garder les noms originaux
+		des programmes utilisateurs.
+		
+	Rajout de l'option -sc pour lancer le programme SynchConsoleTest
+	Création de la fonction SynchConsoleTest
+
+	tests :
+		utilisation courante 		Validé
+		ecriture/lecture parallèle	à faire
+		trop de caractères		validé
+		pas de caractère 		validé
+		arrêt avec EOF 			validé
+
+partie 4 :
+	PutChar -> SyscallException -> Handler -> SynchPutChar
+	création de l'appel system
+		attribution d'un numéro à l'appel GetChar
+	partie assembleur
+		caractère mis dans le registre 4 (sous forme d'int)
+	modifier ExeptionHandler
+		transformation en switch
+		ajout du cas d'une interruption de type GetChar
+			appel à la méthode SynchPutChar de SynchConsole
+				instanciation d'un objet SynchConsole à l'inisialisation du système.
+	ajouter les fonctions aux fonctions utilisable
+
+	tests :
+		test handler
+			un test par appels
+			+ test pour des appels bidon
+		test d'initialisation de la console
+
+partie 5 :
+	création de la fonction copyStringFromMachine
+	  Utilisation de readMEM()
+	Création de l'appel system SynchPutString
+
+	test :
+		avec une chaine cohérente
+		avec une chaine vide
+		avec trop de caractère
+		avec une chaine monstrueuse
+		avec une chaine pas assez grande
+
+partie 6 :
+	implémenter le return
+		copie du registre r2 (valeur retour main) dans le registre 
+			temporaire r8 au début dans l'appel Exit
+		Halt() dans le l'appel système Exit
+
+	tests
+		debug valeur retour main: Fait
+
+partie 7 :
+	registre de retour : r2
+		cast char en int et mettre dans r2
+	GetString
+		fin de ligne débordement
+			ider le buffer dès que caractère de fin ou taille maximale atteinte
+		appel concurent
+			--pas encore fait
+		fuites mémoire
+			liberation du buffer
+
+partie 8 :
+	ettofer feof pour exclure '\127'
+	renvoyer un int avec SynchGetChar
+
+	testé 'ÿ' dans un fichier et en tant que caractère et il est considérer comme un caractère comme un autre

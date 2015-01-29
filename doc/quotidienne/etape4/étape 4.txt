@@ -1,0 +1,110 @@
+adresse virtuel
+
+partie 1 : adressage virtuel par une table de pages
+	action 1
+		écrire un petit programe de test qui écrit des caractère entrelacé à l'écran.
+	action 2
+		examiner executable->ReadAt
+			lis depuis un fichier et mets dans un emplacement mémoire.
+			l'emplacement mémoire choisit est la mémoire principale (pas de virtualisation)
+	action 3
+		écrire une fonction qui écrit en mémoire en utilisant l'adressage virtuel
+			utilisation d'un buffer dans lequel on lit avec ReadAt
+			on ecrit ce qu'il y a dans le buffer vers la page virtuelle choisie avec WriteMem
+				on doit mettre à jour la PageTable et la PageTableSize de la machine afin d'écrire aux bons endroits
+					peut être qu'il faudra réstaurer après l'ecriture dans le cas du multithreading
+	action 4
+		projeté sur le cadre physique
+			une page virtuelle est mappée sur la page physique suivante
+				on remarque que le ppn (physical page number) = vpn (virtual page number) + 128 (taille d'une page)
+	action 5
+		frame provider
+			utilisation d'une bitmap
+				utilisation des méthodes proposées pour:
+					chercher un cadre vide et l'utiliser
+					libérer un cadre
+					NumAvailableFrame
+	action 6
+		refaire addrspace pour utiliser la pagination
+			ppn = GetEmptyFrame de FrameProvider (bitmap)
+				vérifier que page valide: >=0
+			libérer toutes les pages physiques de la pageTable de l'espace d'adressage à sa destruction
+
+choix d'implémentation
+	ReadAtVirtual():
+	façon d'écrire dans la mémoire
+		Ecriture dans buffer avec ReadAt
+		Ecriture du buffer vers page virtuelle avec WriteMem
+	On enlève les interruptions pour éviter qu'un autre thread prenne la main alors que
+	la pageTable de la machine a changé.
+	
+	frameprovider:
+	allocation et sytem de cadre/pagination
+	le systeme renvoit la première page valide et libre.
+	
+	modification de machine page table size :
+
+
+test
+	allouer des pages
+	allouer un nombre de pages max
+	free des pages
+	faire une succession d'alloc et de free
+	essayer de finir sans free et voir comment c'est crade
+
+partie 2 : executer plusieurs programmes en même temps
+	action 1
+		appel system : ForkExec()
+			inspiré de StartProcess
+			do_UserProcessCreate
+				Ouvre l'executable
+				Alloue la mémoire (addrspace)
+				Crée le thread et y attache la mémoire allouée
+				Mets à jour le nombre de processus créés
+				ForkExec le thread créé sur StartUserProcess
+					ForkExec = Fork sans mettre la mémoire à la même adresse que celle du thread en cours
+			StartUserProcess
+				Initalise les registres et charge la pageTable du nouveau processus
+				Lance le programme
+			do_UserProcessExit
+				Mets à jour le nombre de processus créés
+				Attends que ses threads finissent (join)
+				Désalloue la mémoire
+				Demande sa destruction
+	action 2
+		faire en sorte que le dernier processus arrete la machine
+			garder un compteur de processus forkés
+			si dernier processus alors halt la machine, sinon quitter le processus (et libérer ses ressources)
+	action 3
+		fait dans programme de test forkexec
+	action 4
+		il y a quelques fuites de mémoire liées au fait que c'est un thread en cours d'exécution qui tue la machine, et on ne peut donc pas le supprimer ou libérer ses ressources
+
+choix d'implémentation
+	dernier process arrete la machine
+		la machine garde un compteur de processus que l'on peut appeler
+		pour s'ajouter au processus en cours ou dire que l'on quitte.
+
+test
+
+
+partie 3 : shell
+	comprendre ce que fait le programme
+	faire un petit shell pour faire un truc similaire
+
+choix d'implémentation
+	
+
+test
+
+
+partie 4 : allocation dynamique de mémoire
+	
+	action 1
+	action 2
+	action 3
+
+choix d'implémentation
+	
+
+test

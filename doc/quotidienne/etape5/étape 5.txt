@@ -1,0 +1,146 @@
+système de fichier actuel //not anymore
+	système de fichier à un seul niveau
+	dossier -> fichier
+	au plus 10 entrées
+
+tester les fonction avant utilisation
+
+au moment de l'ouverture, Nachos lit sur le disque les info d'espace libre et du repertoire
+
+gros choix
+	implémentation d'une structure parallèle ou bien uniquement des lecture sur le disque?
+
+partie 1 : implantation d'une hiérarchie de répertoires
+aller lire partie 6
+	->répertoire peut contenir un répertoire
+
+	création de fonction :
+		créer un repertoire
+		se déplacer (avant/arrière)
+		supprimer un répertoire
+
+	2 des entrée des répertoire sont réservé pour .(actuel) et ..(précédent)
+	sauf la racine pour qui .. représente aussi l'actuel
+	
+	problème :
+		enregistrement de la structure à la fermeture de la machine
+		restoration de la structure au moment de l'initialisation de la machine
+			écriture/lecture sur le disque
+			
+	état actuel:
+	  on peut créer des repertoires et des fichiers ainsi que les supprimer.
+	  on peut se déplacer dans les repertoires mais lorsque la machine s'arrête
+	    on revient au repertoire racine (il faudrait arriver à faire le shell pour
+	    avoir un fonctionement 'normal')
+	    
+	Après l'implémentation du filesystem, l'appel systeme ForkExec ne marchait plus:
+	on a donc fait plusieurs test pour comprendre d'ou venait le problème:
+		- Lancer un programme simple qui crée un processus qui affiche une chaine de caractère
+		  et quitte
+		- Lancer un programme qui crée un nouvel espace d'adressage mais ne crée pas le processus
+		(cela nous a permit de comprendre que le problème venait des PageTable chargé en mémoire)
+		- un pas à pas avec gdb pour voir les changements d'état de la variable
+	Ces tests ont mis en évidence une section critique dans ReadAtVirtua que l'on a corrigé.
+
+	Déplacement dans les répertoires
+		on a rajoute une fonction pour tester l'existence du repertoire demandé
+		cela consiste à ouvrir un fichier(OpenFile) vers le secteur contenant le repertoire
+		il n'est pas sauvegarder dans le disque dur donc on repart de la racine à chaque redémarrage de la machine
+	
+	Supprimer un repertoire
+		on ne peut pas supprimer un repertoire non vide (. et .. ne sont pas considére comme des repertoires "normaux")
+	
+	Créer un repertoire
+		-Tester s'il n'est pas présent dans le repertoire courant
+		-lui attribuer un sector libre du bitmap
+		-l'ajouter dans la table du repertoire courant en indiquant que c'est un repertoire 
+		 grace à un variable booleen 'isDir' qu'on a ajouté aux entrées de la table de directory 	 
+		-Pour faciliter les deplacements on initialise la table de nouveau repertoire par le secteur associé au '.' du repertoire 			 courant qui sera le '..' du nouveau repertoire et '.' du nouveau repertoire est associé au secteur de son file header.
+
+	
+Choix d'implementation:
+	Nous avons rajouté un OpenFile pour gérer le repertoire courant, celui ci pointe sur la racine lors du lancement de la machine, et est 		modifié via l'appel system cd.
+
+	Lors de l'initialisation du FileSystem, un repertoire system est crée, tous ce que l'on met dedans est accessible ou que l'on soit dans l'arborescence. Par exemple, on peut y mettre cd, ce qui fera que tous les appels à cd sans chemin spécifié marcheront.
+
+Test:
+Puisque qu'on a pas implementer le shell, les tests sont faits par des appels systèmes(mkdir,rmdir,cd).
+Les premiers test creer/supprimer des repertoires dans le repertoires d'origine'root'. Avec l'implementation de cd nous avons réussi à céeer des sous repertoires sans problèmes. Il faut juste signaler que la création(ou la suppression) de sous repertoires nécessite que le cd et le mkdir soit appeler dans le meme fichier de test parce que lorsque la machine s'arrete on revient à la racine(repertoire root) 	 
+
+partie 2 : implantation de la table système des fichiers ouverts
+aller lire partie 7
+	nb max de fichiers ouvert : 10
+
+	choix :
+		tableau de dix entrées . Les entrees contiennent le nom du fichier et le nombre de processus qui l'on ouvert
+		A chaque fois que le systemes ouvre un fichier on regarde s'il est dans la table des fichiers ouverts. Si c'est le cas
+		on l'ajoute pas dans la table sinon on teste si la limite de fichier ouvert n'est pas atteint puis on l'ajoute 
+
+	problème :
+		Ne permet pas de gerer la concurence
+		un processus peut fermer un fichier encore utilisé par un autre 
+		
+partie 3 : support des accès concurents
+	modification des accès concurent
+		plusieur lecteur
+		un seul écrivain
+		même problème dans la structure de fichier
+
+	choix :
+		on met les locks sur les structure ou bien sur les threads?
+		structure -> plus simple, risque d'empécher des fichiers d'acceder au même ressources alors qu'ils devraient pouvoir
+		threads -> plus complexe, bien reflechir à où mettre les lock
+
+partie 4 + 5 : augmentation de la taille max des fichiers + implantation de fichiers de taille variable
+	fichiers de taille variable suivant les besoins avec une taille max de presque celle du disque
+	modification de l'entête à chaque modification du contenu d'un fichier
+		les action d'écriture et de suppression dans un fichier doivent avoir accès à l'entête du fichier
+
+partie 6 : implentation des noms de chemin (path name)
+	faire un interpreteur de commande qui va analyser les nom passer en argument
+		faire un parseur qui va appeler les fonction de déplacement
+		doit se souvenir du dossier courant pour y revenir facilement
+		création fichier/répertoire
+			une ou deux fonctions? plutot 2
+		suppression de fichier/repertoire
+			une ou deux fonctions? plutot 1
+			repertoire vide, tout supprimer ou bien annuler la suppression
+			possibilité d'appel récursif pour tout supprimer
+		déplacement dans le systeme de fichier
+			une seule fonction
+				pointe sur un répertoire, le répertoire précédent est considéré comme un sous répertoire
+
+				
+	Explication de l'utilisation des path name
+	  par souci de simplicite, très peu d'erreur sont testé donc:
+	    - un repertoire qui n'existe pas dans le fichier produira une erreur
+	  il faut ajouter manuellement leur utilisation dans toutes les fonctions
+	  donc il faut tester si les path name marche dans chaques fonctions
+	  (mkdir,cd,rm,...)
+
+choix d'implementation
+	le repertoire courant utilisé par l'utilisateur n'est pas modifié pour que les autres threads/processus puisse s'éxécuter
+	dans le même repertoire.
+	si on veut partir du repertoire racine, on doit rajouter un / devant le chemin
+	dans le cas contraire, on part du répertoire courant.
+				
+partie 7 : amélioration des accès concurents
+	possibilité d'avoir plusieurs lecteur mais un seul écrivain
+		->chaque thread doit avoir son propre conteur pour chaque fichier ouvert
+	/!\ sychronisation des accès aux entêtes
+
+partie 8 : optimisation des entrée/sortie
+	optimisation des accès disques
+		rassembler les blocs de données des fichiers
+		ordonner les accès à la mémoire en fonction de leur proximité avec l'entrée précédente
+			ajout d'une demande d'accès
+				on redéfinie toute la file/on place la nouvelle requete et on ne touche pas au reste
+	utilisation de tampons d'entrée/sortie
+		stocker les opérations dans des tampons de façon à les ordonner au mieux
+		stocker les fichiers ouverts dans un tampon pour y avoir accès plus rapidement?
+
+partie 9 : robustesse
+	intéruption lors d'une écriture
+		en retrouvant la dernière oération dans le tampon?
+		moment où l'on modifie l'entête
+		autres idées?
