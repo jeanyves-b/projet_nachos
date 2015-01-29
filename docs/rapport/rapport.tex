@@ -28,12 +28,12 @@
 	Il abordera les principales fonctionnalités du noyau, la documentation des fonctions proposées à l'utilisateur, l'organisation de l'équipe et celle des tests, ainsi que les différents partis pris.
 
 \section{Fonctionnalités du noyau}
-	Voici les partie que nous avons réussi à implémenter jusque là :
+	Voici les parties que nous avons réussi à implémenter jusque là :
 	\begin{itemize}
-		\item Appels système de lecture et d'écriture : Caractères, chaînes de caractères, et entiers.
+		\item Appels système de lecture et d'écriture : Caractères, chaînes de caractères, etgit entiers.
 		\item Multithreading: Création, destruction d'un thread, ainsi que l'attente d'un autre thread. Partage de la pile d'exécution entre threads.
 		\item Multi-processus s'exécutant en parallèle. 
-		\item Adressage virtuel via un page de tables.
+		\item Adressage virtuel via une table de pages.
 		\item Un système de fichiers: Création et suppression de fichiers/dossiers, ainsi que déplacement dans hiérarchie.
 		\item Transmission synchrone sur le réseau avec attente d'acquittement avant prochaine transmission.
 		\item API d'envoi et de réception de messages et de fichiers par réseau. 
@@ -43,13 +43,13 @@
 	\subsection{Console synchrone}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{char GetChar()}
-			\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans la cas de la fin de fichier.}
+			\item{DESCRIPTION :}{ Lis un caractère depuis l'entrée standard et le retourne sous forme de \texttt{char}. Retourne \texttt{EOF} dans le cas de la fin de fichier.}
 			\item{VALEUR DE RETOUR : } Renvoie un \texttt{char} qui représente le caractère lu, ou \texttt{EOF} en cas de fin de fichier ou d'erreur.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void GetString(char *s, int n)}
-			\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaine de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaîne récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
+			\item{DESCRIPTION : } Lis au maximum \texttt{n} caractères depuis l'entrée standard jusqu'à rencontrer un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}), et copie la chaîne de caractères lue vers le buffer pointé par \texttt{s}. La longueur maximale d'une chaîne récupérée est définie par la constante \texttt{MaxStringSize}. \\Si un caractère dit "bloquant" est rencontré, il est remplacé par l'octet nul (\texttt{\textbackslash{}0}), sinon ce dernier est placé dans l'emplacement mémoire pointé par \texttt{s+n}.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
@@ -65,19 +65,19 @@
 		\vspace{3mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void PutString(const char *s)}
-			\item{DESCRIPTION : } Écrit la chaîne présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaîne sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaine à afficher est définie par la constante \texttt{MaxStringSize}
+			\item{DESCRIPTION : } Écrit la chaîne présente dans le buffer pointé par \texttt{s} ainsi qu'un saut de ligne (\texttt{\textbackslash{}n}) sur la sortie standard. L'écriture de la chaîne sur la sortie standard se poursuit jusqu'à la rencontre d'un caractère dit "bloquant", c'est à dire: un retour chariot (\texttt{\textbackslash{}r}), un saut de ligne (\texttt{\textbackslash{}n}), ou un caractère de fin (\texttt{\textbackslash{}0} ou \texttt{EOF}). La longueur maximale de la chaîne à afficher est définie par la constante \texttt{MaxStringSize}.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void PutInt(int i)}
-			\item{DESCRIPTION : } Convertit l'entier naturel \texttt{i} en chaîne de caractères et l'affiche sur la sortie standard selon les mêmes régèles que \texttt{PutString}.
+			\item{DESCRIPTION : } Convertit l'entier naturel \texttt{i} en chaîne de caractères et l'affiche sur la sortie standard selon les mêmes règles que \texttt{PutString}.
 		\end{description}
 	\subsection{Threads}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int UserThreadCreate(void *f(void*), void* arg)}
-			\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument arg. L'identifiant du thread est unique tout au long de l'exécution du processus. \\
+			\item{DESCRIPTION : } Permet de créer un thread dans le même espace d'adressage que le thread en cours. Le thread créé lancera la fonction f donnée en paramètre avec l'argument \texttt{arg}. L'identifiant du thread est unique tout au long de l'exécution du processus. \\
 			Le thread créé est \emph{de facto} dans le même processus que le thread dans lequel il a été créé. \\
-			Si l'un des threads d'un processus appelle \texttt{exit}, la gestion de l'attente des threads non terminés est gérée par la terminaison du processus.
+			Si l'un des threads d'un processus appelle \texttt{exit}, la gestion de l'attente des threads non-terminés est gérée par la terminaison du processus.
 			\item{VALEUR DE RETOUR : } Identifiant du thread en cas de succès, code d'erreur négatif sinon:
 				\subitem{\texttt{-1} : } Raison inconnue.
 				\subitem{\texttt{-2} : } Pas assez d'espace dans la pile du processus.
@@ -85,12 +85,12 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{void UserThreadExit()}
-			\item{DESCRIPTION : } Termine le thread en cours d'éxecution et libère son emplacement dans la pile. Si c'est le dernier thread du processus, ce dernier se termine aussi après avoir attendu ses threads toujours en cours d'exécution et les ressources qu'il utilise sont libérées.
+			\item{DESCRIPTION : } Termine le thread en cours d’exécution et libère son emplacement dans la pile. Si c'est le dernier thread du processus, ce dernier se termine aussi après avoir attendu ses threads toujours en cours d'exécution et les ressources qu'il utilise sont libérées.
 		\end{description}
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int UserThreadJoin(int id)}
-			\item{DESCRIPTION : } Attend que le thread ayant pour identifiant \texttt{id} se termine, et si le thread s'est déjà terminé la fonction revient de suite. Plusieurs threads peuvent attendre un même thread étant donné que l'identifiant des threads est unique dans le contexte du processus.
+			\item{DESCRIPTION : } Attend que le thread ayant pour identifiant \texttt{id} se termine, et si le thread s'est déjà terminé la fonction retourne de suite. Plusieurs threads peuvent attendre un même thread étant donné que l'identifiant des threads est unique dans le contexte du processus.
 			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès, code d'erreur négatif sinon:
 				\subitem{\texttt{-1}, \texttt{-2} : } Identifiant fourni introuvable (jamais créé ou négatif).
 				\subitem{\texttt{-3} : } Tentative d'attendre le thread en cours d'exécution.
@@ -98,23 +98,23 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int GetTid()}
-			\item{DESCRIPTION : Renvoie le l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
+			\item{DESCRIPTION : Renvoie l'identifiant du thread en cours d'exécution. Cet identifiant n'est unique que dans le contexte de son processus.} 
 			\item{VALEUR DE RETOUR : } Identifiant du thread en cours d'exécution.
 		\end{description}
 	\subsection{Mémoire virtuelle}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int ForkExec(char *path)}
-			\item{DESCRIPTION : } Crée un nouveau processus dans un environnement vide, et y exécute le fichier exécutable dont le nom est pointé par \texttt{path}.
+			\item{DESCRIPTION : } Crée un nouveau processus dans un nouvel environnement d'exécution, et y exécute le fichier exécutable dont le nom est pointé par \texttt{path}.
 			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès, code d'erreur négatif sinon:
 				\subitem{\texttt{-1} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
-				\subitem{\texttt{-2}, \texttt{-4} : } Impossible de créer un environnement d'exécution.
+				\subitem{\texttt{-2} : } Impossible de créer un environnement d'exécution.
 				\subitem{\texttt{-3} : } Pas assez de pages libres en mémoire pour créer l'espace d'adressage du processus.
-		\end{description}
+		\end{description}	
 		
 	\subsection{Système de fichiers}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int mkdir(char *name)}
-			\item{DESCRIPTION : } Crée un répertoire portant le nom \texttt{name} dans le répertoire courrant.
+			\item{DESCRIPTION : } Crée un répertoire portant le nom \texttt{name} dans le répertoire courant.
 			\item{VALEUR DE RETOUR : } 
 				\subitem{\texttt{0} : } Le chemin spécifié n'existe pas, ou le dossier en cours contient déjà 8 fichiers/dossiers.
 				\subitem{\texttt{1} : } Succès.
@@ -140,7 +140,7 @@
 			\item{SIGNATURE : } \texttt{int rmfile(char *name)}
 			\item{DESCRIPTION : } 
 			\item{VALEUR DE RETOUR : } 
-				\subitem{\texttt{0} : } Il n'y a pas de fichier de ce nom dans le répertoire courrant.
+				\subitem{\texttt{0} : } Il n'y a pas de fichier de ce nom dans le répertoire courant.
 				\subitem{\texttt{1} : } Succès.
 		\end{description}
 		\vspace{2.5mm}
@@ -156,7 +156,7 @@
 	\subsection{Réseau}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{unsigned Send(char *tosend, unsigned size, int localPort, int to, int remotePort)}
-			\item{DESCRIPTION : Envoie des données de taille \texttt{size} présentes dans le buffer pointé par \texttt{tosend} à la machine présente en adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements seront reçus sur le port local \texttt{localPort}.} 
+			\item{DESCRIPTION : Envoie des données de taille \texttt{size} présentes dans le buffer pointé par \texttt{tosend} à la machine présente en adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements sont reçus sur le port local \texttt{localPort}.} 
 			\item{VALEUR DE RETOUR : Nombre total d'octets envoyés acquittés.} 
 		\end{description}
 		\vspace{2.5mm}
@@ -167,7 +167,7 @@
 		\vspace{2.5mm}
 		\begin{description}
 			\item{SIGNATURE : } \texttt{int SendFile(char *path, int localPort, int to, int remotePort)}
-			\item{DESCRIPTION : Envoie le fichier présent à l'emplacement \texttt{path} vers la machine ayant l'adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements pour les paquets seront reçus sur le port \texttt{localPort}.} 
+			\item{DESCRIPTION : Envoie le fichier présent à l'emplacement \texttt{path} vers la machine ayant l'adresse \texttt{to} sur le port distant \texttt{remotePort}. Les acquittements pour les paquets sont reçus sur le port \texttt{localPort}.} 
 			\item{VALEUR DE RETOUR : } \texttt{0} en cas de succès et tous les octets acquittés, code d'erreur négatif sinon: 
 				\subitem{\texttt{-1} : } Impossible d'ouvrir le fichier présent à l'emplacement décrit dans le buffer pointé par \texttt{path}.
 				\subitem{\texttt{-2} : } Taille du fichier invalide.
@@ -186,19 +186,18 @@
 
 \section{Tests}
 	\subsection{Organisation}
-		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion de la mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}.}
-		~\par{Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart des cas, ainsi que des programmes de tests developpés par nos soins (\texttt{.cc}) afin de tester les sorties des tests unitaires.}
+		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{testparts.sh}) qui va lancer les fichiers de test du projet. Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possibles du programme, ils sont répartis en une série de fichiers séparés par étape du projet dans les dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion de la mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}.}
+		~\par{Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart.}
 
 	\subsection{Utilisation}
-		{Pour lancer les tests, ils suffit d'exécuter le script \texttt{testpart.sh} situé dans le dossier \texttt{code/test}.}
+		{Pour lancer les tests, ils suffit d'exécuter le script \texttt{testparts.sh} situé dans le dossier \texttt{code/test}.}
 
 	\subsection{Tests effectués et comportements}
 		\subsubsection{Console}
 			\begin{itemize}
-				\item Écriture d'une chaine de 1 caractère: Écrit le caractère correctement sur la console.
-				\item Utilisation de la console				validé : la console réécrit tout ce qui est tapé correctement
-				\item Ecriture/lecture parallèle: Les chaînes de caractères sont écrites/lues d'un coup quelque soit l'ordonnancement, les lectures/écritures de caractères seuls peuvent être entrelacés selon l'ordonnancement.
-				\item Dépassement de la taille maximale d'une chaine: Chaine tronquée.
+				\item Écriture d'une chaîne de 1 caractère: Écrit le caractère correctement sur la console
+				\item Écriture/lecture parallèle: Les chaînes de caractères sont écrites/lues d'un coup quelque soit l'ordonnancement, les lectures/écritures de caractères seuls peuvent être entrelacés selon l'ordonnancement.
+				\item Dépassement de la taille maximale d'une chaîne: Chaîne tronquée.
 				\item Arrêt avec \texttt{Ctrl+D} en début de ligne: Arrête la console, n'est pas confondu avec \texttt{ÿ}.
 			\end{itemize}
 
@@ -208,8 +207,8 @@
 					\subitem Création d'un thread: OK dans les bonnes conditions et retourne le bon code d'erreur dans les mauvaises.
 					\subitem Création d'un très grand nombre de threads: Crée le thread normalement jusqu'au moment où ce n'est plus possible (pile pleine, ou nombre maximal de threads atteint). Gestion d'erreur fonctionnelle.
 				\item Terminaison d'un thread:
-					\subitem Vérification des fuites mémoires: Toutes les structures allouées sont bien supprimées
-					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés par UserThreadExit().
+					\subitem Vérification des fuites mémoires: Toutes les structures allouées sont bien supprimées.
+					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés par \texttt{UserThreadExit}.
 				\item Lancement d'une fonction: Testé avec les fonctions disponibles, elles se sont déroulées correctement.
 			\end{itemize}
 
@@ -220,29 +219,28 @@
 				\item Stress de la mémoire
 					\subitem Les fichiers \texttt{matmult} et \texttt{sort} s'exécutent sans problèmes.
 					\subitem Création d'un grand nombre de processus en même temps se passe bien dans les limites de la mémoire disponible. Au-delà, création de processus rejetée.
-				\item Allocation et libération de pages
 				
 			\end{itemize}
 
 		\subsubsection{Système de fichiers}
 			\begin{itemize}
-				\item Créer un dossier/fichier: Le dossier/fichier est créé et est accessible.
+				\item Création de dossier/fichier: Le dossier/fichier est créé et accessible.
 				\item Déplacement vers un dossier parent/fils: On peut se déplacer à volonté dans les dossiers.
 				\item Suppression dossier/fichier: Le dossier/fichier est supprimé correctement. Il ne réapparaît pas lors de la prochaine lecture du disque.
 			\end{itemize}
 
 		\subsubsection{Réseau}
 			\begin{itemize}
-				\item Test en anneau: La machine 1 envoie un message à la machine 2 qui l'envoi à la machine 3 .... qui l'envoie à la machine n, qui renvoi le message à la machine 1.
-					\subitem Les données sont bien reçues et bien renvoyées, même avec une perte de données significative.
-				\item Envoie/réception de fichier: Fichier envoyé et reçu puis enregistré correctement.
+				\item Test en anneau: La machine 1 envoie un message à la machine 2 qui l'envoie à la machine 3 .... qui l'envoie à la machine n, qui renvoie le message à la machine 1.
+					\subitem Les données sont bien reçues et bien renvoyées, même avec une perte de paquets significative.
+				\item Envoi/réception de fichier: Fichier envoyé et reçu puis enregistré correctement.
 			\end{itemize}
 
 \section{Choix d'implémentation}
 	\subsection{Console}
 	  	{Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, les appels système de lecture et d'écriture ont été créés. Cette section étant très guidée dans le sujet, aucun choix d'implémentation particulier ne s'est posé.}
-	     ~\par{La lecture et l'écriture ont été sécurisées avec un sémaphore chacun. Les fonctions de lectures (\texttt{GetInt}, \texttt{GetChar} et \texttt{GetString}) ne peuvent pas interrompre les une les autres et les fonctions d'écritures (\texttt{PutChar}, \texttt{PutInt} et \texttt{PutString}) ne s'interrompent plus les unes les autres non plus. Mais les fonctions d'écriture peuvent interrompre les fonction de lecture et inversement.}
-		~\par{\texttt{GetString} et \texttt{PutString} appelant respectivement \texttt{GetChar} et \texttt{PutChar}, des versions internes \emph{sans sémaphore} de ces deux dernières routines ont été implémentées pour pouvoir les appeler depuis les deux premières sans récursion de sémaphores.}
+	     ~\par{La lecture et l'écriture ont été sécurisées avec un sémaphore chacun. Les fonctions de lectures (\texttt{GetInt}, \texttt{GetChar} et \texttt{GetString}) ne peuvent pas s'interrompre les unes les autres et les fonctions d'écritures (\texttt{PutChar}, \texttt{PutInt} et \texttt{PutString}) ne s'interrompent pas les unes les autres non plus. Mais les fonctions d'écriture peuvent interrompre les fonctions de lecture et inversement.}
+		~\par{\texttt{GetString} et \texttt{PutString} appelant respectivement \texttt{GetChar} et \texttt{PutChar}, des versions internes "\emph{sans sémaphore}" de ces deux dernières routines ont été implémentées pour pouvoir les appeler depuis les deux premières sans récursion de sémaphores.}
 
 	\subsection{Threads}
 		\subsubsection{Gestion des identifiants de threads}
@@ -255,8 +253,8 @@
 				  \includegraphics{schema_threads_id.eps}
 				  \caption{Exemple d'un état des structures de gestion de l’identifiant de thread.}
 			\end{figure}
-			~\par{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread + un \emph{padding} afin d'éviter les débordements. l'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de \texttt{0} à \texttt{N-1}. \texttt{N-1} étant le bloc ayant l'adresse de pile la plus petite, et \texttt{0} le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsque se termine.}
-			~\par{Afin de stocker les identifiants uniques et les identifiants en pile des threads, on utilise un tableau de taille N (nombre maximal de threads dans un processus), où chaque numéro de case représente un bloc en pile, et le contenu de la case représente l'identifiant unique du thread qui est alloué actuellement dans ce bloc en pile (si positif ou nul), ou que ce dernier n'est pas alloué (négatif, -1). Voir Figure 1.}
+			~\par{La pile est divisée en un nombre de blocs déterminé par le nombre de pages par thread + un \emph{padding} afin d'éviter les débordements. L'identifiant en pile représente le numéro du bloc de la pile qui est alloué au thread. Les blocs de pile sont numérotés de \texttt{0} à \texttt{N-1}. \texttt{N-1} étant le bloc ayant l'adresse en mémoire la plus petite, et \texttt{0} le bloc ayant l'adresse la plus grande. Un thread demande un bloc en pile à sa création, et le libère lorsqu'il se termine.}
+			~\par{Afin de stocker les identifiants uniques et les identifiants en pile des threads, on utilise un tableau de taille \texttt{N} (nombre maximal de threads dans un processus), où chaque numéro de case représente un bloc en pile, et le contenu de la case représente l'identifiant unique du thread qui est alloué actuellement dans ce bloc en pile (si positif ou nul), ou que ce bloc en pile n'est pas alloué (négatif, -1). Voir Figure 1.}
 			~\par{Afin de tester l'état d'un thread ayant pour identifiant unique \texttt{x}, on utilise les algorithmes suivants: }
 				\begin{itemize}
 					\item{\texttt{x} est supérieur au nombre de threads créés: } Le thread n'a jamais été créé ;
@@ -267,38 +265,38 @@
 		\subsubsection{Implémentation du join}
 			Un vecteur contenant la liste des threads en attente et l'identifiant des threads qui les attends.
 				\begin{itemize}
-					\item élément who : Thread qui attend
-					\item élément forId : identifiant du thread que who doit attendre
+					\item élément \texttt{who} : Thread qui attend.
+					\item élément \texttt{forId} : Identifiant du thread que \texttt{who} doit attendre.
 				\end{itemize}
-			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x} et si le thread x est en cours d'éxécution on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
+			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x} et si le thread x est en cours d’exécution on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
 			~\par{Lorsque le thread ayant pour identifiant \texttt{x} se termine, il réveillera le thread qui s'était mis en attente pour qu'il continue son exécution.}
-			~\par{Dans le cas où le thread \texttt{x} est déjà terminé, la fonction retourne immédiatement}
+			~\par{Dans le cas où le thread \texttt{x} est déjà terminé, la fonction retourne immédiatement.}
 			~\par{L’identifiant du thread étant unique dans un processus, il est possible de faire autant de \texttt{Join} que possible sur tous les identifiants.}
 
 	\subsection{Mémoire virtuelle}
 		\subsubsection{Pagination mémoire}
 			{Toutes les demandes de mémoire se font via le \texttt{FrameProvider} qui garde une \texttt{Bitmap} des pages vides ou non en mémoire physique.}
-			~\par{Lors de la création d'un processus, une vérification de la disponibilité d'assez de pages physiques est faite afin de s'assurer que le processus peut s'exécuter. Ensuite, un \emph{mapping} entre les pages virtuelles du processus et les pages physiques disponible est fait.}
+			~\par{Lors de la création d'un processus, une vérification de la disponibilité d'assez de pages physiques est faite afin de s'assurer que le processus peut s'exécuter. Ensuite, un \emph{mapping} entre les pages virtuelles du processus et les pages physiques disponibles est fait.}
 			~\par{Lors de la terminaison d'un processus, les pages physiques utilisées par ce dernier sont toutes libérées.}
 		\subsubsection{Multiprocessus}
 			{La création d'un processus déclenche la création d'un thread noyau avec un nouvel espace d'adressage ainsi que l'incrémentation d'un compteur des processus actifs.}
-			~\par{Lors de la terminaison d'un processus, tous les threads créés dans celui-ci et ne s'étant pas terminé sont attendus, puis si le processus en question est le dernier processus de la machine, terminer la machine. Dans le cas contraire, le processus sera détruit par un des processus encore actif}
-			~\par{Seul un compteur des threads actif est gardé car il n'existe pas hiérarchie entre processus.}
+			~\par{Lors de la terminaison d'un processus, tous les threads créés dans celui-ci et ne s'étant pas terminé sont attendus, puis si le processus en question est le dernier processus de la machine, terminer la machine. Dans le cas contraire, le processus sera détruit par un des processus encore actif.}
+			~\par{Seul un compteur des threads actifs est gardé car il n'existe pas hiérarchie entre processus.}
 			\subsubsection{Shell}
-			{Le shell implémenté permet de lancer un seul programme utilsateur à la fois.La valeur de retour de l'appel système \texttt{ForkExec} permet de déterminer si la commande est valide.}
-			~\par{Lorsque le nouveau processus est lancé, le shell fait un appel à \texttt{Yield} tant que le shell n'est pas le seul processus actif.}
+			{Le \emph{shell} implémenté permet de lancer un seul programme utilisateur à la fois. La valeur de retour de l'appel système \texttt{ForkExec} permet de déterminer si la commande est valide.}
+			~\par{Lorsque le nouveau processus est lancé, le \emph{shell} fait un appel à \texttt{Yield} tant que le \emph{shell} n'est pas le seul processus actif.}
 
 
 	\subsection{Système de fichiers}
 		{Chaque dossier est composé de 8 fichiers/dossiers maximum (en plus des dossiers spéciaux "\texttt{.}" et "\texttt{..}". Les noms des fichiers ne dépassent pas les 9 caractères.}
 		~\par{Si un fichier n'est pas trouvé dans le répertoire en cours, il sera cherché dans "\texttt{/System}", à l'image d'un "\texttt{/usr/bin}" pour Linux.}
-		~\par{Concernant le déplacement dans l'arborescence de repertoire, nous avons ajouté un nouveau \texttt{OpenFile} vers le repertoire courant. Celui-ci est modifié uniquement par l'appel système \texttt{cd}.}
-		~\par{Les chemins sont pris en compte par la fonction \texttt{MoveTo} qui navigue dans les repertoires jusqu'à celui demandé. on peut spécifié un chemin absolu en rajoutant "\texttt{/}" devant le chemin, sinon le chemin est relatif.}
+		~\par{Concernant le déplacement dans l'arborescence de répertoires, nouveau \texttt{OpenFile} vers le répertoire courant a été ajouté. Celui-ci est modifié uniquement par l'appel système \texttt{cd}.}
+		~\par{Les chemins sont pris en compte par la fonction \texttt{MoveTo} qui navigue dans les répertoires jusqu'à celui demandé. on peut spécifier un chemin absolu en rajoutant "\texttt{/}" devant le chemin, sinon le chemin est relatif.}
 		
 		
 	\subsection{Réseaux}
 		\subsubsection{En-tête du message}
-			{En plus des informations déjà présentes dans l'en-tête d'un paquet, le type du message (message de données (\texttt{MSG}) ou message d'acquittement (\texttt{ACK}), ainsi qu'un identifiant séquentiel unique parmi les messages envoyés de la machine en cours, sont ajoutés dans cet en-tête.}
+			{En plus des informations déjà présentes dans l'en-tête d'un paquet, son type (message de données (\texttt{MSG}) ou message d'acquittement (\texttt{ACK}), ainsi que son identifiant séquentiel unique parmi les messages envoyés de la machine en cours, sont ajoutés dans cet en-tête.}
 		\subsubsection{Démons}
 			{Le démon "\texttt{postal worker}" déjà implémenté, et dont la tâche était simplement d'attendre la réception des paquets, et de les mettre sur le bon port, se voit ajouter la tâche de renvoyer des acquittements pour les paquets de type \texttt{MSG}, ainsi que d'acquitter les paquets selon les identifiants des paquets de type \texttt{ACK} reçus.}
 			~\par{Un second démon nommé "\texttt{postal sender}" tourne aussi en fond, et s'occupe de retransmettre toutes les "\texttt{TEMPO}" secondes le paquet, un maximum de "{MAXREEMISSIONS}" fois, tant que le "\texttt{postal worker}" n'aura pas signifié qu'un acquittement a été reçu pour le message en attente d'acquittement.}
@@ -306,20 +304,20 @@
 			{Lors de l'envoi, un paquet \texttt{MSG} est envoyé à la bonne destination via la couche réseau physique simulée par Nachos, et on déclenche le démon "\texttt{postal sender}" qui s'occupe de retransmettre périodiquement le paquet tout en attendant un acquittement.
 		\subsubsection{Transmission sans limite de taille}
 			{Les données sont fragmentées en plusieurs paquets d'une taille maximale de \texttt{MaxMailSize} et transmises séquentiellement à l'aide de la couche de transmission fiable.}
-			~\par{La taille maximale pour une transmission de données est la taille maximale d'une zone mémoire, c'est à dire \texttt{MaxStringSize}.}
+			~\par{La taille maximale pour une transmission de données est la taille maximale d'une zone mémoire utilisateur, c'est à dire \texttt{MaxStringSize}.}
 		\subsubsection{Transmission de fichiers}
 			{À l'aide de la couche de transmission sans limite de taille, la taille du fichier est envoyée, puis le contenu du fichier par parties de \texttt{MaxStringSize}. }
 			~\par{À la réception, dès qu'une partie du fichier source est reçue, elle est écrite par fragments de \texttt{MaxStringSize} dans le fichier destination. La taille du fichier source reçue en premier sert à initialiser la taille du fichier destination, ainsi qu'à connaître la quantité de données attendues.}
 		
 
 \section{Organisation du travail}
-		{L'équipe s'est réuni presque tous les jours de semaine à l'université afin de connaître le reste de l'équipe, et adapter le planning quand il le fallait.}
+		{L'équipe s'est réunie presque tous les jours de semaine à l'université afin de connaître le reste de l'équipe, et adapter le planning quand il le fallait.}
 		~\par{Avant de démarrer chaque étape, chaque membre a bien lu le sujet de celle-ci. S'en suivait une discussion qui permettait de répartir les tâches pour cette partie entre les différents membres de l'équipe.}
 		~\par{L'utilisation d'un \emph{repository} git a permit l'échange rapide et intuitif de code entre les membres de l'équipe, ainsi qu'un retour à des versions plus stables lorsque cela a été nécessaire.}
-		~\par{Afin de valider une certaine implémentation, les tests unitaires devait tous réussir.}
-		~\par{Des outils tels \emph{gdb} ainsi que \emph{valgrind} ont permis une détection beaucoup plus rapide des bugs et des fuites mémoire.}
+		~\par{Afin de valider une implémentation, les tests unitaires devaient tous réussir.}
+		~\par{Des outils tels \emph{gdb} ou \emph{valgrind} ont permis une détection beaucoup plus rapide des bugs et des fuites mémoire.}
 		~\par{Sur les quatre premières étapes, le travail s'effectuait par des équipes de deux personnes, travaillant chacune sur une partie de l'étape en parallèle, ce qui a permis une progression assez rapide sur ces étapes.}
 		~\par{En ce qui concerne les deux dernières parties (5 et 6), elles ont été réalisées en parallèle en fin de semaine 3 et début de semaine 4. Durant cette période, le \emph{repository} a été divisé en deux branches pour permettre le travail en parallèle des deux équipes.}
-		~\par{Les derniers jours ont été exclusivement réservés à la fusion des deux branches du \emph{repository}, la complétion du rapport, la présentation de soutenance, et celle de la démo.}
+		~\par{Les derniers jours ont été exclusivement réservés à la fusion des deux branches du \emph{repository}, la complétion du rapport, la préparation de soutenance, et celle de la démo.}
 
 \end{document}
