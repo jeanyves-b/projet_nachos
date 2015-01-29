@@ -10,7 +10,7 @@
 main ()
 {
 	Sleep(2);
-	PutInt(SendFile("00_tiny", 1, 1, 0));
+	PutInt(SendFile("network/outbox/00_tiny", 1, 1, 0));
 	PutString("Fichier envoyé.");
 	return 0;
 }

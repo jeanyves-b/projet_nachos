@@ -6,7 +6,7 @@
  */
 
 #include "syscall.h"
-#define SIZE 50
+#define SIZE 52
 	int
 main ()
 {
@@ -23,7 +23,10 @@ main ()
 	
 	int i = 3;
 	while (i< SIZE-1) {
-		got[i]++;
+		if (got[i] == 'Z')
+			got[i] = 'A';
+		else
+			got[i]++;
 		i++;
 	}
 	got[SIZE-1] = '\0';

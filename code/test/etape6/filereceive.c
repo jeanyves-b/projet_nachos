@@ -8,8 +8,9 @@
 	int
 main ()
 {
-	ReceiveFile(0, "01_R");
 	Sleep(2);
+	ReceiveFile(0, "network/inbox/01_R");
+	
 	PutString("Fichier reçu.");
 	return 0;
 }
