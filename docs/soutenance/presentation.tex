@@ -135,13 +135,12 @@
    \end{itemize}
 \end{frame}
 
-\begin{frame}{Multithreading: Attente et terminaison}
+\begin{frame}{Multithreading: Attente}
    \begin{itemize}
        \item Liste de threads en attente et qui ils attendent.
 		\item Thread qui attend mis en pause et relancé à la fin du thread qu'il attend.
        \item Attendre si thread en cours d'exécution, retour direct sinon.
        \item Utilisation d'un compteur de thread créés et du tableau des identifiants pour connaître l'état d'exécution d'un thread.
-       \item Terminaison automatique des threads ayant terminé l'exécution de leur fonction.
    \end{itemize}
 \end{frame}
 
@@ -149,21 +148,9 @@
 \subsection{Gestion de la mémoire}
 \begin{frame}{Gestion de la mémoire: Multi-processus}
     \begin{itemize}
-
-        \item Création d'un processus
- 		\begin{itemize}
- 			\item StartUserProcess
- 		\end{itemize}
-        \item Arrêt automatique
-        \begin{itemize}
- 			\item Attente des threads fils
- 			\item Vérification du nombre de processus
- 		\end{itemize}
-        \item Relation entre processus
-        \begin{itemize}
- 			\item Compteur
- 			\item Evolution possible
- 		\end{itemize}
+        \item Partage de la mémoire physique entre différents processus.
+        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
+        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
     \end{itemize}
 \end{frame}
 
@@ -171,29 +158,30 @@
 	 \begin{center}
 			\includegraphics[width=10cm]{schema_memoire.pdf}
 	\end{center}
-	\begin{itemize}
-        \item Partage de la mémoire physique entre différents processus.
-        \item Table de pages: mapping entre pages virtuelles du processus et pages physiques.
-        \item Utilisation d'un FrameProvider pour obtenir les pages libres.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Gestion de la mémoire: Autre fonctionnalités et problème}
-    \begin{itemize}
-        \item Shell
-        \begin{itemize}
- 			\item Attente active
- 		\end{itemize}
-        \item L'ordonnancement
-        \item 
-    \end{itemize}
 \end{frame}
 
 \subsection{Système de fichiers}
-\begin{frame}{Système de fichiers}
+
+\begin{frame}{Système de fichiers: Mise en place }
     \begin{itemize}
 		\item 8 fichiers/dossiers maximum par dossier (+ "\texttt{.}" et "\texttt{..}").
+		\item Mise en place d'une hiérarchie de répertoire.
+		\item Prise en compte du pathname.
 		\item Dossier "\texttt{/System}" contient tous les exécutables (à l'image de \texttt{/usr/bin} pour Linux).
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Tests }
+    \begin{itemize}
+		\item Appel système pour créer, supprimer et se déplacer entre les répertoires.
+		\item Lancer des exécutables dans le système de Nachos.
+		
+    \end{itemize}
+\end{frame}
+\begin{frame}{Système de fichiers: Problèmes et extensions }
+    \begin{itemize}
+		\item Problème de création de processus. 
+		\item Table de fichiers ouverts.
+		
     \end{itemize}
 \end{frame}
 
@@ -213,6 +201,15 @@
         \item Retransmission périodique du message s'il n'est pas acquitté.
     \end{itemize}
     
+\end{frame}
+
+\subsection{Améliorations possibles}
+\begin{frame}{Améliorations possibles}
+    \begin{itemize}
+        \item Utilisation d'un cache TLB.
+        \item Table des fichiers ouverts.
+        \item Migration de processus via le réseau.
+    \end{itemize}
 \end{frame}
 
 \section{Gestion du projet}
@@ -236,22 +233,15 @@
 
 \begin{frame}{Conclusion}
 	\begin{itemize}
-		\item \textbf{Commentaires :}
+		\item \textbf{Commentaires:}
 		\begin{itemize}
-			\item Nous a aidée à comprendre les fonctionalités bas niveau du système.
-			\item Nous avons mieux maitriser les partie 3 et 4.
-			\item docs sur l'architecture global et les liens entre les fichiers.
-			\item interessant et agréable
+			\item 
 		\end{itemize}
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{Conclusion}
     \center{Fin.}
-\end{frame}
-
-\begin{frame}{here's a potatoe}
-	\includegraphics[width=10cm]{potatoes.jpg}	
 \end{frame}
 
 \end{document}
