@@ -12,13 +12,21 @@ echo "	Lancement de test en anneau de taille 8"
 ./../../build/nachos-final -cp ./../../build/etape6/ring_0 r0 > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/ring_i ri > /dev/null
 ./../../build/nachos-final -cp ./../../build/etape6/ring_last rn > /dev/null
-gnome-terminal -e "./../../build/nachos-final -m 1 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 2 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 3 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 4 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 5 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 6 -rs 7 -x ri"
-gnome-terminal -e "./../../build/nachos-final -m 7 -rs 7 -x rn"
+gnome-terminal --title="Membre 1 de l'anneau" -e "./../../build/nachos-final -m 1 -rs 7 -x ri"
+gnome-terminal --title="Membre 2 de l'anneau" -e "./../../build/nachos-final -m 2 -rs 7 -x ri"
+gnome-terminal --title="Membre 3 de l'anneau" -e "./../../build/nachos-final -m 3 -rs 7 -x ri"
+gnome-terminal --title="Membre 4 de l'anneau" -e "./../../build/nachos-final -m 4 -rs 7 -x ri"
+gnome-terminal --title="Membre 5 de l'anneau" -e "./../../build/nachos-final -m 5 -rs 7 -x ri"
+gnome-terminal --title="Membre 6 de l'anneau" -e "./../../build/nachos-final -m 6 -rs 7 -x ri"
+gnome-terminal --title="Membre 7 de l'anneau (dernier)" -e "./../../build/nachos-final -m 7 -rs 7 -x rn"
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 1 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 2 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 2 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 3 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 4 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 5 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 6 -rs 7 -x ri; exec bash\""
+#gnome-terminal -e "bash -c \"./../../build/nachos-final -m 7 -rs 7 -x rn; exec bash\""
 ./../../build/nachos-final -m 0 -rs 7 -x r0
 read -p "		Appuyer pour passer à l'étape suivante..."
 ./../../build/nachos-final -r r0 > /dev/null
