@@ -7,14 +7,12 @@
 int main()
 {
 	char c;
-	while (c!='q') {
 		c = GetChar();
 		if (c!='\n') {
 			PutString("Le caractère entré est: ");
 			PutChar(c);
 			PutChar('\n');
 		}
-	}
 
 	return 0;
 

@@ -28,9 +28,9 @@ echo "lancement de putstring"
 ./../../build/nachos-step6 -x a -rs 23
 ./../../build/nachos-step6 -r a
 echo "lancement de la console synchrone avec les fichiers in0, in1, in2, in3"
-./../../build/nachos-step6 -sc < in0 > out0
-./../../build/nachos-step6 -sc < in1 > out1
-./../../build/nachos-step6 -sc < in2 > out2
-./../../build/nachos-step6 -sc < in3 > out3
+./../../build/nachos-step6 -sc in0 out0
+./../../build/nachos-step6 -sc in1 out1
+./../../build/nachos-step6 -sc in2 out2
+./../../build/nachos-step6 -sc in3 out3
 echo "fin du lancer de l'étape 2"
 echo ""
