@@ -20,9 +20,9 @@ void joinerror3(void *n)
 {
 		int error = UserThreadJoin(GetTid());
 		if (error == -3)
-			PutString("test 3 : OK\n");
+			PutString("Erreur essaie de se join lui-même : OK\n");
 		else
-			PutString("test 3 : NON\n");
+			PutString("Erreur essaie de se join lui-même : NON\n");
 	UserThreadExit();
 }
 
@@ -36,18 +36,18 @@ int main()
 	{
 		error = UserThreadJoin(-1); 
 		if (error == -1 || error == -2)
-			PutString("test 1 : OK\n");
+			PutString("Erreur essaie de join identifiant négatif : OK\n");
 		else
-			PutString("test 1 : NON\n");
+			PutString("Erreur essaie de join identifiant négatif : NON\n");
 	} 
 
 	if (id >= 0)
 	{
 		error=UserThreadJoin(25);
 		if (error == -1 || error == -2)
-			PutString("test 2 : OK\n");
+			PutString("Erreur essaie de join identifiant jamais créé : OK\n");
 		else
-			PutString("test 2 : NON\n");
+			PutString("Erreur essaie de join identifiant jamais créé : NON\n");
 	} 
 
 	unsigned i;
@@ -58,7 +58,7 @@ int main()
 		ids[i] = UserThreadCreate(thread, (void *)&n);
 		if (ids[i] == -2 || ids[i] == -1)
 		{
-			PutString("test 4 : OK\n");
+			PutString("Erreur essaie de créer trop de threads : OK\n");
 			break;
 		}
 	} 

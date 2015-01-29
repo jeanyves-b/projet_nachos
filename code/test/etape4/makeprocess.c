@@ -13,8 +13,8 @@ int main()
 {
 
 	UserThreadCreate(thread2, 0);
-	ForkExec("userpages");
-	//ForkExec("userpages1");
+	ForkExec("user0");
+	ForkExec("user0");
 
 	return 0;
 }

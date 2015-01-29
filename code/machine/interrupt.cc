@@ -243,8 +243,9 @@ Interrupt::Idle()
 	void
 Interrupt::Halt()
 {
-	printf("Machine halting!\n\n");
-	stats->Print();
+	printf("\n\033[32;1mMachine halting!\033[0m\n");
+	if (!DebugIsEnabled('z'))
+		stats->Print();
 	Cleanup();   // Never returns.
 }
 

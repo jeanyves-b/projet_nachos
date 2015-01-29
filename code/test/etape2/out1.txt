@@ -23,8 +23,8 @@ v
 w
 x
 y
-zMachine halting!
-
+z
+[32;1mMachine halting![0m
 Ticks: total 9140, idle 6000, system 3140, user 0
 Disk I/O: reads 2, writes 0
 Console I/O: reads 55, writes 50
