@@ -1,6 +1,6 @@
 #include <syscall.h>
 
-#define N 1000
+#define N 500
 
 void thread(void *n)
 {
@@ -8,7 +8,7 @@ void thread(void *n)
 
 	for(i=0; i <  *((int*)n)  ; i++)
 	{
-		PutChar('3');
+		PutChar('H');
 	}
 
 	PutChar('\n');
@@ -18,32 +18,28 @@ void thread(void *n)
 
 void joinerror3(void *n)
 {
-	int id = *((int*)n);
-	if (id != 0)
-	{
-		int error = UserThreadJoin(id);
+		int error = UserThreadJoin(GetTid());
 		if (error == -3)
 			PutString("test 3 : OK\n");
 		else
 			PutString("test 3 : NON\n");
-	}
 	UserThreadExit();
 }
 
 int main()
 {
-	int n = 100;
+	
 	int error = 0;
 	unsigned id = UserThreadCreate(joinerror3, 0);
 
-	if (id >= 0)
+	 if (id >= 0)
 	{
 		error = UserThreadJoin(-1); 
 		if (error == -1 || error == -2)
 			PutString("test 1 : OK\n");
 		else
 			PutString("test 1 : NON\n");
-	}
+	} 
 
 	if (id >= 0)
 	{
@@ -52,9 +48,10 @@ int main()
 			PutString("test 2 : OK\n");
 		else
 			PutString("test 2 : NON\n");
-	}
+	} 
 
-	int i=0;
+	unsigned i;
+	int n = 100;
 	unsigned ids[N];
 	for(i = 0; i<N; i++)
 	{
@@ -62,9 +59,9 @@ int main()
 		if (ids[i] == -2 || ids[i] == -1)
 		{
 			PutString("test 4 : OK\n");
-			i = N;
+			break;
 		}
-	}
+	} 
 
 	PutString("On quitte main\n");
 	return 0;
