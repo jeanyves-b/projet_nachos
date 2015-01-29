@@ -186,7 +186,7 @@
 
 \section{Tests}
 	\subsection{Organisation}
-		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion del a mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}.}
+		{Pour automatiser les tests, nous avons décidé de créer un script (\texttt{.sh}) qui va lancer les fichiers de test du projet. Nous avons essayé de faire suffisamment de tests afin tester tous les défauts possible du programme, ils sont répartis en une série de fichiers séparé par étape du projet dans des dossiers correspondant à l'étape, par exemple, les tests présents dans le dossier \texttt{etape4} correspondent à la partie sur la gestion de la mémoire virtuelle. Tous ces dossiers sont situés dans \texttt{code/test}.}
 		~\par{Les fichiers \texttt{.sh} se basent sur les programmes de test utilisateur (\texttt{.c}), unitaires pour la plupart des cas, ainsi que des programmes de tests developpés par nos soins (\texttt{.cc}) afin de tester les sorties des tests unitaires.}
 
 	\subsection{Utilisation}
@@ -196,8 +196,8 @@
 		\subsubsection{Console}
 			\begin{itemize}
 				\item Écriture d'une chaine de 1 caractère: Écrit le caractère correctement sur la console.
-				\item Utilisation de la console				validé : la console réécrit tout ce qui est tappé correctement
-				\item Ecriture/lecture parallèle: Les chaînes de caractères sont écrites/lues d'un coup quelque soit l'ordonnancement, les lectures/écritures de caractères seuls peuvent être entralacés selon l'ordonancement.
+				\item Utilisation de la console				validé : la console réécrit tout ce qui est tapé correctement
+				\item Ecriture/lecture parallèle: Les chaînes de caractères sont écrites/lues d'un coup quelque soit l'ordonnancement, les lectures/écritures de caractères seuls peuvent être entrelacés selon l'ordonnancement.
 				\item Dépassement de la taille maximale d'une chaine: Chaine tronquée.
 				\item Arrêt avec \texttt{Ctrl+D} en début de ligne: Arrête la console, n'est pas confondu avec \texttt{ÿ}.
 			\end{itemize}
@@ -206,10 +206,10 @@
 			\begin{itemize}
 				\item Création d'un thread :
 					\subitem Création d'un thread: OK dans les bonnes conditions et retourne le bon code d'erreur dans les mauvaises.
-					\subitem Création d'un très grand nombre de threads: Crée le threads normalement jusqu'au moment où ce n'est plus possible (pile pleine, ou nombre maximal de threads atteint). Gestion d'erreur fonctionnelle.
+					\subitem Création d'un très grand nombre de threads: Crée le thread normalement jusqu'au moment où ce n'est plus possible (pile pleine, ou nombre maximal de threads atteint). Gestion d'erreur fonctionnelle.
 				\item Terminaison d'un thread:
 					\subitem Vérification des fuites mémoires: Toutes les structures allouées sont bien supprimées
-					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés.
+					\subitem Terminaison automatique: Tous les threads se terminent bien à la terminaison de leur processus même s'ils ne se sont pas explicitement terminés par UserThreadExit().
 				\item Lancement d'une fonction: Testé avec les fonctions disponibles, elles se sont déroulées correctement.
 			\end{itemize}
 
@@ -226,10 +226,9 @@
 
 		\subsubsection{Système de fichiers}
 			\begin{itemize}
-				\item Créer un dossier/fichier: Le dossier/fichier est créer et est accessible.
+				\item Créer un dossier/fichier: Le dossier/fichier est créé et est accessible.
 				\item Déplacement vers un dossier parent/fils: On peut se déplacer à volonté dans les dossiers.
 				\item Suppression dossier/fichier: Le dossier/fichier est supprimé correctement. Il ne réapparaît pas lors de la prochaine lecture du disque.
-				\item Persistance du système de fichiers: Le système de fichiers persiste entre deux exécutions de la machine.
 			\end{itemize}
 
 		\subsubsection{Réseau}
@@ -242,8 +241,8 @@
 \section{Choix d'implémentation}
 	\subsection{Console}
 	  	{Le but de cette section est la mise en place des entrées/sorties de niveau utilisateur. Pour cela, les appels système de lecture et d'écriture ont été créés. Cette section étant très guidée dans le sujet, aucun choix d'implémentation particulier ne s'est posé.}
-	     ~\par{La lecture et l'écriture ont été sécurisées avec un sémaphore chacun. Les fonctions de lectures (\texttt{GetInt}, \texttt{GetChar} et \texttt{GetString}) ne peuvent pas interrompre les une les autres et les fonctions d'écritures (\texttt{PutChar}, \texttt{PutInt} et \texttt{PutString}) ne interrompent plus les unes les autres non plus. Mais les fonctions d'écriture peuvent interrompre les fonction de lecture et inversement.}
-		~\par{\texttt{GetString} et \texttt{PutString} appelant respectivement \texttt{GetChar} et \texttt{PutChar}, des version internes \emph{sans sémaphore} de ces deux dernières routines ont été implémentées pouvoir les appeler depuis les deux premières sans récursion de sémaphores.}
+	     ~\par{La lecture et l'écriture ont été sécurisées avec un sémaphore chacun. Les fonctions de lectures (\texttt{GetInt}, \texttt{GetChar} et \texttt{GetString}) ne peuvent pas interrompre les une les autres et les fonctions d'écritures (\texttt{PutChar}, \texttt{PutInt} et \texttt{PutString}) ne s'interrompent plus les unes les autres non plus. Mais les fonctions d'écriture peuvent interrompre les fonction de lecture et inversement.}
+		~\par{\texttt{GetString} et \texttt{PutString} appelant respectivement \texttt{GetChar} et \texttt{PutChar}, des versions internes \emph{sans sémaphore} de ces deux dernières routines ont été implémentées pour pouvoir les appeler depuis les deux premières sans récursion de sémaphores.}
 
 	\subsection{Threads}
 		\subsubsection{Gestion des identifiants de threads}
@@ -271,8 +270,9 @@
 					\item élément who : Thread qui attend
 					\item élément forId : identifiant du thread que who doit attendre
 				\end{itemize}
-			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x}, on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
+			~\par{Dès l'appel à \texttt{Join} pour le thread ayant pour identifiant \texttt{x} et si le thread x est en cours d'éxécution on ajoute la paire (thread courant, x) à la liste des threads en attente et le thread courant se met en pause. 
 			~\par{Lorsque le thread ayant pour identifiant \texttt{x} se termine, il réveillera le thread qui s'était mis en attente pour qu'il continue son exécution.}
+			~\par{Dans le cas où le thread \texttt{x} est déjà terminé, la fonction retourne immédiatement}
 			~\par{L’identifiant du thread étant unique dans un processus, il est possible de faire autant de \texttt{Join} que possible sur tous les identifiants.}
 
 	\subsection{Mémoire virtuelle}
@@ -282,38 +282,44 @@
 			~\par{Lors de la terminaison d'un processus, les pages physiques utilisées par ce dernier sont toutes libérées.}
 		\subsubsection{Multiprocessus}
 			{La création d'un processus déclenche la création d'un thread noyau avec un nouvel espace d'adressage ainsi que l'incrémentation d'un compteur des processus actifs.}
-			~\par{Lors de la terminaison d'un processus, tous les threads créés dans celui-ci et ne s'étant pas terminé sont attendus, puis si le processus en question est le dernier processus de la machine, terminer la machine.}
+			~\par{Lors de la terminaison d'un processus, tous les threads créés dans celui-ci et ne s'étant pas terminé sont attendus, puis si le processus en question est le dernier processus de la machine, terminer la machine. Dans le cas contraire, le processus sera détruit par un des processus encore actif}
 			~\par{Seul un compteur des threads actif est gardé car il n'existe pas hiérarchie entre processus.}
+			\subsubsection{Shell}
+			{Le shell implémenté permet de lancer un seul programme utilsateur à la fois.La valeur de retour de l'appel système \texttt{ForkExec} permet de déterminer si la commande est valide.}
+			~\par{Lorsque le nouveau processus est lancé, le shell fait un appel à \texttt{Yield} tant que le shell n'est pas le seul processus actif.}
 
 
 	\subsection{Système de fichiers}
 		{Chaque dossier est composé de 8 fichiers/dossiers maximum (en plus des dossiers spéciaux "\texttt{.}" et "\texttt{..}". Les noms des fichiers ne dépassent pas les 9 caractères.}
 		~\par{Si un fichier n'est pas trouvé dans le répertoire en cours, il sera cherché dans "\texttt{/System}", à l'image d'un "\texttt{/usr/bin}" pour Linux.}
+		~\par{Concernant le déplacement dans l'arborescence de repertoire, nous avons ajouté un nouveau \texttt{OpenFile} vers le repertoire courant. Celui-ci est modifié uniquement par l'appel système \texttt{cd}.}
+		~\par{Les chemins sont pris en compte par la fonction \texttt{MoveTo} qui navigue dans les repertoires jusqu'à celui demandé. on peut spécifié un chemin absolu en rajoutant "\texttt{/}" devant le chemin, sinon le chemin est relatif.}
+		
 		
 	\subsection{Réseaux}
 		\subsubsection{En-tête du message}
-			{En plus des informations déjà présentes dans l'en-tête d'un paquet, le type du message (message de données (\texttt{MSG}) ou messages d'acquittement (\texttt{ACK}), ainsi qu'un identifiant séquentiel unique parmi les messages envoyés de la machine en cours, sont ajouté dans cet en-tête.}
+			{En plus des informations déjà présentes dans l'en-tête d'un paquet, le type du message (message de données (\texttt{MSG}) ou message d'acquittement (\texttt{ACK}), ainsi qu'un identifiant séquentiel unique parmi les messages envoyés de la machine en cours, sont ajoutés dans cet en-tête.}
 		\subsubsection{Démons}
 			{Le démon "\texttt{postal worker}" déjà implémenté, et dont la tâche était simplement d'attendre la réception des paquets, et de les mettre sur le bon port, se voit ajouter la tâche de renvoyer des acquittements pour les paquets de type \texttt{MSG}, ainsi que d'acquitter les paquets selon les identifiants des paquets de type \texttt{ACK} reçus.}
 			~\par{Un second démon nommé "\texttt{postal sender}" tourne aussi en fond, et s'occupe de retransmettre toutes les "\texttt{TEMPO}" secondes le paquet, un maximum de "{MAXREEMISSIONS}" fois, tant que le "\texttt{postal worker}" n'aura pas signifié qu'un acquittement a été reçu pour le message en attente d'acquittement.}
 		\subsubsection{Transmission fiable d'un seul paquet }
 			{Lors de l'envoi, un paquet \texttt{MSG} est envoyé à la bonne destination via la couche réseau physique simulée par Nachos, et on déclenche le démon "\texttt{postal sender}" qui s'occupe de retransmettre périodiquement le paquet tout en attendant un acquittement.
 		\subsubsection{Transmission sans limite de taille}
-			{Les données sont fragmentées en plusieurs paquets d'une taille maximale de \texttt{MaxMailSize} et transmises à séquentiellement à l'aide de la couche de transmission fiable.}
+			{Les données sont fragmentées en plusieurs paquets d'une taille maximale de \texttt{MaxMailSize} et transmises séquentiellement à l'aide de la couche de transmission fiable.}
 			~\par{La taille maximale pour une transmission de données est la taille maximale d'une zone mémoire, c'est à dire \texttt{MaxStringSize}.}
 		\subsubsection{Transmission de fichiers}
 			{À l'aide de la couche de transmission sans limite de taille, la taille du fichier est envoyée, puis le contenu du fichier par parties de \texttt{MaxStringSize}. }
-			~\par{À la réception, dès qu'une partie du fichier source est reçue, elle est écrite par fragments de \texttt{MaxStringSize} dans le fichier destination. La taille du fichier source reçue en premier sert à initialiser la taille du fichier destination, ainsi qu'à connaître la quantité de données attendue.}
+			~\par{À la réception, dès qu'une partie du fichier source est reçue, elle est écrite par fragments de \texttt{MaxStringSize} dans le fichier destination. La taille du fichier source reçue en premier sert à initialiser la taille du fichier destination, ainsi qu'à connaître la quantité de données attendues.}
 		
 
 \section{Organisation du travail}
 		{L'équipe s'est réuni presque tous les jours de semaine à l'université afin de connaître le reste de l'équipe, et adapter le planning quand il le fallait.}
 		~\par{Avant de démarrer chaque étape, chaque membre a bien lu le sujet de celle-ci. S'en suivait une discussion qui permettait de répartir les tâches pour cette partie entre les différents membres de l'équipe.}
 		~\par{L'utilisation d'un \emph{repository} git a permit l'échange rapide et intuitif de code entre les membres de l'équipe, ainsi qu'un retour à des versions plus stables lorsque cela a été nécessaire.}
-		~\par{Afin de valider une implémentation, les tests unitaires devait tous réussir.}
-		~\par{Des outils tels \emph{gdb} ou \emph{valgrind} ont permis une détection beaucoup plus simplifiée des bugs et des fuites mémoire.}
-		~\par{Sur les quatre premières étapes, le travail s'effectuait par équipes de deux personnes, travaillant chacune sur une partie de l'étape en parallèle, ce qui a permis une progression assez rapide sur ces étapes.}
-		~\par{En ce qui concerne les deux dernières parties, elles ont été réalisées en parallèle en fin de semaine 3 et début de semaine 4. Durant cette période, le \emph{repository} a été divisé en deux branches pour permettre le travail en parallèle des deux équipes.}
+		~\par{Afin de valider une certaine implémentation, les tests unitaires devait tous réussir.}
+		~\par{Des outils tels \emph{gdb} ainsi que \emph{valgrind} ont permis une détection beaucoup plus rapide des bugs et des fuites mémoire.}
+		~\par{Sur les quatre premières étapes, le travail s'effectuait par des équipes de deux personnes, travaillant chacune sur une partie de l'étape en parallèle, ce qui a permis une progression assez rapide sur ces étapes.}
+		~\par{En ce qui concerne les deux dernières parties (5 et 6), elles ont été réalisées en parallèle en fin de semaine 3 et début de semaine 4. Durant cette période, le \emph{repository} a été divisé en deux branches pour permettre le travail en parallèle des deux équipes.}
 		~\par{Les derniers jours ont été exclusivement réservés à la fusion des deux branches du \emph{repository}, la complétion du rapport, la présentation de soutenance, et celle de la démo.}
 
 \end{document}

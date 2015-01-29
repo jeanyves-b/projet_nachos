@@ -4,6 +4,7 @@ int main()
 {
   
   char buffer[15];
+  PutString("Enter the file name:");
   GetString(buffer,15);
   if (mkfile(buffer,128)){
     PutString("file is created");
