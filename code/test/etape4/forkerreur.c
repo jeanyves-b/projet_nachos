@@ -15,13 +15,13 @@ int main()
 
 	for (i=0 ; i<N ; i++)
 	{
-		pid = ForkExec("halt");
-		if(pid == -2 || pid == -4)
+		pid = ForkExec("nothing");
+		if(pid == -2 || pid == -3)
 		{
 			PutString("Test trop grand nombre de processus : OK\n");
 			i = N;
 		}
+			
 	}
-
 	return 0;
 }

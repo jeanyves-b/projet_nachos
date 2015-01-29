@@ -119,10 +119,13 @@ AddrSpace::AddrSpace (OpenFile *executable)
 	threads_created = 0; 
 	
 	machine->frameprovider->s->P();
-	ASSERT (numPages <= (unsigned)machine->frameprovider->NumAvailFrame());	// check we're not trying
-	// to run anything too big --
-	// at least until we have
-	// virtual memory
+	assigned_vpn = 0;
+	if( numPages > (unsigned)machine->frameprovider->NumAvailFrame()){
+		machine->frameprovider->s->V();									// check we're not trying
+		delete stack;											// to run anything too big --
+		return;													// at least until we have							
+	}																	// virtual memory
+	
 
 	//	initialisation des variables de gestion des threads de l'espace
 	//		d'adressage
@@ -135,7 +138,7 @@ AddrSpace::AddrSpace (OpenFile *executable)
 
 	pageTable = new TranslationEntry[numPages];
 
-	for (assigned_vpn = 0; assigned_vpn < numPages; assigned_vpn++)
+	for (; assigned_vpn < numPages; assigned_vpn++)
 	{
 		
 		pageTable[assigned_vpn].virtualPage = assigned_vpn;

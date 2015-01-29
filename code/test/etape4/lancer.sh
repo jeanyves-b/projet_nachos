@@ -17,7 +17,9 @@ echo -e "Appuyer sur [Enter] pour lancer \033[33;1mun grand nombre de processus 
 ./../../build/nachos-final -r user0 > /dev/null
 echo -e "Appuyer sur [Enter] pour lancer un test sur \033[33;1mvaleurs d'erreur'\033[0m: "; read;
 ./../../build/nachos-final -cp ./../../build/etape4/forkerreur a > /dev/null
+./../../build/nachos-final -cp ./../../build/etape4/matmult nothing > /dev/null
 ./../../build/nachos-final -x a -rs 23 -d z
 ./../../build/nachos-final -r a > /dev/null
+./../../build/nachos-final -r nothing > /dev/null
 echo "fin du lancer de l'étape 4"
 echo ""

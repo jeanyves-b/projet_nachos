@@ -31,7 +31,7 @@ int do_UserProcessCreate(char *s){
 	AddrSpace *addrSpace = new AddrSpace(executable);
 
 	delete executable;
-	if(addrSpace == NULL)
+	if(addrSpace->HasFailed())
 		return -2;
 
 	Thread *newThread = new Thread(s);
