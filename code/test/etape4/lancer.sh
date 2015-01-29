@@ -14,11 +14,11 @@ echo "lancement de forkexec"
 ./../../build/nachos-final -x a -rs 23
 ./../../build/nachos-final -r a > /dev/null
 echo "lancement de forkerror"
-./../../build/nachos-final -cp ./../../build/etape4/forkerror a
+./../../build/nachos-final -cp ./../../build/etape4/forkerror a > /dev/null
 ./../../build/nachos-final -x a -rs 23
 ./../../build/nachos-final -r a > /dev/null
 echo "lancement du shell"
-./../../build/nachos-final -cp ./../../build/etape4/shell a
+./../../build/nachos-final -cp ./../../build/etape4/shell a > /dev/null
 ./../../build/nachos-final -x a -rs 23
 ./../../build/nachos-final -r a > /dev/null
 echo "fin du lancer de l'étape 4"
