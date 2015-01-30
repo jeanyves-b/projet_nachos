@@ -20,6 +20,7 @@ int C[Dim][Dim];
 	int
 main ()
 {
+	PutString("Execution de Matmult\n");
 	int i, j, k;
 
 	for (i = 0; i < Dim; i++)	/* first initialize the matrices */
@@ -34,5 +35,6 @@ main ()
 		for (j = 0; j < Dim; j++)
 			for (k = 0; k < Dim; k++)
 				C[i][j] += A[i][k] * B[k][j];
+	PutString("Matmult est terminé\n");
 	Exit (C[Dim - 1][Dim - 1]);	/* and then we're done */
 }

@@ -13,7 +13,9 @@ int main()
 {
 
 	UserThreadCreate(thread2, 0);
+	PutString("On lance un premier processus\n");
 	ForkExec("user0");
+	PutString("On lance un second processus\n");
 	ForkExec("user0");
 
 	return 0;
