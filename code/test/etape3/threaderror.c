@@ -59,10 +59,12 @@ int main()
 		if (ids[i] == -2 || ids[i] == -1)
 		{
 			PutString("On a essayé de créer trop de threads, on a le bon code d'erreur.");
-			break;
+			PutString("On quitte main");
+			return 0;
 		}
 	} 
 
+	PutString("On a essayé de créer trop de threads, on n'a pas eu de code d'erreur.");
 	PutString("On quitte main");
 	return 0;
 }
