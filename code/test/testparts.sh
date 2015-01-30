@@ -44,7 +44,6 @@ echo
 echo -e "Appuyer sur [Entrée] pour passer à l'\033[31;1métape 6\033[0m.."; read;
 read
 clear
-read
 
 #echo -e "\033[31;1m## Étape 5 ##\033[0m"
 #echo "mkdir : crée un dossier"
@@ -59,6 +58,8 @@ read
 #cd ..
 #echo
 #echo -e "Appuyer sur [Entrée] pour passer à l'\033[31;1métape 6\033[0m.."; read;
+read
+clear
 
 echo -e "\033[31;1m## Étape 6 ##\033[0m"
 cd etape6
