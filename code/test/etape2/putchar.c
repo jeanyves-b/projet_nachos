@@ -16,7 +16,7 @@ void print(char c, int n)
 int main()
 {
 
-	print('a',4);
+	print('a',26);
 	return 0;
 
 }

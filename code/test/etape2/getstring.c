@@ -6,8 +6,8 @@
 
 int main()
 {
-	char s[10];
-	GetString(s, 10);
+	char s[50];
+	GetString(s, 50);
 	PutString("La chaine entree est :");
 	PutString(s);
 	return 0;

@@ -1,22 +1,10 @@
 #include "syscall.h"
 
-void thread2(void *n){
-	int i=0;
-	while (i<10) {
-		PutChar('0'+i);
-		i++;
-	}
-}
-
 
 int main()
 {
-
-	UserThreadCreate(thread2, 0);
-	PutString("On lance un premier processus\n");
-	ForkExec("user0");
-	PutString("On lance un second processus\n");
-	ForkExec("user0");
+	ForkExec("user1");
+	ForkExec("user2");
 
 	return 0;
 }
